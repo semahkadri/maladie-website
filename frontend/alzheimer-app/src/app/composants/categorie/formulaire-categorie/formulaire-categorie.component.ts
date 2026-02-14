@@ -10,53 +10,63 @@ import { CategorieService } from '../../../services/categorie.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">
-              <i class="bi" [ngClass]="estModification ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
-              {{ estModification ? 'Modifier la Catégorie' : 'Nouvelle Catégorie' }}
-            </h4>
-          </div>
-          <div class="card-body">
-            <form #formulaire="ngForm" (ngSubmit)="sauvegarder()">
+    <div class="fade-in">
+      <div class="page-header">
+        <h2 class="page-title">
+          <i class="bi me-2 text-gradient" [ngClass]="estModification ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+          {{ estModification ? 'Modifier la Catégorie' : 'Nouvelle Catégorie' }}
+        </h2>
+        <p class="page-subtitle">{{ estModification ? 'Modifier les informations de la catégorie' : 'Ajouter une nouvelle catégorie au stock' }}</p>
+      </div>
 
-              <div class="mb-3">
-                <label for="nom" class="form-label fw-semibold">Nom *</label>
-                <input type="text" class="form-control" id="nom" name="nom"
-                       [(ngModel)]="categorie.nom" required minlength="2" maxlength="100"
-                       #nom="ngModel"
-                       [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
-                <div class="invalid-feedback" *ngIf="nom.errors?.['required']">
-                  Le nom est obligatoire
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #1a73e8, #1557b0); color: white;">
+              <h5 class="mb-0">
+                <i class="bi bi-info-circle me-2"></i>Informations de la Catégorie
+              </h5>
+            </div>
+            <div class="card-body">
+              <form #formulaire="ngForm" (ngSubmit)="sauvegarder()">
+
+                <div class="mb-3">
+                  <label for="nom" class="form-label">Nom *</label>
+                  <input type="text" class="form-control" id="nom" name="nom"
+                         [(ngModel)]="categorie.nom" required minlength="2" maxlength="100"
+                         #nom="ngModel" placeholder="Entrez le nom de la catégorie"
+                         [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
+                  <div class="invalid-feedback" *ngIf="nom.errors?.['required']">
+                    Le nom est obligatoire
+                  </div>
+                  <div class="invalid-feedback" *ngIf="nom.errors?.['minlength']">
+                    Le nom doit contenir au moins 2 caractères
+                  </div>
                 </div>
-                <div class="invalid-feedback" *ngIf="nom.errors?.['minlength']">
-                  Le nom doit contenir au moins 2 caractères
+
+                <div class="mb-4">
+                  <label for="description" class="form-label">Description</label>
+                  <textarea class="form-control" id="description" name="description"
+                            rows="4" [(ngModel)]="categorie.description"
+                            maxlength="500" #desc="ngModel"
+                            placeholder="Décrivez la catégorie..."></textarea>
+                  <small class="text-muted mt-1 d-block">{{ categorie.description?.length || 0 }}/500 caractères</small>
                 </div>
-              </div>
 
-              <div class="mb-3">
-                <label for="description" class="form-label fw-semibold">Description</label>
-                <textarea class="form-control" id="description" name="description"
-                          rows="4" [(ngModel)]="categorie.description"
-                          maxlength="500" #desc="ngModel"></textarea>
-                <small class="text-muted">{{ categorie.description?.length || 0 }}/500 caractères</small>
-              </div>
+                <div class="d-flex justify-content-between">
+                  <a routerLink="/categories" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Retour
+                  </a>
+                  <button type="submit" class="btn btn-primary"
+                          [disabled]="formulaire.invalid || enCours">
+                    <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
+                    <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
+                    {{ estModification ? 'Modifier' : 'Créer' }}
+                  </button>
+                </div>
 
-              <div class="d-flex justify-content-between">
-                <a routerLink="/categories" class="btn btn-secondary">
-                  <i class="bi bi-arrow-left me-1"></i>Retour
-                </a>
-                <button type="submit" class="btn btn-primary"
-                        [disabled]="formulaire.invalid || enCours">
-                  <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
-                  <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
-                  {{ estModification ? 'Modifier' : 'Créer' }}
-                </button>
-              </div>
-
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>

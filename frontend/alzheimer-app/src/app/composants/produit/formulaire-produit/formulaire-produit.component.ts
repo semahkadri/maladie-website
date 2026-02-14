@@ -12,83 +12,92 @@ import { CategorieService } from '../../../services/categorie.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">
-              <i class="bi" [ngClass]="estModification ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
-              {{ estModification ? 'Modifier le Produit' : 'Nouveau Produit' }}
-            </h4>
-          </div>
-          <div class="card-body">
-            <form #formulaire="ngForm" (ngSubmit)="sauvegarder()">
+    <div class="fade-in">
+      <div class="page-header">
+        <h2 class="page-title">
+          <i class="bi me-2 text-gradient" [ngClass]="estModification ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+          {{ estModification ? 'Modifier le Produit' : 'Nouveau Produit' }}
+        </h2>
+        <p class="page-subtitle">{{ estModification ? 'Modifier les informations du produit' : 'Ajouter un nouveau produit au stock' }}</p>
+      </div>
 
-              <div class="mb-3">
-                <label for="nom" class="form-label fw-semibold">Nom *</label>
-                <input type="text" class="form-control" id="nom" name="nom"
-                       [(ngModel)]="produit.nom" required minlength="2" maxlength="100"
-                       #nom="ngModel"
-                       [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
-                <div class="invalid-feedback" *ngIf="nom.errors?.['required']">
-                  Le nom est obligatoire
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #1a73e8, #1557b0); color: white;">
+              <h5 class="mb-0">
+                <i class="bi bi-info-circle me-2"></i>Informations du Produit
+              </h5>
+            </div>
+            <div class="card-body">
+              <form #formulaire="ngForm" (ngSubmit)="sauvegarder()">
+
+                <div class="mb-3">
+                  <label for="nom" class="form-label">Nom *</label>
+                  <input type="text" class="form-control" id="nom" name="nom"
+                         [(ngModel)]="produit.nom" required minlength="2" maxlength="100"
+                         #nom="ngModel" placeholder="Entrez le nom du produit"
+                         [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
+                  <div class="invalid-feedback" *ngIf="nom.errors?.['required']">
+                    Le nom est obligatoire
+                  </div>
+                  <div class="invalid-feedback" *ngIf="nom.errors?.['minlength']">
+                    Le nom doit contenir au moins 2 caractères
+                  </div>
                 </div>
-                <div class="invalid-feedback" *ngIf="nom.errors?.['minlength']">
-                  Le nom doit contenir au moins 2 caractères
+
+                <div class="mb-3">
+                  <label for="description" class="form-label">Description</label>
+                  <textarea class="form-control" id="description" name="description"
+                            rows="3" [(ngModel)]="produit.description"
+                            maxlength="500" placeholder="Décrivez le produit..."></textarea>
                 </div>
-              </div>
 
-              <div class="mb-3">
-                <label for="description" class="form-label fw-semibold">Description</label>
-                <textarea class="form-control" id="description" name="description"
-                          rows="3" [(ngModel)]="produit.description"
-                          maxlength="500"></textarea>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="prix" class="form-label fw-semibold">Prix (TND) *</label>
-                  <input type="number" class="form-control" id="prix" name="prix"
-                         [(ngModel)]="produit.prix" required min="0.01" step="0.01"
-                         #prix="ngModel"
-                         [ngClass]="{'is-invalid': prix.invalid && prix.touched}">
-                  <div class="invalid-feedback">Le prix doit être supérieur à 0</div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="prix" class="form-label">Prix (TND) *</label>
+                    <input type="number" class="form-control" id="prix" name="prix"
+                           [(ngModel)]="produit.prix" required min="0.01" step="0.01"
+                           #prix="ngModel" placeholder="0.00"
+                           [ngClass]="{'is-invalid': prix.invalid && prix.touched}">
+                    <div class="invalid-feedback">Le prix doit être supérieur à 0</div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="quantite" class="form-label">Quantité *</label>
+                    <input type="number" class="form-control" id="quantite" name="quantite"
+                           [(ngModel)]="produit.quantite" required min="0"
+                           #quantite="ngModel" placeholder="0"
+                           [ngClass]="{'is-invalid': quantite.invalid && quantite.touched}">
+                    <div class="invalid-feedback">La quantité ne peut pas être négative</div>
+                  </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label for="quantite" class="form-label fw-semibold">Quantité *</label>
-                  <input type="number" class="form-control" id="quantite" name="quantite"
-                         [(ngModel)]="produit.quantite" required min="0"
-                         #quantite="ngModel"
-                         [ngClass]="{'is-invalid': quantite.invalid && quantite.touched}">
-                  <div class="invalid-feedback">La quantité ne peut pas être négative</div>
+
+                <div class="mb-4">
+                  <label for="categorie" class="form-label">Catégorie *</label>
+                  <select class="form-select" id="categorie" name="categorieId"
+                          [(ngModel)]="produit.categorieId" required
+                          #cat="ngModel"
+                          [ngClass]="{'is-invalid': cat.invalid && cat.touched}">
+                    <option [ngValue]="0" disabled>-- Sélectionner une catégorie --</option>
+                    <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.nom }}</option>
+                  </select>
+                  <div class="invalid-feedback">La catégorie est obligatoire</div>
                 </div>
-              </div>
 
-              <div class="mb-4">
-                <label for="categorie" class="form-label fw-semibold">Catégorie *</label>
-                <select class="form-select" id="categorie" name="categorieId"
-                        [(ngModel)]="produit.categorieId" required
-                        #cat="ngModel"
-                        [ngClass]="{'is-invalid': cat.invalid && cat.touched}">
-                  <option [ngValue]="0" disabled>-- Sélectionner une catégorie --</option>
-                  <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.nom }}</option>
-                </select>
-                <div class="invalid-feedback">La catégorie est obligatoire</div>
-              </div>
+                <div class="d-flex justify-content-between">
+                  <a routerLink="/produits" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Retour
+                  </a>
+                  <button type="submit" class="btn btn-primary"
+                          [disabled]="formulaire.invalid || enCours">
+                    <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
+                    <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
+                    {{ estModification ? 'Modifier' : 'Créer' }}
+                  </button>
+                </div>
 
-              <div class="d-flex justify-content-between">
-                <a routerLink="/produits" class="btn btn-secondary">
-                  <i class="bi bi-arrow-left me-1"></i>Retour
-                </a>
-                <button type="submit" class="btn btn-primary"
-                        [disabled]="formulaire.invalid || enCours">
-                  <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
-                  <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
-                  {{ estModification ? 'Modifier' : 'Créer' }}
-                </button>
-              </div>
-
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>

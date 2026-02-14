@@ -1,7 +1,12 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/categories', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./composants/tableau-de-bord/tableau-de-bord.component')
+        .then(m => m.TableauDeBordComponent)
+  },
   {
     path: 'categories',
     loadComponent: () =>
@@ -38,5 +43,5 @@ export const routes: Routes = [
       import('./composants/produit/formulaire-produit/formulaire-produit.component')
         .then(m => m.FormulaireProduitComponent)
   },
-  { path: '**', redirectTo: '/categories' }
+  { path: '**', redirectTo: '' }
 ];
