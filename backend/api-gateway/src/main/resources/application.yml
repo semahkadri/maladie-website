@@ -16,7 +16,7 @@ spring:
           predicates:
             - Path=/api/stock/**
           filters:
-            - RewritePath=/api/stock/(?<segment>.*), /${segment}
+            - RewritePath=/api/stock/(?<segment>.*), /api/${segment}
       globalcors:
         cors-configurations:
           '[/**]':
