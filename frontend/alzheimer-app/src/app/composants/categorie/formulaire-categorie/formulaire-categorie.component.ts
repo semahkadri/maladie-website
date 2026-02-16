@@ -19,8 +19,21 @@ import { CategorieService } from '../../../services/categorie.service';
         <p class="page-subtitle">{{ estModification ? 'Modifier les informations de la catégorie' : 'Ajouter une nouvelle catégorie au stock' }}</p>
       </div>
 
-      <div class="row justify-content-center">
-        <div class="col-md-8">
+      <!-- Loading -->
+      <div *ngIf="chargement" class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-3 text-muted">Chargement...</p>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="erreur" class="alert alert-danger mb-3">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ erreur }}
+      </div>
+
+      <div *ngIf="!chargement" class="row justify-content-center">
+        <div class="col-lg-8">
           <div class="card">
             <div class="card-header" style="background: linear-gradient(135deg, #1a73e8, #1557b0); color: white;">
               <h5 class="mb-0">
@@ -31,10 +44,10 @@ import { CategorieService } from '../../../services/categorie.service';
               <form #formulaire="ngForm" (ngSubmit)="sauvegarder()">
 
                 <div class="mb-3">
-                  <label for="nom" class="form-label">Nom *</label>
+                  <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" id="nom" name="nom"
                          [(ngModel)]="categorie.nom" required minlength="2" maxlength="100"
-                         #nom="ngModel" placeholder="Entrez le nom de la catégorie"
+                         #nom="ngModel" placeholder="Ex: Médicaments, Équipements..."
                          [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
                   <div class="invalid-feedback" *ngIf="nom.errors?.['required']">
                     Le nom est obligatoire
@@ -50,7 +63,7 @@ import { CategorieService } from '../../../services/categorie.service';
                             rows="4" [(ngModel)]="categorie.description"
                             maxlength="500" #desc="ngModel"
                             placeholder="Décrivez la catégorie..."></textarea>
-                  <small class="text-muted mt-1 d-block">{{ categorie.description?.length || 0 }}/500 caractères</small>
+                  <small class="text-muted mt-1 d-block">{{ categorie.description.length || 0 }}/500 caractères</small>
                 </div>
 
                 <div class="d-flex justify-content-between">
@@ -77,6 +90,8 @@ export class FormulaireCategorieComponent implements OnInit {
   categorie: Categorie = { nom: '', description: '' };
   estModification = false;
   enCours = false;
+  chargement = false;
+  erreur = '';
   categorieId: number | null = null;
 
   constructor(
@@ -90,22 +105,30 @@ export class FormulaireCategorieComponent implements OnInit {
     if (id) {
       this.estModification = true;
       this.categorieId = +id;
+      this.chargement = true;
       this.categorieService.obtenirParId(this.categorieId).subscribe({
-        next: (data) => this.categorie = data,
-        error: () => this.router.navigate(['/categories'])
+        next: (data) => {
+          this.categorie = data;
+          this.chargement = false;
+        },
+        error: () => {
+          this.erreur = 'Impossible de charger la catégorie';
+          this.chargement = false;
+        }
       });
     }
   }
 
   sauvegarder(): void {
     this.enCours = true;
+    this.erreur = '';
 
     if (this.estModification && this.categorieId) {
       this.categorieService.modifier(this.categorieId, this.categorie).subscribe({
         next: () => this.router.navigate(['/categories']),
         error: (err) => {
           this.enCours = false;
-          console.error('Erreur lors de la modification', err);
+          this.erreur = err.error?.message || 'Erreur lors de la modification';
         }
       });
     } else {
@@ -113,7 +136,7 @@ export class FormulaireCategorieComponent implements OnInit {
         next: () => this.router.navigate(['/categories']),
         error: (err) => {
           this.enCours = false;
-          console.error('Erreur lors de la création', err);
+          this.erreur = err.error?.message || 'Erreur lors de la création';
         }
       });
     }

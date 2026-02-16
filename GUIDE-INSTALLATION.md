@@ -236,9 +236,22 @@ Le navigateur s'ouvrira automatiquement sur : http://localhost:4200
 | http://localhost:8761 | Dashboard Eureka (voir les services) |
 | http://localhost:8081/api/categories | Liste des catégories (JSON) |
 | http://localhost:8081/api/produits | Liste des produits (JSON) |
-| http://localhost:4200 | Interface Angular |
+| http://localhost:8081/api/tableau-de-bord | Statistiques agrégées du stock (JSON) |
+| **http://localhost:8081/api/swagger-ui.html** | **Documentation interactive Swagger UI** |
+| **http://localhost:4200** | **Interface backoffice Angular** |
 
-### 7.2 - Tester avec Postman
+### 7.2 - Tester avec Swagger UI (recommandé)
+
+Ouvrir **http://localhost:8081/api/swagger-ui.html** dans le navigateur. Swagger UI permet de :
+
+- Visualiser tous les endpoints groupés par catégorie (Tableau de Bord, Catégories, Produits)
+- Cliquer **"Try it out"** sur n'importe quel endpoint pour le tester
+- Voir la structure JSON attendue pour chaque requête
+- Voir les codes de réponse possibles et les contraintes de validation
+
+> Swagger UI est intégré au projet et ne nécessite aucune installation. Il remplace Postman pour les tests rapides.
+
+### 7.3 - Tester avec Postman (alternative)
 
 Télécharger Postman : https://www.postman.com/downloads/
 
@@ -378,14 +391,16 @@ Réponse attendue : **400 Bad Request**.
 
 ---
 
-## Résumé des ports
+## Résumé des ports et URLs
 
 | Service | Port | URL |
 |---------|------|-----|
 | Eureka Server | 8761 | http://localhost:8761 |
 | API Gateway | 8080 | http://localhost:8080 |
 | Service Stock | 8081 | http://localhost:8081 |
-| Frontend Angular | 4200 | http://localhost:4200 |
+| **Swagger UI** | **8081** | **http://localhost:8081/api/swagger-ui.html** |
+| OpenAPI JSON | 8081 | http://localhost:8081/api/v3/api-docs |
+| **Frontend Backoffice** | **4200** | **http://localhost:4200** |
 | PostgreSQL | 5432 | localhost:5432 |
 
 ## Ordre de démarrage obligatoire
@@ -426,19 +441,23 @@ Après chaque étape, vérifiez que tout est OK avant de passer à la suivante :
 [ ] Étape 5 : Backend lancé (3 terminaux ouverts)
     [ ] http://localhost:8761 → Dashboard Eureka visible
     [ ] http://localhost:8081/api/categories → affiche "[]"
+    [ ] http://localhost:8081/api/swagger-ui.html → Swagger UI visible
+    [ ] http://localhost:8081/api/tableau-de-bord → JSON avec statistiques
     [ ] Dans pgAdmin : tables "categories" et "produits" créées
 
 [ ] Étape 6 : Frontend lancé
-    [ ] http://localhost:4200 → Interface Angular visible
-    [ ] La navbar affiche "Catégories" et "Produits"
+    [ ] http://localhost:4200 → Interface backoffice Angular visible
+    [ ] La sidebar affiche "Tableau de Bord", "Catégories", "Produits"
+    [ ] Le Dashboard affiche les 4 cartes de statistiques
 
-[ ] Étape 7 : Tests CRUD OK
-    [ ] Créer une catégorie dans Postman → 201
+[ ] Étape 7 : Tests CRUD OK (via Swagger UI ou Postman)
+    [ ] Créer une catégorie → 201
     [ ] Lister les catégories → la catégorie apparaît
     [ ] Modifier la catégorie → le nom change
     [ ] Créer un produit → 201
     [ ] Lister les produits → le produit apparaît
     [ ] Supprimer le produit → 204
+    [ ] Tableau de bord → statistiques mises à jour
     [ ] Vérifier sur http://localhost:4200 que les données apparaissent
 ```
 
@@ -460,9 +479,15 @@ Ce scénario vous guide à tester **toutes les fonctionnalités** du projet de b
    - Vous devez voir `[]` (tableau JSON vide) si aucune catégorie n'existe
    - Ou une liste de catégories si vous en avez déjà créé
 
-3. Ouvrir **http://localhost:4200**
-   - L'interface Angular s'affiche avec la barre de navigation bleue
-   - Vous voyez "Gestion des Catégories" avec le tableau
+3. Ouvrir **http://localhost:8081/api/swagger-ui.html**
+   - Vous devez voir l'interface **Swagger UI** avec 3 groupes d'API :
+     - **Tableau de Bord** (1 endpoint)
+     - **Catégories** (5 endpoints)
+     - **Produits** (6 endpoints)
+
+4. Ouvrir **http://localhost:4200**
+   - L'interface backoffice Angular s'affiche avec la sidebar à gauche
+   - Le Dashboard affiche les 4 cartes de statistiques
 
 ### 9.2 - Test complet avec Postman (étape par étape)
 
@@ -634,7 +659,7 @@ Ouvrir **Postman** et suivre ces étapes dans l'ordre :
 4. Cliquer **Modifier** sur la catégorie créée
    - Changer le nom, cliquer **Modifier**
    - Le nom est mis à jour dans la liste
-5. Cliquer **Produits** dans la barre de navigation
+5. Cliquer **Produits** dans la sidebar
 6. Cliquer **Nouveau Produit**
    - Remplir les champs, choisir une catégorie dans la liste déroulante
    - Cliquer **Créer**
@@ -661,7 +686,9 @@ Ouvrir **Postman** et suivre ces étapes dans l'ordre :
 | 11 | Supprimer produit | DELETE | /api/produits/1 | 204 No Content |
 | 12 | Validation nom vide | POST | /api/categories | 400 Bad Request |
 | 13 | Ressource inexistante | GET | /api/categories/999 | 404 Not Found |
-| 14 | Interface Angular | Navigateur | http://localhost:4200 | CRUD visuel OK |
+| 14 | Tableau de bord | GET | /api/tableau-de-bord | 200 + statistiques agrégées |
+| 15 | Swagger UI | Navigateur | /api/swagger-ui.html | Documentation interactive |
+| 16 | Interface backoffice | Navigateur | http://localhost:4200 | Dashboard + CRUD visuel OK |
 
 ---
 

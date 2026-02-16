@@ -1,21 +1,23 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './composants/partage/navbar/navbar.component';
+import { SidebarComponent } from './composants/partage/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet, SidebarComponent],
   template: `
-    <app-navbar></app-navbar>
-    <div class="container mt-4 mb-4">
-      <router-outlet></router-outlet>
-    </div>
-    <footer class="footer">
-      <div class="container">
-        Alzheimer - Gestion de Stock &copy; {{ annee }} | Microservices Spring Boot + Angular
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <div class="main-content-inner">
+        <router-outlet></router-outlet>
       </div>
-    </footer>
+      <footer class="footer">
+        <div class="container">
+          Alzheimer - Gestion de Stock &copy; {{ annee }} | Microservices Spring Boot + Angular
+        </div>
+      </footer>
+    </div>
   `
 })
 export class AppComponent {

@@ -14,25 +14,23 @@ import { Produit } from '../../modeles/produit.model';
     <div class="fade-in">
       <!-- Header -->
       <div class="dashboard-header">
-        <div class="container">
-          <h1><i class="bi bi-heart-pulse me-2"></i>Tableau de Bord</h1>
-          <p class="mb-0">Gestion de Stock - Détection Maladie Alzheimer</p>
-        </div>
+        <h1><i class="bi bi-grid-1x2-fill me-2"></i>Tableau de Bord</h1>
+        <p>Gestion de Stock - Plateforme Détection Maladie Alzheimer</p>
       </div>
 
-      <!-- Loading Spinner -->
-      <div *ngIf="chargement" class="text-center py-5">
+      <!-- Loading -->
+      <div *ngIf="chargement" class="loading-container">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Chargement...</span>
         </div>
         <p class="mt-3 text-muted">Chargement du tableau de bord...</p>
       </div>
 
-      <!-- Error Message -->
-      <div *ngIf="erreur" class="alert alert-danger d-flex align-items-center mx-3 mt-3" role="alert">
+      <!-- Error -->
+      <div *ngIf="erreur" class="alert alert-danger d-flex align-items-center" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
         <div>
-          Impossible de charger les données du tableau de bord. Veuillez réessayer.
+          Impossible de charger les données. Vérifiez que le serveur est démarré.
           <button class="btn btn-sm btn-outline-danger ms-3" (click)="chargerDonnees()">
             <i class="bi bi-arrow-clockwise me-1"></i>Réessayer
           </button>
@@ -42,12 +40,12 @@ import { Produit } from '../../modeles/produit.model';
       <!-- Content -->
       <div *ngIf="!chargement && !erreur">
         <!-- Stat Cards -->
-        <div class="row g-4 mb-4">
-          <div class="col-md-3">
+        <div class="row g-3 mb-4">
+          <div class="col-lg-3 col-md-6">
             <a routerLink="/categories" class="stat-card">
               <div class="d-flex align-items-center">
                 <div class="stat-icon me-3" style="background: var(--primary-light); color: var(--primary);">
-                  <i class="bi bi-tags"></i>
+                  <i class="bi bi-tags-fill"></i>
                 </div>
                 <div>
                   <div class="stat-number">{{ totalCategories }}</div>
@@ -56,11 +54,11 @@ import { Produit } from '../../modeles/produit.model';
               </div>
             </a>
           </div>
-          <div class="col-md-3">
+          <div class="col-lg-3 col-md-6">
             <a routerLink="/produits" class="stat-card">
               <div class="d-flex align-items-center">
                 <div class="stat-icon me-3" style="background: var(--accent-light); color: var(--accent);">
-                  <i class="bi bi-box-seam"></i>
+                  <i class="bi bi-box-seam-fill"></i>
                 </div>
                 <div>
                   <div class="stat-number">{{ totalProduits }}</div>
@@ -69,11 +67,11 @@ import { Produit } from '../../modeles/produit.model';
               </div>
             </a>
           </div>
-          <div class="col-md-3">
+          <div class="col-lg-3 col-md-6">
             <div class="stat-card">
               <div class="d-flex align-items-center">
                 <div class="stat-icon me-3" style="background: var(--warning-light); color: var(--warning);">
-                  <i class="bi bi-exclamation-triangle"></i>
+                  <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
                 <div>
                   <div class="stat-number">{{ produitsStockBas }}</div>
@@ -82,14 +80,14 @@ import { Produit } from '../../modeles/produit.model';
               </div>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-lg-3 col-md-6">
             <div class="stat-card">
               <div class="d-flex align-items-center">
-                <div class="stat-icon me-3" style="background: #fce4ec; color: #c62828;">
+                <div class="stat-icon me-3" style="background: #e8f5e9; color: #2e7d32;">
                   <i class="bi bi-cash-stack"></i>
                 </div>
                 <div>
-                  <div class="stat-number">{{ valeurTotaleStock | number:'1.2-2' }}</div>
+                  <div class="stat-number" style="font-size: 1.4rem;">{{ valeurTotaleStock | number:'1.0-0' }}</div>
                   <div class="stat-label">Valeur Stock (TND)</div>
                 </div>
               </div>
@@ -97,31 +95,70 @@ import { Produit } from '../../modeles/produit.model';
           </div>
         </div>
 
-        <!-- Rupture de stock alert -->
+        <!-- Rupture de stock -->
         <div *ngIf="produitsEnRupture > 0" class="alert alert-danger d-flex align-items-center mb-4" role="alert">
-          <i class="bi bi-x-circle-fill me-2"></i>
-          <strong>{{ produitsEnRupture }}</strong>&nbsp;produit{{ produitsEnRupture > 1 ? 's' : '' }} en rupture de stock !
+          <i class="bi bi-x-circle-fill me-2 fs-5"></i>
+          <div>
+            <strong>Alerte :</strong> {{ produitsEnRupture }} produit{{ produitsEnRupture > 1 ? 's' : '' }} en rupture de stock !
+            <a routerLink="/produits" class="ms-2 text-decoration-underline" style="color: inherit;">Voir les produits</a>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <a routerLink="/categories/ajouter" class="quick-action">
+              <i class="bi bi-plus-circle-fill" style="background: var(--primary-light); color: var(--primary);"></i>
+              <div>
+                <span>Nouvelle Catégorie</span>
+                <small>Ajouter une catégorie</small>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a routerLink="/produits/ajouter" class="quick-action">
+              <i class="bi bi-plus-circle-fill" style="background: var(--accent-light); color: var(--accent);"></i>
+              <div>
+                <span>Nouveau Produit</span>
+                <small>Ajouter un produit au stock</small>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a routerLink="/produits" class="quick-action">
+              <i class="bi bi-list-ul" style="background: var(--warning-light); color: var(--warning);"></i>
+              <div>
+                <span>Voir tout le Stock</span>
+                <small>Liste complète des produits</small>
+              </div>
+            </a>
+          </div>
         </div>
 
         <!-- Recent data -->
         <div class="row g-4">
           <!-- Catégories récentes -->
-          <div class="col-md-6">
+          <div class="col-lg-6">
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-tags me-2"></i>Catégories</h6>
-                <a routerLink="/categories" class="btn btn-sm btn-primary">Voir tout</a>
+                <h6 class="mb-0 fw-bold"><i class="bi bi-tags-fill me-2 text-primary"></i>Dernières Catégories</h6>
+                <a routerLink="/categories" class="btn btn-sm btn-outline-primary">
+                  Voir tout <i class="bi bi-arrow-right ms-1"></i>
+                </a>
               </div>
               <div class="card-body p-0">
                 <div *ngIf="categories.length === 0" class="empty-state">
                   <i class="bi bi-inbox d-block"></i>
                   <p>Aucune catégorie</p>
+                  <a routerLink="/categories/ajouter" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Ajouter
+                  </a>
                 </div>
                 <div class="list-group list-group-flush" *ngIf="categories.length > 0">
                   <div *ngFor="let cat of categories" class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
                     <div>
                       <span class="fw-semibold">{{ cat.nom }}</span>
-                      <small class="d-block text-muted">{{ cat.description | slice:0:50 }}{{ (cat.description?.length || 0) > 50 ? '...' : '' }}</small>
+                      <small class="d-block text-muted">{{ cat.description | slice:0:50 }}{{ (cat.description.length || 0) > 50 ? '...' : '' }}</small>
                     </div>
                     <span class="badge badge-category">{{ cat.nombreProduits }} produit{{ cat.nombreProduits !== 1 ? 's' : '' }}</span>
                   </div>
@@ -131,16 +168,21 @@ import { Produit } from '../../modeles/produit.model';
           </div>
 
           <!-- Produits récents -->
-          <div class="col-md-6">
+          <div class="col-lg-6">
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-box-seam me-2"></i>Produits</h6>
-                <a routerLink="/produits" class="btn btn-sm btn-primary">Voir tout</a>
+                <h6 class="mb-0 fw-bold"><i class="bi bi-box-seam-fill me-2 text-primary"></i>Derniers Produits</h6>
+                <a routerLink="/produits" class="btn btn-sm btn-outline-primary">
+                  Voir tout <i class="bi bi-arrow-right ms-1"></i>
+                </a>
               </div>
               <div class="card-body p-0">
                 <div *ngIf="produits.length === 0" class="empty-state">
                   <i class="bi bi-inbox d-block"></i>
                   <p>Aucun produit</p>
+                  <a routerLink="/produits/ajouter" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Ajouter
+                  </a>
                 </div>
                 <div class="list-group list-group-flush" *ngIf="produits.length > 0">
                   <div *ngFor="let prod of produits" class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
