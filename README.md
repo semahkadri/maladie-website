@@ -36,6 +36,7 @@ Le module actuellement développé est la **Gestion de Stock** (Catégorie / Pro
 - Assurer la **traçabilité** avec dates de création et de modification
 - Fournir une **interface backoffice** professionnelle pour les administrateurs (sous `/admin`)
 - Fournir une **interface frontoffice** publique pour consulter le catalogue de produits (sous `/`)
+- Proposer une **interface bilingue FR/EN** avec bouton de changement de langue et persistance du choix
 - Exposer des **API REST documentées** (Swagger/OpenAPI) pour l'intégration avec les autres modules
 
 ---
@@ -210,7 +211,8 @@ alzheimer-detection/
 │               ├── services/
 │               │   ├── categorie.service.ts             # Service HTTP Catégorie
 │               │   ├── produit.service.ts               # Service HTTP Produit
-│               │   └── tableau-de-bord.service.ts       # Service HTTP Dashboard
+│               │   ├── tableau-de-bord.service.ts       # Service HTTP Dashboard
+│               │   └── traduction.service.ts            # Service i18n FR/EN (dictionnaire + toggle)
 │               └── composants/
 │                   ├── layouts/                          # Wrappers de mise en page
 │                   │   ├── layout-frontoffice/
@@ -443,7 +445,7 @@ http://localhost:4200/
 
 #### Layout Frontoffice (site public)
 
-- **Navbar horizontale** : Logo, liens Accueil / Catalogue, bouton "Administration"
+- **Navbar horizontale** : Logo, liens Accueil / Catalogue, bouton "Administration", **bouton FR/EN**
 - **Zone de contenu** : Pages publiques en lecture seule
 - **Footer** : Branding projet + badges technologies
 - **Responsive** : Menu hamburger sur mobile
@@ -451,7 +453,7 @@ http://localhost:4200/
 #### Layout Backoffice (administration)
 
 - **Sidebar fixe** (gauche) : Navigation avec icônes, sections groupées (Principal, Gestion, Actions Rapides), lien "Voir le site" pour retourner au frontoffice
-- **Topbar** (haut) : Breadcrumbs dynamiques, horloge en temps réel
+- **Topbar** (haut) : Breadcrumbs dynamiques, **bouton FR/EN**, horloge en temps réel
 - **Zone de contenu** : Zone scrollable avec padding et max-width
 - **Responsive** : Sidebar en overlay sur mobile avec bouton hamburger
 
@@ -488,6 +490,7 @@ http://localhost:4200/
 | `CategorieService` | `listerTout()`, `obtenirParId()`, `creer()`, `modifier()`, `supprimer()` | Appels HTTP vers `/api/categories` |
 | `ProduitService` | `listerTout()`, `listerParCategorie()`, `obtenirParId()`, `creer()`, `modifier()`, `supprimer()` | Appels HTTP vers `/api/produits` |
 | `TableauDeBordService` | `obtenirTableauDeBord()` | Appel HTTP unique vers `/api/tableau-de-bord` |
+| `TraductionService` | `tr()`, `setLang()`, `toggleLang()` | Service i18n FR/EN : dictionnaire centralisé, persistance localStorage |
 
 ### 6.5 - Environnements
 
@@ -530,6 +533,15 @@ http://localhost:4200/
 - Spinner sur le bouton pendant la soumission
 - Messages d'erreur de l'API affichés à l'utilisateur
 
+**Traduction FR/EN (i18n)** :
+- Bouton pill-shaped avec globe icon (FR | EN) dans la navbar frontoffice et la topbar backoffice
+- **Tous les textes** de l'application traduits : titres, labels, messages, placeholders, validations, alertes, pagination
+- `TraductionService` centralisé avec dictionnaire de ~160 clés organisées par composant
+- Persistance du choix de langue dans `localStorage` (survit au rechargement de page)
+- Interpolation de paramètres dynamiques : `{nom}`, `{n}`, etc.
+- Format de date adapté au locale (`fr-FR` / `en-US`) dans la topbar
+- Traductions professionnelles et naturelles (pas de traduction littérale mot-à-mot)
+
 **UI/UX** :
 - Design professionnel avec CSS custom properties (thème cohérent)
 - Styles frontoffice isolés avec préfixe `.fo-*` (pas de conflit avec le backoffice)
@@ -538,6 +550,7 @@ http://localhost:4200/
 - Modale de confirmation avant chaque suppression
 - Messages de succès/erreur après chaque opération
 - Design responsive (desktop, tablette, mobile) pour les deux parties
+- Bouton de langue avec design moderne (pill shape, backdrop blur, animation de transition)
 
 ---
 
@@ -806,6 +819,10 @@ ng serve --open
 9. Naviguer vers `/admin/categories` → le CRUD fonctionne (ajouter, modifier, supprimer)
 10. Naviguer vers `/admin/produits` → le CRUD fonctionne (ajouter, modifier, supprimer)
 11. Cliquer **"Voir le site"** dans le footer de la sidebar → retour au frontoffice `/`
+12. Cliquer le bouton **FR/EN** dans la navbar → toute l'interface bascule en anglais (titres, labels, filtres, messages, pagination)
+13. Naviguer vers `/admin` → le backoffice est aussi en anglais (dashboard, sidebar, breadcrumbs, formulaires)
+14. Recharger la page → la langue anglaise est conservée (persistance localStorage)
+15. Cliquer **EN → FR** → retour au français immédiat sans rechargement
 
 ---
 
@@ -815,7 +832,7 @@ ng serve --open
 
 #### Page Accueil (`/`)
 
-- Navbar horizontale avec liens Accueil, Catalogue, Administration
+- Navbar horizontale avec liens Accueil, Catalogue, Administration, **bouton FR/EN** (pill shape)
 - Hero section avec gradient, titre du projet et bouton "Parcourir le Catalogue"
 - 3 cartes statistiques : nombre de produits, nombre de catégories, valeur totale du stock (TND)
 - Grille de catégories cliquables avec icône, description et nombre de produits
@@ -853,7 +870,7 @@ ng serve --open
 
 #### Page Tableau de Bord (`/admin`)
 
-- Layout backoffice avec sidebar fixe (gauche) et topbar (breadcrumbs + horloge)
+- Layout backoffice avec sidebar fixe (gauche) et topbar (breadcrumbs + **bouton FR/EN** + horloge)
 - 4 cartes statistiques : catégories, produits, stock faible (≤ 10), valeur totale stock (TND)
 - Alerte rouge si produits en rupture de stock
 - 3 boutons d'actions rapides : Nouvelle Catégorie, Nouveau Produit, Voir tout le Stock

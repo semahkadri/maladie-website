@@ -1905,4 +1905,108 @@ body {
   .fo-filter-chips {
     flex-wrap: wrap;
   }
+
+  .lang-toggle {
+    margin: 4px 0;
+    align-self: flex-start;
+  }
+}
+
+/* ==================== LANGUAGE TOGGLE ==================== */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50px;
+  padding: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  transition: var(--transition);
+  margin-left: 12px;
+}
+
+.lang-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.lang-toggle-icon {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 6px 0 8px;
+  transition: var(--transition);
+}
+
+.lang-toggle:hover .lang-toggle-icon {
+  color: #fff;
+}
+
+.lang-toggle button {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 5px 14px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  font-family: 'Inter', sans-serif;
+}
+
+.lang-toggle button:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.lang-toggle button.active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+}
+
+/* Backoffice variant (darker topbar context) */
+.lang-toggle-bo {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: var(--border);
+  margin-left: 0;
+  margin-right: 16px;
+}
+
+.lang-toggle-bo:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: var(--primary);
+}
+
+.lang-toggle-bo .lang-toggle-icon {
+  color: var(--text-secondary);
+}
+
+.lang-toggle-bo:hover .lang-toggle-icon {
+  color: var(--primary);
+}
+
+.lang-toggle-bo button {
+  color: var(--text-secondary);
+}
+
+.lang-toggle-bo button:hover {
+  color: var(--text-primary);
+}
+
+.lang-toggle-bo button.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+/* Topbar right section alignment */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
 }

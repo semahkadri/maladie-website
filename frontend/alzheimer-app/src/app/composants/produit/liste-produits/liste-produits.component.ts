@@ -6,6 +6,7 @@ import { Produit } from '../../../modeles/produit.model';
 import { Categorie } from '../../../modeles/categorie.model';
 import { ProduitService } from '../../../services/produit.service';
 import { CategorieService } from '../../../services/categorie.service';
+import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
   selector: 'app-liste-produits',
@@ -16,12 +17,12 @@ import { CategorieService } from '../../../services/categorie.service';
       <div class="page-header d-flex justify-content-between align-items-center">
         <div>
           <h2 class="page-title">
-            <i class="bi bi-box-seam-fill me-2 text-gradient"></i>Gestion des Produits
+            <i class="bi bi-box-seam-fill me-2 text-gradient"></i>{{ t.tr('lp.titre') }}
           </h2>
-          <p class="page-subtitle">{{ produitsFiltres.length }} produit{{ produitsFiltres.length !== 1 ? 's' : '' }} au total</p>
+          <p class="page-subtitle">{{ produitsFiltres.length }} {{ produitsFiltres.length !== 1 ? t.tr('common.produits') : t.tr('common.produit') }} {{ t.tr('lp.auTotal') }}</p>
         </div>
         <a routerLink="/admin/produits/ajouter" class="btn btn-primary">
-          <i class="bi bi-plus-circle me-1"></i>Nouveau Produit
+          <i class="bi bi-plus-circle me-1"></i>{{ t.tr('lp.nouveauProd') }}
         </a>
       </div>
 
@@ -35,9 +36,9 @@ import { CategorieService } from '../../../services/categorie.service';
       <!-- Loading -->
       <div *ngIf="chargement" class="loading-container">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Chargement...</span>
+          <span class="visually-hidden">{{ t.tr('common.chargement') }}</span>
         </div>
-        <p class="mt-3 text-muted">Chargement des produits...</p>
+        <p class="mt-3 text-muted">{{ t.tr('lp.chargement') }}</p>
       </div>
 
       <!-- Content -->
@@ -48,23 +49,23 @@ import { CategorieService } from '../../../services/categorie.service';
             <div class="filter-bar">
               <div class="search-input">
                 <i class="bi bi-search"></i>
-                <input type="text" class="form-control" placeholder="Rechercher un produit..."
+                <input type="text" class="form-control" [placeholder]="t.tr('lp.rechercher')"
                        [(ngModel)]="recherche" (ngModelChange)="filtrer()">
               </div>
               <select class="form-select" style="width: auto; min-width: 180px;"
                       [(ngModel)]="filtreCategorie" (ngModelChange)="filtrer()">
-                <option [ngValue]="0">Toutes catégories</option>
+                <option [ngValue]="0">{{ t.tr('lp.toutesCat') }}</option>
                 <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.nom }}</option>
               </select>
               <select class="form-select" style="width: auto; min-width: 150px;"
                       [(ngModel)]="filtreStock" (ngModelChange)="filtrer()">
-                <option value="tous">Tout le stock</option>
-                <option value="normal">Stock normal</option>
-                <option value="faible">Stock faible</option>
-                <option value="rupture">En rupture</option>
+                <option value="tous">{{ t.tr('lp.toutStock') }}</option>
+                <option value="normal">{{ t.tr('lp.stockNormal') }}</option>
+                <option value="faible">{{ t.tr('lp.stockFaible') }}</option>
+                <option value="rupture">{{ t.tr('lp.enRupture') }}</option>
               </select>
               <span class="text-muted" style="font-size: 0.82rem; white-space: nowrap;">
-                {{ produitsFiltres.length }} résultat{{ produitsFiltres.length !== 1 ? 's' : '' }}
+                {{ produitsFiltres.length }} {{ produitsFiltres.length !== 1 ? t.tr('common.resultats') : t.tr('common.resultat') }}
               </span>
             </div>
           </div>
@@ -77,14 +78,14 @@ import { CategorieService } from '../../../services/categorie.service';
               <table class="table table-hover mb-0">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Nom</th>
-                    <th>Description</th>
-                    <th>Prix (TND)</th>
-                    <th>Quantité</th>
-                    <th>Catégorie</th>
-                    <th>Date Création</th>
-                    <th class="text-center">Actions</th>
+                    <th>{{ t.tr('common.id') }}</th>
+                    <th>{{ t.tr('common.nom') }}</th>
+                    <th>{{ t.tr('common.description') }}</th>
+                    <th>{{ t.tr('lp.prixTND') }}</th>
+                    <th>{{ t.tr('lp.quantite') }}</th>
+                    <th>{{ t.tr('detail.categorie') }}</th>
+                    <th>{{ t.tr('lp.dateCreation') }}</th>
+                    <th class="text-center">{{ t.tr('common.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -92,15 +93,15 @@ import { CategorieService } from '../../../services/categorie.service';
                     <td colspan="8" class="text-center">
                       <div class="empty-state">
                         <i class="bi bi-inbox d-block"></i>
-                        <p *ngIf="!recherche && filtreCategorie === 0 && filtreStock === 'tous'">Aucun produit trouvé</p>
-                        <p *ngIf="recherche || filtreCategorie !== 0 || filtreStock !== 'tous'">Aucun résultat pour vos filtres</p>
+                        <p *ngIf="!recherche && filtreCategorie === 0 && filtreStock === 'tous'">{{ t.tr('lp.aucunProduit') }}</p>
+                        <p *ngIf="recherche || filtreCategorie !== 0 || filtreStock !== 'tous'">{{ t.tr('lp.aucunFiltre') }}</p>
                         <a *ngIf="!recherche && filtreCategorie === 0 && filtreStock === 'tous'"
                            routerLink="/admin/produits/ajouter" class="btn btn-primary btn-sm">
-                          <i class="bi bi-plus-circle me-1"></i>Ajouter un produit
+                          <i class="bi bi-plus-circle me-1"></i>{{ t.tr('lp.ajouterProduit') }}
                         </a>
                         <button *ngIf="recherche || filtreCategorie !== 0 || filtreStock !== 'tous'"
                                 class="btn btn-secondary btn-sm" (click)="reinitialiserFiltres()">
-                          <i class="bi bi-x-circle me-1"></i>Réinitialiser les filtres
+                          <i class="bi bi-x-circle me-1"></i>{{ t.tr('lp.reinitialiser') }}
                         </button>
                       </div>
                     </td>
@@ -116,7 +117,7 @@ import { CategorieService } from '../../../services/categorie.service';
                       <span class="badge badge-stock"
                             [ngClass]="produit.quantite > 10 ? 'bg-success' : produit.quantite > 0 ? 'bg-warning' : 'bg-danger'">
                         {{ produit.quantite }}
-                        <span *ngIf="produit.quantite === 0"> - Rupture</span>
+                        <span *ngIf="produit.quantite === 0"> - {{ t.tr('lp.ruptureBadge') }}</span>
                       </span>
                     </td>
                     <td>
@@ -126,10 +127,10 @@ import { CategorieService } from '../../../services/categorie.service';
                     <td class="text-center">
                       <div class="btn-action-group">
                         <a [routerLink]="['/admin/produits/modifier', produit.id]" class="btn btn-sm btn-warning">
-                          <i class="bi bi-pencil"></i> Modifier
+                          <i class="bi bi-pencil"></i> {{ t.tr('common.modifier') }}
                         </a>
                         <button class="btn btn-sm btn-danger" (click)="confirmerSuppression(produit)">
-                          <i class="bi bi-trash"></i> Supprimer
+                          <i class="bi bi-trash"></i> {{ t.tr('common.supprimer') }}
                         </button>
                       </div>
                     </td>
@@ -141,7 +142,7 @@ import { CategorieService } from '../../../services/categorie.service';
             <!-- Pagination -->
             <div *ngIf="totalPages > 1" class="pagination-wrapper">
               <div class="pagination-info">
-                Affichage {{ debut + 1 }}-{{ fin }} sur {{ produitsFiltres.length }}
+                {{ t.tr('lp.affichage') }} {{ debut + 1 }}-{{ fin }} {{ t.tr('catalogue.sur') }} {{ produitsFiltres.length }}
               </div>
               <div class="pagination-controls">
                 <button (click)="page = page - 1; paginer()" [disabled]="page === 1">
@@ -165,17 +166,17 @@ import { CategorieService } from '../../../services/categorie.service';
           <div class="modal-content">
             <div class="modal-header bg-danger text-white">
               <h5 class="modal-title">
-                <i class="bi bi-exclamation-triangle me-2"></i>Confirmation de suppression
+                <i class="bi bi-exclamation-triangle me-2"></i>{{ t.tr('lp.confirmTitre') }}
               </h5>
             </div>
             <div class="modal-body">
-              <p>Êtes-vous sûr de vouloir supprimer le produit
+              <p>{{ t.tr('lp.confirmMsg') }}
                 <strong>{{ produitASupprimer.nom }}</strong> ?</p>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="produitASupprimer = null">Annuler</button>
+              <button class="btn btn-secondary" (click)="produitASupprimer = null">{{ t.tr('common.annuler') }}</button>
               <button class="btn btn-danger" (click)="supprimer()">
-                <i class="bi bi-trash me-1"></i>Supprimer
+                <i class="bi bi-trash me-1"></i>{{ t.tr('common.supprimer') }}
               </button>
             </div>
           </div>
@@ -207,7 +208,8 @@ export class ListeProduitsComponent implements OnInit {
 
   constructor(
     private produitService: ProduitService,
-    private categorieService: CategorieService
+    private categorieService: CategorieService,
+    public t: TraductionService
   ) {}
 
   ngOnInit(): void {
@@ -227,7 +229,7 @@ export class ListeProduitsComponent implements OnInit {
         this.chargement = false;
       },
       error: (err) => {
-        this.message = 'Erreur lors du chargement des produits';
+        this.message = this.t.tr('lp.erreurChargement');
         this.messageType = 'error';
         this.chargement = false;
         console.error(err);
@@ -276,13 +278,13 @@ export class ListeProduitsComponent implements OnInit {
     if (this.produitASupprimer?.id) {
       this.produitService.supprimer(this.produitASupprimer.id).subscribe({
         next: () => {
-          this.message = 'Produit "' + this.produitASupprimer?.nom + '" supprimé avec succès';
+          this.message = this.t.tr('lp.successSupp', { nom: this.produitASupprimer?.nom || '' });
           this.messageType = 'success';
           this.produitASupprimer = null;
           this.chargerDonnees();
         },
         error: (err) => {
-          this.message = 'Erreur lors de la suppression';
+          this.message = this.t.tr('lp.erreurSuppression');
           this.messageType = 'error';
           this.produitASupprimer = null;
           console.error(err);

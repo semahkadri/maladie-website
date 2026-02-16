@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
   selector: 'app-layout-frontoffice',
@@ -13,7 +14,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
           <div class="fo-navbar-brand-icon">
             <i class="bi bi-heart-pulse"></i>
           </div>
-          <span>Gestion de Stock</span>
+          <span>{{ t.tr('nav.brand') }}</span>
         </a>
 
         <button class="fo-navbar-toggle" (click)="menuOpen = !menuOpen">
@@ -23,15 +24,22 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
         <div class="fo-navbar-menu" [class.open]="menuOpen">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
              class="fo-navbar-link" (click)="menuOpen = false">
-            <i class="bi bi-house-door"></i> Accueil
+            <i class="bi bi-house-door"></i> {{ t.tr('nav.accueil') }}
           </a>
           <a routerLink="/catalogue" routerLinkActive="active"
              class="fo-navbar-link" (click)="menuOpen = false">
-            <i class="bi bi-grid-3x3-gap"></i> Catalogue
+            <i class="bi bi-grid-3x3-gap"></i> {{ t.tr('nav.catalogue') }}
           </a>
           <a routerLink="/admin" class="fo-navbar-link fo-navbar-admin" (click)="menuOpen = false">
-            <i class="bi bi-gear"></i> Administration
+            <i class="bi bi-gear"></i> {{ t.tr('nav.admin') }}
           </a>
+
+          <!-- Language Toggle -->
+          <div class="lang-toggle">
+            <i class="bi bi-globe2 lang-toggle-icon"></i>
+            <button [class.active]="t.isFr" (click)="t.setLang('fr')">FR</button>
+            <button [class.active]="t.isEn" (click)="t.setLang('en')">EN</button>
+          </div>
         </div>
       </div>
     </nav>
@@ -46,10 +54,10 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
       <div class="fo-footer-container">
         <div class="fo-footer-brand">
           <i class="bi bi-heart-pulse"></i>
-          <span>Alzheimer - Gestion de Stock</span>
+          <span>{{ t.tr('footer.brand') }}</span>
         </div>
         <div class="fo-footer-info">
-          Microservices Spring Boot + Angular &copy; {{ annee }}
+          {{ t.tr('footer.info') }} &copy; {{ annee }}
         </div>
         <div class="fo-footer-tech">
           <span class="fo-footer-badge">Angular 17</span>
@@ -63,4 +71,6 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 export class LayoutFrontofficeComponent {
   annee = new Date().getFullYear();
   menuOpen = false;
+
+  constructor(public t: TraductionService) {}
 }

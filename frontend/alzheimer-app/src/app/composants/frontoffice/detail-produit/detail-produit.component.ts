@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProduitService } from '../../../services/produit.service';
 import { Produit } from '../../../modeles/produit.model';
+import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
   selector: 'app-detail-produit',
@@ -13,7 +14,7 @@ import { Produit } from '../../../modeles/produit.model';
       <div class="fo-section-container">
         <!-- Breadcrumb -->
         <div class="fo-breadcrumb">
-          <a routerLink="/catalogue">Catalogue</a>
+          <a routerLink="/catalogue">{{ t.tr('detail.catalogue') }}</a>
           <span>/</span>
           <span>{{ produit.nom }}</span>
         </div>
@@ -30,11 +31,11 @@ import { Produit } from '../../../modeles/produit.model';
 
             <div class="fo-product-detail-meta">
               <div class="fo-product-detail-price">
-                <span class="label">Prix</span>
+                <span class="label">{{ t.tr('detail.prix') }}</span>
                 <span class="value">{{ produit.prix | number:'1.2-2' }} TND</span>
               </div>
               <div class="fo-product-detail-stock">
-                <span class="label">Disponibilité</span>
+                <span class="label">{{ t.tr('detail.disponibilite') }}</span>
                 <span class="fo-product-stock fo-product-stock-lg"
                       [class.in-stock]="produit.quantite > 10"
                       [class.low-stock]="produit.quantite > 0 && produit.quantite <= 10"
@@ -42,13 +43,13 @@ import { Produit } from '../../../modeles/produit.model';
                   <i class="bi" [class.bi-check-circle-fill]="produit.quantite > 10"
                      [class.bi-exclamation-triangle-fill]="produit.quantite > 0 && produit.quantite <= 10"
                      [class.bi-x-circle-fill]="produit.quantite === 0"></i>
-                  {{ produit.quantite > 10 ? 'En stock (' + produit.quantite + ' unités)' :
-                     produit.quantite > 0 ? 'Stock faible (' + produit.quantite + ' unités)' :
-                     'Rupture de stock' }}
+                  {{ produit.quantite > 10 ? t.tr('detail.enStockUnites', {n: produit.quantite}) :
+                     produit.quantite > 0 ? t.tr('detail.faibleUnites', {n: produit.quantite}) :
+                     t.tr('detail.ruptureStock') }}
                 </span>
               </div>
               <div class="fo-product-detail-category">
-                <span class="label">Catégorie</span>
+                <span class="label">{{ t.tr('detail.categorie') }}</span>
                 <a [routerLink]="['/categories', produit.categorieId]" class="fo-category-link">
                   <i class="bi bi-tag-fill"></i> {{ produit.categorieNom }}
                 </a>
@@ -56,14 +57,14 @@ import { Produit } from '../../../modeles/produit.model';
             </div>
 
             <a routerLink="/catalogue" class="fo-btn fo-btn-outline" style="margin-top: 24px;">
-              <i class="bi bi-arrow-left me-2"></i>Retour au catalogue
+              <i class="bi bi-arrow-left me-2"></i>{{ t.tr('detail.retourCatalogue') }}
             </a>
           </div>
         </div>
 
         <!-- Related Products -->
         <div *ngIf="relatedProducts.length > 0" class="fo-related-section">
-          <h2 class="fo-section-title">Produits similaires</h2>
+          <h2 class="fo-section-title">{{ t.tr('detail.similaires') }}</h2>
           <div class="fo-product-grid">
             <a *ngFor="let p of relatedProducts" [routerLink]="['/catalogue', p.id]" class="fo-product-card">
               <div class="fo-product-card-img">
@@ -78,7 +79,7 @@ import { Produit } from '../../../modeles/produit.model';
                         [class.in-stock]="p.quantite > 10"
                         [class.low-stock]="p.quantite > 0 && p.quantite <= 10"
                         [class.out-of-stock]="p.quantite === 0">
-                    {{ p.quantite > 10 ? 'En stock' : p.quantite > 0 ? 'Stock faible' : 'Rupture' }}
+                    {{ p.quantite > 10 ? t.tr('common.enStock') : p.quantite > 0 ? t.tr('common.stockFaible') : t.tr('common.rupture') }}
                   </span>
                 </div>
               </div>
@@ -91,7 +92,7 @@ import { Produit } from '../../../modeles/produit.model';
     <!-- Loading -->
     <div *ngIf="loading" class="fo-loading">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Chargement...</span>
+        <span class="visually-hidden">{{ t.tr('common.chargement') }}</span>
       </div>
     </div>
   `
@@ -103,7 +104,8 @@ export class DetailProduitComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private produitService: ProduitService
+    private produitService: ProduitService,
+    public t: TraductionService
   ) {}
 
   ngOnInit(): void {

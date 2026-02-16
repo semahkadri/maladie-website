@@ -6,6 +6,7 @@ import { CategorieService } from '../../../services/categorie.service';
 import { ProduitService } from '../../../services/produit.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Produit } from '../../../modeles/produit.model';
+import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
   selector: 'app-categorie-produits',
@@ -16,7 +17,7 @@ import { Produit } from '../../../modeles/produit.model';
       <div class="fo-section-container">
         <!-- Breadcrumb -->
         <div class="fo-breadcrumb">
-          <a routerLink="/">Accueil</a>
+          <a routerLink="/">{{ t.tr('nav.accueil') }}</a>
           <span>/</span>
           <span>{{ categorie?.nom }}</span>
         </div>
@@ -36,17 +37,17 @@ import { Produit } from '../../../modeles/produit.model';
         <div class="fo-filter-bar">
           <div class="fo-search-box">
             <i class="bi bi-search"></i>
-            <input type="text" placeholder="Rechercher dans cette catégorie..."
+            <input type="text" [placeholder]="t.tr('catProd.rechercherDans')"
                    [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()">
           </div>
           <select class="fo-filter-select fo-filter-stock" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
-            <option value="tous">Tout le stock</option>
-            <option value="en-stock">En stock (&gt; 10)</option>
-            <option value="faible">Stock faible (1-10)</option>
-            <option value="rupture">Rupture de stock</option>
+            <option value="tous">{{ t.tr('catalogue.toutStock') }}</option>
+            <option value="en-stock">{{ t.tr('catalogue.enStockFiltre') }}</option>
+            <option value="faible">{{ t.tr('catalogue.faibleFiltre') }}</option>
+            <option value="rupture">{{ t.tr('catalogue.ruptureFiltre') }}</option>
           </select>
           <a routerLink="/catalogue" class="fo-btn fo-btn-outline">
-            <i class="bi bi-grid-3x3-gap me-1"></i>Tout parcourir
+            <i class="bi bi-grid-3x3-gap me-1"></i>{{ t.tr('catalogue.toutParcourir') }}
           </a>
         </div>
 
@@ -54,27 +55,27 @@ import { Produit } from '../../../modeles/produit.model';
         <div class="fo-toolbar">
           <div class="fo-toolbar-left">
             <span class="fo-results-count">
-              <strong>{{ filteredProducts.length }}</strong> produit{{ filteredProducts.length !== 1 ? 's' : '' }}
+              <strong>{{ filteredProducts.length }}</strong> {{ filteredProducts.length !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}
               <span *ngIf="hasActiveFilters()" class="fo-results-filtered">
-                (filtré{{ filteredProducts.length !== 1 ? 's' : '' }})
+                ({{ t.tr('catalogue.filtres') }}{{ filteredProducts.length !== 1 ? 's' : '' }})
                 <button class="fo-clear-filters" (click)="resetFilters()">
-                  <i class="bi bi-x-circle"></i> Tout effacer
+                  <i class="bi bi-x-circle"></i> {{ t.tr('catalogue.toutEffacer') }}
                 </button>
               </span>
             </span>
           </div>
           <div class="fo-toolbar-right">
             <div class="fo-sort-control">
-              <label><i class="bi bi-sort-down me-1"></i>Trier par</label>
+              <label><i class="bi bi-sort-down me-1"></i>{{ t.tr('catalogue.trierPar') }}</label>
               <select [(ngModel)]="sortBy" (ngModelChange)="applySort()">
-                <option value="nom-asc">Nom A → Z</option>
-                <option value="nom-desc">Nom Z → A</option>
-                <option value="prix-asc">Prix croissant</option>
-                <option value="prix-desc">Prix décroissant</option>
-                <option value="date-desc">Plus récents</option>
-                <option value="date-asc">Plus anciens</option>
-                <option value="stock-desc">Stock décroissant</option>
-                <option value="stock-asc">Stock croissant</option>
+                <option value="nom-asc">{{ t.tr('catalogue.nomAZ') }}</option>
+                <option value="nom-desc">{{ t.tr('catalogue.nomZA') }}</option>
+                <option value="prix-asc">{{ t.tr('catalogue.prixAsc') }}</option>
+                <option value="prix-desc">{{ t.tr('catalogue.prixDesc') }}</option>
+                <option value="date-desc">{{ t.tr('catalogue.dateDesc') }}</option>
+                <option value="date-asc">{{ t.tr('catalogue.dateAsc') }}</option>
+                <option value="stock-desc">{{ t.tr('catalogue.stockDesc') }}</option>
+                <option value="stock-asc">{{ t.tr('catalogue.stockAsc') }}</option>
               </select>
             </div>
           </div>
@@ -83,11 +84,11 @@ import { Produit } from '../../../modeles/produit.model';
         <!-- Active Filters Chips -->
         <div class="fo-filter-chips" *ngIf="hasActiveFilters()">
           <span class="fo-chip" *ngIf="searchTerm">
-            Recherche : « {{ searchTerm }} »
+            {{ t.tr('catalogue.chipRecherche') }} : &laquo; {{ searchTerm }} &raquo;
             <button (click)="searchTerm = ''; applyFilters()"><i class="bi bi-x"></i></button>
           </span>
           <span class="fo-chip" *ngIf="selectedStock !== 'tous'">
-            Stock : {{ getStockLabel(selectedStock) }}
+            {{ t.tr('catalogue.chipStock') }} : {{ getStockLabel(selectedStock) }}
             <button (click)="selectedStock = 'tous'; applyFilters()"><i class="bi bi-x"></i></button>
           </span>
         </div>
@@ -108,7 +109,7 @@ import { Produit } from '../../../modeles/produit.model';
                       [class.in-stock]="prod.quantite > 10"
                       [class.low-stock]="prod.quantite > 0 && prod.quantite <= 10"
                       [class.out-of-stock]="prod.quantite === 0">
-                  {{ prod.quantite > 10 ? 'En stock' : prod.quantite > 0 ? 'Stock faible' : 'Rupture' }}
+                  {{ prod.quantite > 10 ? t.tr('common.enStock') : prod.quantite > 0 ? t.tr('common.stockFaible') : t.tr('common.rupture') }}
                 </span>
               </div>
             </div>
@@ -118,26 +119,26 @@ import { Produit } from '../../../modeles/produit.model';
         <!-- Pagination -->
         <div class="fo-pagination" *ngIf="totalPages > 1">
           <div class="fo-pagination-info">
-            Affichage {{ startIndex + 1 }}–{{ endIndex }} sur {{ filteredProducts.length }}
+            {{ t.tr('catalogue.affichage') }} {{ startIndex + 1 }}–{{ endIndex }} {{ t.tr('catalogue.sur') }} {{ filteredProducts.length }}
           </div>
           <div class="fo-pagination-controls">
-            <button (click)="goToPage(1)" [disabled]="page === 1" title="Première page">
+            <button (click)="goToPage(1)" [disabled]="page === 1" [title]="t.tr('catalogue.premierePage')">
               <i class="bi bi-chevron-double-left"></i>
             </button>
-            <button (click)="goToPage(page - 1)" [disabled]="page === 1" title="Page précédente">
+            <button (click)="goToPage(page - 1)" [disabled]="page === 1" [title]="t.tr('catalogue.precedente')">
               <i class="bi bi-chevron-left"></i>
             </button>
             <button *ngFor="let p of visiblePages" (click)="goToPage(p)"
                     [class.active]="p === page">{{ p }}</button>
-            <button (click)="goToPage(page + 1)" [disabled]="page === totalPages" title="Page suivante">
+            <button (click)="goToPage(page + 1)" [disabled]="page === totalPages" [title]="t.tr('catalogue.suivante')">
               <i class="bi bi-chevron-right"></i>
             </button>
-            <button (click)="goToPage(totalPages)" [disabled]="page === totalPages" title="Dernière page">
+            <button (click)="goToPage(totalPages)" [disabled]="page === totalPages" [title]="t.tr('catalogue.dernierePage')">
               <i class="bi bi-chevron-double-right"></i>
             </button>
           </div>
           <div class="fo-pagination-size">
-            <label>Par page :</label>
+            <label>{{ t.tr('catalogue.parPage') }}</label>
             <select [(ngModel)]="perPage" (ngModelChange)="onPerPageChange()">
               <option [ngValue]="6">6</option>
               <option [ngValue]="12">12</option>
@@ -150,12 +151,12 @@ import { Produit } from '../../../modeles/produit.model';
         <!-- Empty State -->
         <div *ngIf="filteredProducts.length === 0 && !loading" class="fo-empty-state">
           <i class="bi bi-inbox"></i>
-          <p *ngIf="!hasActiveFilters()">Aucun produit dans cette catégorie.</p>
-          <p *ngIf="hasActiveFilters()">Aucun produit trouvé pour vos critères.</p>
+          <p *ngIf="!hasActiveFilters()">{{ t.tr('catProd.aucunProduit') }}</p>
+          <p *ngIf="hasActiveFilters()">{{ t.tr('catProd.aucunFiltre') }}</p>
           <button *ngIf="hasActiveFilters()" class="fo-btn fo-btn-outline" (click)="resetFilters()">
-            <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser les filtres
+            <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.tr('catalogue.reinitialiser') }}
           </button>
-          <a *ngIf="!hasActiveFilters()" routerLink="/catalogue" class="fo-btn fo-btn-outline">Parcourir le catalogue</a>
+          <a *ngIf="!hasActiveFilters()" routerLink="/catalogue" class="fo-btn fo-btn-outline">{{ t.tr('catProd.parcourirCatalogue') }}</a>
         </div>
       </div>
     </div>
@@ -163,7 +164,7 @@ import { Produit } from '../../../modeles/produit.model';
     <!-- Loading -->
     <div *ngIf="loading" class="fo-loading">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Chargement...</span>
+        <span class="visually-hidden">{{ t.tr('common.chargement') }}</span>
       </div>
     </div>
   `
@@ -195,7 +196,8 @@ export class CategorieProduitsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private categorieService: CategorieService,
-    private produitService: ProduitService
+    private produitService: ProduitService,
+    public t: TraductionService
   ) {}
 
   ngOnInit(): void {
@@ -302,9 +304,9 @@ export class CategorieProduitsComponent implements OnInit {
 
   getStockLabel(value: string): string {
     const labels: Record<string, string> = {
-      'en-stock': 'En stock',
-      'faible': 'Stock faible',
-      'rupture': 'Rupture'
+      'en-stock': this.t.tr('common.enStock'),
+      'faible': this.t.tr('common.stockFaible'),
+      'rupture': this.t.tr('common.rupture')
     };
     return labels[value] || value;
   }

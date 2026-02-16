@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Categorie } from '../../../modeles/categorie.model';
 import { CategorieService } from '../../../services/categorie.service';
+import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
   selector: 'app-liste-categories',
@@ -14,12 +15,12 @@ import { CategorieService } from '../../../services/categorie.service';
       <div class="page-header d-flex justify-content-between align-items-center">
         <div>
           <h2 class="page-title">
-            <i class="bi bi-tags-fill me-2 text-gradient"></i>Gestion des Catégories
+            <i class="bi bi-tags-fill me-2 text-gradient"></i>{{ t.tr('lc.titre') }}
           </h2>
-          <p class="page-subtitle">{{ categoriesFiltrees.length }} catégorie{{ categoriesFiltrees.length !== 1 ? 's' : '' }} au total</p>
+          <p class="page-subtitle">{{ categoriesFiltrees.length }} {{ categoriesFiltrees.length !== 1 ? t.tr('common.categories') : t.tr('common.categorie') }} {{ t.tr('lc.auTotal') }}</p>
         </div>
         <a routerLink="/admin/categories/ajouter" class="btn btn-primary">
-          <i class="bi bi-plus-circle me-1"></i>Nouvelle Catégorie
+          <i class="bi bi-plus-circle me-1"></i>{{ t.tr('lc.nouvelleCat') }}
         </a>
       </div>
 
@@ -33,9 +34,9 @@ import { CategorieService } from '../../../services/categorie.service';
       <!-- Loading -->
       <div *ngIf="chargement" class="loading-container">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Chargement...</span>
+          <span class="visually-hidden">{{ t.tr('common.chargement') }}</span>
         </div>
-        <p class="mt-3 text-muted">Chargement des catégories...</p>
+        <p class="mt-3 text-muted">{{ t.tr('lc.chargement') }}</p>
       </div>
 
       <!-- Content -->
@@ -46,11 +47,11 @@ import { CategorieService } from '../../../services/categorie.service';
             <div class="filter-bar">
               <div class="search-input">
                 <i class="bi bi-search"></i>
-                <input type="text" class="form-control" placeholder="Rechercher une catégorie..."
+                <input type="text" class="form-control" [placeholder]="t.tr('lc.rechercher')"
                        [(ngModel)]="recherche" (ngModelChange)="filtrer()">
               </div>
               <span class="text-muted" style="font-size: 0.82rem; white-space: nowrap;">
-                {{ categoriesFiltrees.length }} résultat{{ categoriesFiltrees.length !== 1 ? 's' : '' }}
+                {{ categoriesFiltrees.length }} {{ categoriesFiltrees.length !== 1 ? t.tr('common.resultats') : t.tr('common.resultat') }}
               </span>
             </div>
           </div>
@@ -63,12 +64,12 @@ import { CategorieService } from '../../../services/categorie.service';
               <table class="table table-hover mb-0">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Nom</th>
-                    <th>Description</th>
-                    <th>Nb. Produits</th>
-                    <th>Date Création</th>
-                    <th class="text-center">Actions</th>
+                    <th>{{ t.tr('common.id') }}</th>
+                    <th>{{ t.tr('common.nom') }}</th>
+                    <th>{{ t.tr('common.description') }}</th>
+                    <th>{{ t.tr('lc.nbProduits') }}</th>
+                    <th>{{ t.tr('lc.dateCreation') }}</th>
+                    <th class="text-center">{{ t.tr('common.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -76,10 +77,10 @@ import { CategorieService } from '../../../services/categorie.service';
                     <td colspan="6" class="text-center">
                       <div class="empty-state">
                         <i class="bi bi-inbox d-block"></i>
-                        <p *ngIf="!recherche">Aucune catégorie trouvée</p>
-                        <p *ngIf="recherche">Aucun résultat pour "{{ recherche }}"</p>
+                        <p *ngIf="!recherche">{{ t.tr('lc.aucuneCat') }}</p>
+                        <p *ngIf="recherche">{{ t.tr('lc.aucunResultat') }} "{{ recherche }}"</p>
                         <a *ngIf="!recherche" routerLink="/admin/categories/ajouter" class="btn btn-primary btn-sm">
-                          <i class="bi bi-plus-circle me-1"></i>Ajouter une catégorie
+                          <i class="bi bi-plus-circle me-1"></i>{{ t.tr('lc.ajouterCat') }}
                         </a>
                       </div>
                     </td>
@@ -97,10 +98,10 @@ import { CategorieService } from '../../../services/categorie.service';
                     <td class="text-center">
                       <div class="btn-action-group">
                         <a [routerLink]="['/admin/categories/modifier', categorie.id]" class="btn btn-sm btn-warning">
-                          <i class="bi bi-pencil"></i> Modifier
+                          <i class="bi bi-pencil"></i> {{ t.tr('common.modifier') }}
                         </a>
                         <button class="btn btn-sm btn-danger" (click)="confirmerSuppression(categorie)">
-                          <i class="bi bi-trash"></i> Supprimer
+                          <i class="bi bi-trash"></i> {{ t.tr('common.supprimer') }}
                         </button>
                       </div>
                     </td>
@@ -112,7 +113,7 @@ import { CategorieService } from '../../../services/categorie.service';
             <!-- Pagination -->
             <div *ngIf="totalPages > 1" class="pagination-wrapper">
               <div class="pagination-info">
-                Affichage {{ debut + 1 }}-{{ fin }} sur {{ categoriesFiltrees.length }}
+                {{ t.tr('lc.affichage') }} {{ debut + 1 }}-{{ fin }} {{ t.tr('catalogue.sur') }} {{ categoriesFiltrees.length }}
               </div>
               <div class="pagination-controls">
                 <button (click)="page = page - 1; paginer()" [disabled]="page === 1">
@@ -136,20 +137,20 @@ import { CategorieService } from '../../../services/categorie.service';
           <div class="modal-content">
             <div class="modal-header bg-danger text-white">
               <h5 class="modal-title">
-                <i class="bi bi-exclamation-triangle me-2"></i>Confirmation de suppression
+                <i class="bi bi-exclamation-triangle me-2"></i>{{ t.tr('lc.confirmTitre') }}
               </h5>
             </div>
             <div class="modal-body">
-              <p>Êtes-vous sûr de vouloir supprimer la catégorie
+              <p>{{ t.tr('lc.confirmMsg') }}
                 <strong>{{ categorieASupprimer.nom }}</strong> ?</p>
               <div class="alert alert-danger py-2 mb-0">
-                <small><i class="bi bi-info-circle me-1"></i>Cette action est irréversible et supprimera tous les produits associés.</small>
+                <small><i class="bi bi-info-circle me-1"></i>{{ t.tr('lc.confirmWarning') }}</small>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="categorieASupprimer = null">Annuler</button>
+              <button class="btn btn-secondary" (click)="categorieASupprimer = null">{{ t.tr('common.annuler') }}</button>
               <button class="btn btn-danger" (click)="supprimer()">
-                <i class="bi bi-trash me-1"></i>Supprimer
+                <i class="bi bi-trash me-1"></i>{{ t.tr('common.supprimer') }}
               </button>
             </div>
           </div>
@@ -176,7 +177,10 @@ export class ListeCategoriesComponent implements OnInit {
   debut = 0;
   fin = 0;
 
-  constructor(private categorieService: CategorieService) {}
+  constructor(
+    private categorieService: CategorieService,
+    public t: TraductionService
+  ) {}
 
   ngOnInit(): void {
     this.chargerCategories();
@@ -191,7 +195,7 @@ export class ListeCategoriesComponent implements OnInit {
         this.chargement = false;
       },
       error: (err) => {
-        this.message = 'Erreur lors du chargement des catégories';
+        this.message = this.t.tr('lc.erreurChargement');
         this.messageType = 'error';
         this.chargement = false;
         console.error(err);
@@ -225,13 +229,13 @@ export class ListeCategoriesComponent implements OnInit {
     if (this.categorieASupprimer?.id) {
       this.categorieService.supprimer(this.categorieASupprimer.id).subscribe({
         next: () => {
-          this.message = 'Catégorie "' + this.categorieASupprimer?.nom + '" supprimée avec succès';
+          this.message = this.t.tr('lc.successSupp', { nom: this.categorieASupprimer?.nom || '' });
           this.messageType = 'success';
           this.categorieASupprimer = null;
           this.chargerCategories();
         },
         error: (err) => {
-          this.message = 'Erreur lors de la suppression';
+          this.message = this.t.tr('lc.erreurSuppression');
           this.messageType = 'error';
           this.categorieASupprimer = null;
           console.error(err);

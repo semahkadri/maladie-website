@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../../partage/sidebar/sidebar.component';
+import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
   selector: 'app-layout-backoffice',
@@ -14,7 +15,7 @@ import { SidebarComponent } from '../../partage/sidebar/sidebar.component';
       </div>
       <footer class="footer">
         <div class="container">
-          Alzheimer - Gestion de Stock &copy; {{ annee }} | Microservices Spring Boot + Angular
+          {{ t.tr('footer.boInfo') }} &copy; {{ annee }} | {{ t.tr('footer.info') }}
         </div>
       </footer>
     </div>
@@ -22,4 +23,6 @@ import { SidebarComponent } from '../../partage/sidebar/sidebar.component';
 })
 export class LayoutBackofficeComponent {
   annee = new Date().getFullYear();
+
+  constructor(public t: TraductionService) {}
 }

@@ -5,6 +5,7 @@ import { TableauDeBordService } from '../../services/tableau-de-bord.service';
 import { TableauDeBord } from '../../modeles/tableau-de-bord.model';
 import { Categorie } from '../../modeles/categorie.model';
 import { Produit } from '../../modeles/produit.model';
+import { TraductionService } from '../../services/traduction.service';
 
 @Component({
   selector: 'app-tableau-de-bord',
@@ -14,25 +15,25 @@ import { Produit } from '../../modeles/produit.model';
     <div class="fade-in">
       <!-- Header -->
       <div class="dashboard-header">
-        <h1><i class="bi bi-grid-1x2-fill me-2"></i>Tableau de Bord</h1>
-        <p>Gestion de Stock - Plateforme Détection Maladie Alzheimer</p>
+        <h1><i class="bi bi-grid-1x2-fill me-2"></i>{{ t.tr('tdb.titre') }}</h1>
+        <p>{{ t.tr('tdb.sousTitre') }}</p>
       </div>
 
       <!-- Loading -->
       <div *ngIf="chargement" class="loading-container">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Chargement...</span>
+          <span class="visually-hidden">{{ t.tr('common.chargement') }}</span>
         </div>
-        <p class="mt-3 text-muted">Chargement du tableau de bord...</p>
+        <p class="mt-3 text-muted">{{ t.tr('tdb.chargement') }}</p>
       </div>
 
       <!-- Error -->
       <div *ngIf="erreur" class="alert alert-danger d-flex align-items-center" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
         <div>
-          Impossible de charger les données. Vérifiez que le serveur est démarré.
+          {{ t.tr('tdb.erreurChargement') }}
           <button class="btn btn-sm btn-outline-danger ms-3" (click)="chargerDonnees()">
-            <i class="bi bi-arrow-clockwise me-1"></i>Réessayer
+            <i class="bi bi-arrow-clockwise me-1"></i>{{ t.tr('tdb.reessayer') }}
           </button>
         </div>
       </div>
@@ -49,7 +50,7 @@ import { Produit } from '../../modeles/produit.model';
                 </div>
                 <div>
                   <div class="stat-number">{{ totalCategories }}</div>
-                  <div class="stat-label">Catégories</div>
+                  <div class="stat-label">{{ t.tr('tdb.categories') }}</div>
                 </div>
               </div>
             </a>
@@ -62,7 +63,7 @@ import { Produit } from '../../modeles/produit.model';
                 </div>
                 <div>
                   <div class="stat-number">{{ totalProduits }}</div>
-                  <div class="stat-label">Produits</div>
+                  <div class="stat-label">{{ t.tr('tdb.produits') }}</div>
                 </div>
               </div>
             </a>
@@ -75,7 +76,7 @@ import { Produit } from '../../modeles/produit.model';
                 </div>
                 <div>
                   <div class="stat-number">{{ produitsStockBas }}</div>
-                  <div class="stat-label">Stock Faible (&le; 10)</div>
+                  <div class="stat-label">{{ t.tr('tdb.stockFaible') }}</div>
                 </div>
               </div>
             </div>
@@ -88,7 +89,7 @@ import { Produit } from '../../modeles/produit.model';
                 </div>
                 <div>
                   <div class="stat-number" style="font-size: 1.4rem;">{{ valeurTotaleStock | number:'1.0-0' }}</div>
-                  <div class="stat-label">Valeur Stock (TND)</div>
+                  <div class="stat-label">{{ t.tr('tdb.valeurStock') }}</div>
                 </div>
               </div>
             </div>
@@ -99,8 +100,8 @@ import { Produit } from '../../modeles/produit.model';
         <div *ngIf="produitsEnRupture > 0" class="alert alert-danger d-flex align-items-center mb-4" role="alert">
           <i class="bi bi-x-circle-fill me-2 fs-5"></i>
           <div>
-            <strong>Alerte :</strong> {{ produitsEnRupture }} produit{{ produitsEnRupture > 1 ? 's' : '' }} en rupture de stock !
-            <a routerLink="/admin/produits" class="ms-2 text-decoration-underline" style="color: inherit;">Voir les produits</a>
+            <strong>{{ t.tr('tdb.alerteRupture') }}</strong> {{ produitsEnRupture }} {{ produitsEnRupture !== 1 ? t.tr('common.produits') : t.tr('common.produit') }} {{ t.tr('tdb.enRuptureMsg') }}
+            <a routerLink="/admin/produits" class="ms-2 text-decoration-underline" style="color: inherit;">{{ t.tr('tdb.voirProduits') }}</a>
           </div>
         </div>
 
@@ -110,8 +111,8 @@ import { Produit } from '../../modeles/produit.model';
             <a routerLink="/admin/categories/ajouter" class="quick-action">
               <i class="bi bi-plus-circle-fill" style="background: var(--primary-light); color: var(--primary);"></i>
               <div>
-                <span>Nouvelle Catégorie</span>
-                <small>Ajouter une catégorie</small>
+                <span>{{ t.tr('tdb.nouvelleCat') }}</span>
+                <small>{{ t.tr('tdb.ajouterCat') }}</small>
               </div>
             </a>
           </div>
@@ -119,8 +120,8 @@ import { Produit } from '../../modeles/produit.model';
             <a routerLink="/admin/produits/ajouter" class="quick-action">
               <i class="bi bi-plus-circle-fill" style="background: var(--accent-light); color: var(--accent);"></i>
               <div>
-                <span>Nouveau Produit</span>
-                <small>Ajouter un produit au stock</small>
+                <span>{{ t.tr('tdb.nouveauProd') }}</span>
+                <small>{{ t.tr('tdb.ajouterProd') }}</small>
               </div>
             </a>
           </div>
@@ -128,8 +129,8 @@ import { Produit } from '../../modeles/produit.model';
             <a routerLink="/admin/produits" class="quick-action">
               <i class="bi bi-list-ul" style="background: var(--warning-light); color: var(--warning);"></i>
               <div>
-                <span>Voir tout le Stock</span>
-                <small>Liste complète des produits</small>
+                <span>{{ t.tr('tdb.voirStock') }}</span>
+                <small>{{ t.tr('tdb.listeComplete') }}</small>
               </div>
             </a>
           </div>
@@ -141,17 +142,17 @@ import { Produit } from '../../modeles/produit.model';
           <div class="col-lg-6">
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-tags-fill me-2 text-primary"></i>Dernières Catégories</h6>
+                <h6 class="mb-0 fw-bold"><i class="bi bi-tags-fill me-2 text-primary"></i>{{ t.tr('tdb.dernieresCat') }}</h6>
                 <a routerLink="/admin/categories" class="btn btn-sm btn-outline-primary">
-                  Voir tout <i class="bi bi-arrow-right ms-1"></i>
+                  {{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right ms-1"></i>
                 </a>
               </div>
               <div class="card-body p-0">
                 <div *ngIf="categories.length === 0" class="empty-state">
                   <i class="bi bi-inbox d-block"></i>
-                  <p>Aucune catégorie</p>
+                  <p>{{ t.tr('tdb.aucuneCat') }}</p>
                   <a routerLink="/admin/categories/ajouter" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle me-1"></i>Ajouter
+                    <i class="bi bi-plus-circle me-1"></i>{{ t.tr('common.ajouter') }}
                   </a>
                 </div>
                 <div class="list-group list-group-flush" *ngIf="categories.length > 0">
@@ -160,7 +161,7 @@ import { Produit } from '../../modeles/produit.model';
                       <span class="fw-semibold">{{ cat.nom }}</span>
                       <small class="d-block text-muted">{{ cat.description | slice:0:50 }}{{ (cat.description.length || 0) > 50 ? '...' : '' }}</small>
                     </div>
-                    <span class="badge badge-category">{{ cat.nombreProduits }} produit{{ cat.nombreProduits !== 1 ? 's' : '' }}</span>
+                    <span class="badge badge-category">{{ cat.nombreProduits }} {{ cat.nombreProduits !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}</span>
                   </div>
                 </div>
               </div>
@@ -171,17 +172,17 @@ import { Produit } from '../../modeles/produit.model';
           <div class="col-lg-6">
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-box-seam-fill me-2 text-primary"></i>Derniers Produits</h6>
+                <h6 class="mb-0 fw-bold"><i class="bi bi-box-seam-fill me-2 text-primary"></i>{{ t.tr('tdb.derniersProd') }}</h6>
                 <a routerLink="/admin/produits" class="btn btn-sm btn-outline-primary">
-                  Voir tout <i class="bi bi-arrow-right ms-1"></i>
+                  {{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right ms-1"></i>
                 </a>
               </div>
               <div class="card-body p-0">
                 <div *ngIf="produits.length === 0" class="empty-state">
                   <i class="bi bi-inbox d-block"></i>
-                  <p>Aucun produit</p>
+                  <p>{{ t.tr('tdb.aucunProd') }}</p>
                   <a routerLink="/admin/produits/ajouter" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle me-1"></i>Ajouter
+                    <i class="bi bi-plus-circle me-1"></i>{{ t.tr('common.ajouter') }}
                   </a>
                 </div>
                 <div class="list-group list-group-flush" *ngIf="produits.length > 0">
@@ -194,7 +195,7 @@ import { Produit } from '../../modeles/produit.model';
                       <span class="fw-bold">{{ prod.prix | number:'1.2-2' }} TND</span>
                       <small class="d-block">
                         <span class="badge" [ngClass]="prod.quantite > 10 ? 'bg-success' : prod.quantite > 0 ? 'bg-warning' : 'bg-danger'">
-                          Qté: {{ prod.quantite }}
+                          {{ t.tr('tdb.qte') }} {{ prod.quantite }}
                         </span>
                       </small>
                     </div>
@@ -219,7 +220,10 @@ export class TableauDeBordComponent implements OnInit {
   chargement = true;
   erreur = false;
 
-  constructor(private tableauDeBordService: TableauDeBordService) {}
+  constructor(
+    private tableauDeBordService: TableauDeBordService,
+    public t: TraductionService
+  ) {}
 
   ngOnInit(): void {
     this.chargerDonnees();
