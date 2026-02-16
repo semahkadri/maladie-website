@@ -42,7 +42,7 @@ import { Produit } from '../../modeles/produit.model';
         <!-- Stat Cards -->
         <div class="row g-3 mb-4">
           <div class="col-lg-3 col-md-6">
-            <a routerLink="/categories" class="stat-card">
+            <a routerLink="/admin/categories" class="stat-card">
               <div class="d-flex align-items-center">
                 <div class="stat-icon me-3" style="background: var(--primary-light); color: var(--primary);">
                   <i class="bi bi-tags-fill"></i>
@@ -55,7 +55,7 @@ import { Produit } from '../../modeles/produit.model';
             </a>
           </div>
           <div class="col-lg-3 col-md-6">
-            <a routerLink="/produits" class="stat-card">
+            <a routerLink="/admin/produits" class="stat-card">
               <div class="d-flex align-items-center">
                 <div class="stat-icon me-3" style="background: var(--accent-light); color: var(--accent);">
                   <i class="bi bi-box-seam-fill"></i>
@@ -100,14 +100,14 @@ import { Produit } from '../../modeles/produit.model';
           <i class="bi bi-x-circle-fill me-2 fs-5"></i>
           <div>
             <strong>Alerte :</strong> {{ produitsEnRupture }} produit{{ produitsEnRupture > 1 ? 's' : '' }} en rupture de stock !
-            <a routerLink="/produits" class="ms-2 text-decoration-underline" style="color: inherit;">Voir les produits</a>
+            <a routerLink="/admin/produits" class="ms-2 text-decoration-underline" style="color: inherit;">Voir les produits</a>
           </div>
         </div>
 
         <!-- Quick Actions -->
         <div class="row g-3 mb-4">
           <div class="col-md-4">
-            <a routerLink="/categories/ajouter" class="quick-action">
+            <a routerLink="/admin/categories/ajouter" class="quick-action">
               <i class="bi bi-plus-circle-fill" style="background: var(--primary-light); color: var(--primary);"></i>
               <div>
                 <span>Nouvelle Catégorie</span>
@@ -116,7 +116,7 @@ import { Produit } from '../../modeles/produit.model';
             </a>
           </div>
           <div class="col-md-4">
-            <a routerLink="/produits/ajouter" class="quick-action">
+            <a routerLink="/admin/produits/ajouter" class="quick-action">
               <i class="bi bi-plus-circle-fill" style="background: var(--accent-light); color: var(--accent);"></i>
               <div>
                 <span>Nouveau Produit</span>
@@ -125,7 +125,7 @@ import { Produit } from '../../modeles/produit.model';
             </a>
           </div>
           <div class="col-md-4">
-            <a routerLink="/produits" class="quick-action">
+            <a routerLink="/admin/produits" class="quick-action">
               <i class="bi bi-list-ul" style="background: var(--warning-light); color: var(--warning);"></i>
               <div>
                 <span>Voir tout le Stock</span>
@@ -142,7 +142,7 @@ import { Produit } from '../../modeles/produit.model';
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-bold"><i class="bi bi-tags-fill me-2 text-primary"></i>Dernières Catégories</h6>
-                <a routerLink="/categories" class="btn btn-sm btn-outline-primary">
+                <a routerLink="/admin/categories" class="btn btn-sm btn-outline-primary">
                   Voir tout <i class="bi bi-arrow-right ms-1"></i>
                 </a>
               </div>
@@ -150,7 +150,7 @@ import { Produit } from '../../modeles/produit.model';
                 <div *ngIf="categories.length === 0" class="empty-state">
                   <i class="bi bi-inbox d-block"></i>
                   <p>Aucune catégorie</p>
-                  <a routerLink="/categories/ajouter" class="btn btn-primary btn-sm">
+                  <a routerLink="/admin/categories/ajouter" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle me-1"></i>Ajouter
                   </a>
                 </div>
@@ -172,7 +172,7 @@ import { Produit } from '../../modeles/produit.model';
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-bold"><i class="bi bi-box-seam-fill me-2 text-primary"></i>Derniers Produits</h6>
-                <a routerLink="/produits" class="btn btn-sm btn-outline-primary">
+                <a routerLink="/admin/produits" class="btn btn-sm btn-outline-primary">
                   Voir tout <i class="bi bi-arrow-right ms-1"></i>
                 </a>
               </div>
@@ -180,7 +180,7 @@ import { Produit } from '../../modeles/produit.model';
                 <div *ngIf="produits.length === 0" class="empty-state">
                   <i class="bi bi-inbox d-block"></i>
                   <p>Aucun produit</p>
-                  <a routerLink="/produits/ajouter" class="btn btn-primary btn-sm">
+                  <a routerLink="/admin/produits/ajouter" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle me-1"></i>Ajouter
                   </a>
                 </div>

@@ -112,7 +112,7 @@ import { CategorieService } from '../../../services/categorie.service';
                 </div>
 
                 <div class="d-flex justify-content-between">
-                  <a routerLink="/produits" class="btn btn-secondary">
+                  <a routerLink="/admin/produits" class="btn btn-secondary">
                     <i class="bi bi-arrow-left me-1"></i>Retour
                   </a>
                   <button type="submit" class="btn btn-primary"
@@ -187,7 +187,7 @@ export class FormulaireProduitComponent implements OnInit {
 
     if (this.estModification && this.produitId) {
       this.produitService.modifier(this.produitId, this.produit).subscribe({
-        next: () => this.router.navigate(['/produits']),
+        next: () => this.router.navigate(['/admin/produits']),
         error: (err) => {
           this.enCours = false;
           this.erreur = err.error?.message || 'Erreur lors de la modification';
@@ -195,7 +195,7 @@ export class FormulaireProduitComponent implements OnInit {
       });
     } else {
       this.produitService.creer(this.produit).subscribe({
-        next: () => this.router.navigate(['/produits']),
+        next: () => this.router.navigate(['/admin/produits']),
         error: (err) => {
           this.enCours = false;
           this.erreur = err.error?.message || 'Erreur lors de la création';

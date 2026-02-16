@@ -18,7 +18,7 @@ import { CategorieService } from '../../../services/categorie.service';
           </h2>
           <p class="page-subtitle">{{ categoriesFiltrees.length }} catégorie{{ categoriesFiltrees.length !== 1 ? 's' : '' }} au total</p>
         </div>
-        <a routerLink="/categories/ajouter" class="btn btn-primary">
+        <a routerLink="/admin/categories/ajouter" class="btn btn-primary">
           <i class="bi bi-plus-circle me-1"></i>Nouvelle Catégorie
         </a>
       </div>
@@ -78,7 +78,7 @@ import { CategorieService } from '../../../services/categorie.service';
                         <i class="bi bi-inbox d-block"></i>
                         <p *ngIf="!recherche">Aucune catégorie trouvée</p>
                         <p *ngIf="recherche">Aucun résultat pour "{{ recherche }}"</p>
-                        <a *ngIf="!recherche" routerLink="/categories/ajouter" class="btn btn-primary btn-sm">
+                        <a *ngIf="!recherche" routerLink="/admin/categories/ajouter" class="btn btn-primary btn-sm">
                           <i class="bi bi-plus-circle me-1"></i>Ajouter une catégorie
                         </a>
                       </div>
@@ -96,7 +96,7 @@ import { CategorieService } from '../../../services/categorie.service';
                     <td>{{ categorie.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td class="text-center">
                       <div class="btn-action-group">
-                        <a [routerLink]="['/categories/modifier', categorie.id]" class="btn btn-sm btn-warning">
+                        <a [routerLink]="['/admin/categories/modifier', categorie.id]" class="btn btn-sm btn-warning">
                           <i class="bi bi-pencil"></i> Modifier
                         </a>
                         <button class="btn btn-sm btn-danger" (click)="confirmerSuppression(categorie)">

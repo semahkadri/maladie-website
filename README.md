@@ -34,7 +34,8 @@ Le module actuellement développé est la **Gestion de Stock** (Catégorie / Pro
 - Gérer les **produits** associés à chaque catégorie (CRUD complet)
 - Fournir un **tableau de bord** avec statistiques agrégées (totaux, stock bas, ruptures, valeur totale)
 - Assurer la **traçabilité** avec dates de création et de modification
-- Fournir une **interface backoffice** professionnelle pour les utilisateurs
+- Fournir une **interface backoffice** professionnelle pour les administrateurs (sous `/admin`)
+- Fournir une **interface frontoffice** publique pour consulter le catalogue de produits (sous `/`)
 - Exposer des **API REST documentées** (Swagger/OpenAPI) pour l'intégration avec les autres modules
 
 ---
@@ -84,7 +85,7 @@ Le projet suit une architecture **microservices** avec les composants suivants :
 | **Eureka Server** | Registre de découverte de services. Tous les microservices s'y enregistrent automatiquement au démarrage. Permet la résolution dynamique des adresses. | 8761 |
 | **API Gateway** | Point d'entrée unique pour le frontend en production. Route les requêtes vers les microservices. Gère le CORS et le load balancing. | 8080 |
 | **Service Stock** | Microservice métier responsable de la gestion des catégories, produits et tableau de bord. Expose les API REST CRUD et la documentation Swagger. | 8081 |
-| **Frontend Angular** | Interface backoffice web avec sidebar, tableau de bord, gestion des catégories et produits. | 4200 |
+| **Frontend Angular** | Interface web comprenant un **frontoffice** public (catalogue, détail produit, catégories) et un **backoffice** d'administration (sidebar, tableau de bord, CRUD catégories et produits). | 4200 |
 | **PostgreSQL** | Système de gestion de base de données relationnelle stockant les catégories et produits. | 5432 |
 
 ---
@@ -194,14 +195,14 @@ alzheimer-detection/
 │       └── src/
 │           ├── index.html                               # Page HTML principale
 │           ├── main.ts                                  # Point d'entrée Angular
-│           ├── styles.css                               # Styles globaux (backoffice theme)
+│           ├── styles.css                               # Styles globaux (backoffice + frontoffice .fo-*)
 │           ├── environments/
 │           │   ├── environment.ts                       # Config développement (port 8081)
 │           │   └── environment.prod.ts                  # Config production (gateway 8080)
 │           └── app/
-│               ├── app.component.ts                     # Composant racine (layout sidebar)
+│               ├── app.component.ts                     # Composant racine (simple <router-outlet>)
 │               ├── app.config.ts                        # Configuration application
-│               ├── app.routes.ts                        # Définition des routes (lazy loading)
+│               ├── app.routes.ts                        # Routes : frontoffice (/) + backoffice (/admin)
 │               ├── modeles/
 │               │   ├── categorie.model.ts               # Interface Catégorie
 │               │   ├── produit.model.ts                 # Interface Produit
@@ -211,9 +212,23 @@ alzheimer-detection/
 │               │   ├── produit.service.ts               # Service HTTP Produit
 │               │   └── tableau-de-bord.service.ts       # Service HTTP Dashboard
 │               └── composants/
+│                   ├── layouts/                          # Wrappers de mise en page
+│                   │   ├── layout-frontoffice/
+│                   │   │   └── layout-frontoffice.component.ts  # Shell public (navbar + footer)
+│                   │   └── layout-backoffice/
+│                   │       └── layout-backoffice.component.ts   # Shell admin (sidebar + topbar)
+│                   ├── frontoffice/                      # Pages publiques (lecture seule)
+│                   │   ├── accueil/
+│                   │   │   └── accueil.component.ts      # Page d'accueil (hero, stats, catégories)
+│                   │   ├── catalogue/
+│                   │   │   └── catalogue.component.ts    # Catalogue produits (grille, recherche)
+│                   │   ├── detail-produit/
+│                   │   │   └── detail-produit.component.ts  # Détail produit + similaires
+│                   │   └── categorie-produits/
+│                   │       └── categorie-produits.component.ts  # Produits par catégorie
 │                   ├── partage/
 │                   │   └── sidebar/
-│                   │       └── sidebar.component.ts     # Sidebar + Topbar (navigation)
+│                   │       └── sidebar.component.ts     # Sidebar + Topbar (navigation admin)
 │                   ├── tableau-de-bord/
 │                   │   └── tableau-de-bord.component.ts # Dashboard (stats, actions rapides)
 │                   ├── categorie/
@@ -399,29 +414,72 @@ Le frontend utilise **Angular 17** en mode **Standalone Components** (sans NgMod
 - **Services injectables** : Communication HTTP centralisée avec le backend
 - **Template-driven Forms** : Formulaires avec validation côté client
 - **Routing** : Navigation SPA (Single Page Application)
-- **Layout Backoffice** : Sidebar fixe + topbar avec breadcrumbs
+- **Layout Wrapper Pattern** : Chaque partie (frontoffice/backoffice) a son propre composant layout
 
-### 6.2 - Layout Backoffice
+### 6.2 - Architecture Frontoffice / Backoffice
 
-L'application utilise un **layout backoffice professionnel** avec :
+L'application est divisée en **deux parties** coexistant dans le même projet Angular, chacune avec son propre layout :
 
-- **Sidebar fixe** (gauche) : Navigation principale avec icônes, sections groupées (Principal, Gestion, Actions Rapides), indicateur de page active, logo et branding
-- **Topbar** (haut) : Breadcrumbs de navigation dynamiques, horloge en temps réel
-- **Zone de contenu** : Zone principale scrollable avec padding et max-width
-- **Responsive** : La sidebar se transforme en overlay sur mobile avec bouton hamburger
+```
+http://localhost:4200/
+│
+├── /                     ─── LayoutFrontofficeComponent (navbar publique + footer)
+│   ├── /                       → AccueilComponent (page d'accueil)
+│   ├── /catalogue              → CatalogueComponent (grille de produits)
+│   ├── /catalogue/:id          → DetailProduitComponent (détail produit)
+│   └── /categories/:id         → CategorieProduitsComponent (produits par catégorie)
+│
+├── /admin                ─── LayoutBackofficeComponent (sidebar + topbar + footer)
+│   ├── /admin                  → TableauDeBordComponent (dashboard)
+│   ├── /admin/categories       → ListeCategoriesComponent (CRUD)
+│   ├── /admin/categories/ajouter       → FormulaireCategorieComponent
+│   ├── /admin/categories/modifier/:id  → FormulaireCategorieComponent
+│   ├── /admin/produits         → ListeProduitsComponent (CRUD)
+│   ├── /admin/produits/ajouter         → FormulaireProduitComponent
+│   └── /admin/produits/modifier/:id    → FormulaireProduitComponent
+│
+└── /**                   ─── Redirection vers /
+```
+
+#### Layout Frontoffice (site public)
+
+- **Navbar horizontale** : Logo, liens Accueil / Catalogue, bouton "Administration"
+- **Zone de contenu** : Pages publiques en lecture seule
+- **Footer** : Branding projet + badges technologies
+- **Responsive** : Menu hamburger sur mobile
+
+#### Layout Backoffice (administration)
+
+- **Sidebar fixe** (gauche) : Navigation avec icônes, sections groupées (Principal, Gestion, Actions Rapides), lien "Voir le site" pour retourner au frontoffice
+- **Topbar** (haut) : Breadcrumbs dynamiques, horloge en temps réel
+- **Zone de contenu** : Zone scrollable avec padding et max-width
+- **Responsive** : Sidebar en overlay sur mobile avec bouton hamburger
 
 ### 6.3 - Composants
 
+#### Frontoffice (pages publiques, lecture seule)
+
 | Composant | Route | Description |
 |-----------|-------|-------------|
+| `LayoutFrontofficeComponent` | - | Shell public : navbar horizontale + router-outlet + footer |
+| `AccueilComponent` | `/` | Page d'accueil : hero section, 3 stats (produits, catégories, valeur stock), grille catégories, 6 derniers produits |
+| `CatalogueComponent` | `/catalogue` | Grille de produits responsive (3/2/1 colonnes), recherche par nom, filtre par catégorie, badges stock |
+| `DetailProduitComponent` | `/catalogue/:id` | Détail complet du produit : prix, stock, catégorie, description + section "Produits similaires" (max 4) |
+| `CategorieProduitsComponent` | `/categories/:id` | En-tête catégorie + grille de produits filtrés, recherche dans la catégorie |
+
+#### Backoffice (administration, CRUD)
+
+| Composant | Route | Description |
+|-----------|-------|-------------|
+| `LayoutBackofficeComponent` | - | Shell admin : sidebar + topbar + router-outlet + footer |
 | `SidebarComponent` | - | Sidebar de navigation + topbar avec breadcrumbs et horloge |
-| `TableauDeBordComponent` | `/` | Dashboard avec 4 cartes stats, alertes rupture, actions rapides, dernières données |
-| `ListeCategoriesComponent` | `/categories` | Tableau avec recherche, pagination, actions CRUD |
-| `FormulaireCategorieComponent` | `/categories/ajouter` | Formulaire de création de catégorie |
-| `FormulaireCategorieComponent` | `/categories/modifier/:id` | Formulaire de modification de catégorie |
-| `ListeProduitsComponent` | `/produits` | Tableau avec recherche, filtres (catégorie, stock), pagination, actions CRUD |
-| `FormulaireProduitComponent` | `/produits/ajouter` | Formulaire de création de produit avec aperçu valeur stock |
-| `FormulaireProduitComponent` | `/produits/modifier/:id` | Formulaire de modification de produit |
+| `TableauDeBordComponent` | `/admin` | Dashboard avec 4 cartes stats, alertes rupture, actions rapides, dernières données |
+| `ListeCategoriesComponent` | `/admin/categories` | Tableau avec recherche, pagination, actions CRUD |
+| `FormulaireCategorieComponent` | `/admin/categories/ajouter` | Formulaire de création de catégorie |
+| `FormulaireCategorieComponent` | `/admin/categories/modifier/:id` | Formulaire de modification de catégorie |
+| `ListeProduitsComponent` | `/admin/produits` | Tableau avec recherche, filtres (catégorie, stock), pagination, actions CRUD |
+| `FormulaireProduitComponent` | `/admin/produits/ajouter` | Formulaire de création de produit avec aperçu valeur stock |
+| `FormulaireProduitComponent` | `/admin/produits/modifier/:id` | Formulaire de modification de produit |
 
 ### 6.4 - Services
 
@@ -440,7 +498,14 @@ L'application utilise un **layout backoffice professionnel** avec :
 
 ### 6.6 - Fonctionnalités de l'interface
 
-**Tableau de bord** :
+**Frontoffice (site public)** :
+- Page d'accueil avec hero section, statistiques, catégories et produits récents
+- Catalogue de produits en grille responsive avec recherche et filtre par catégorie
+- Page détail produit avec informations complètes et produits similaires
+- Page catégorie avec produits filtrés et recherche
+- Navigation : navbar horizontale + bouton "Administration" vers le backoffice
+
+**Backoffice - Tableau de bord** :
 - 4 cartes statistiques : catégories, produits, stock faible (≤ 10), valeur totale du stock (TND)
 - Alerte rouge si des produits sont en rupture de stock
 - 3 boutons d'actions rapides (nouvelle catégorie, nouveau produit, voir le stock)
@@ -448,7 +513,7 @@ L'application utilise un **layout backoffice professionnel** avec :
 - Loading spinner pendant le chargement
 - Gestion d'erreur avec bouton "Réessayer"
 
-**Listes (Catégories / Produits)** :
+**Backoffice - Listes (Catégories / Produits)** :
 - Barre de recherche en temps réel
 - Filtre par catégorie (produits)
 - Filtre par niveau de stock : normal, faible, rupture (produits)
@@ -457,7 +522,7 @@ L'application utilise un **layout backoffice professionnel** avec :
 - Loading spinner pendant le chargement
 - États vides illustrés avec boutons d'action
 
-**Formulaires** :
+**Backoffice - Formulaires** :
 - Validation en temps réel (champs obligatoires, longueur, format)
 - Compteur de caractères (description)
 - Aperçu de la valeur en stock en temps réel (formulaire produit)
@@ -467,11 +532,12 @@ L'application utilise un **layout backoffice professionnel** avec :
 
 **UI/UX** :
 - Design professionnel avec CSS custom properties (thème cohérent)
+- Styles frontoffice isolés avec préfixe `.fo-*` (pas de conflit avec le backoffice)
 - Animations : fade-in pages, slide-down alertes, animation modale
 - Badges colorés pour les quantités : vert (> 10), orange (1-10), rouge (0)
 - Modale de confirmation avant chaque suppression
 - Messages de succès/erreur après chaque opération
-- Design responsive (desktop, tablette, mobile)
+- Design responsive (desktop, tablette, mobile) pour les deux parties
 
 ---
 
@@ -688,7 +754,7 @@ npm install       # (uniquement la première fois)
 ng serve --open
 ```
 
-### Vérification
+### Vérification des services
 
 | Service | URL | Attendu |
 |---------|-----|---------|
@@ -696,13 +762,96 @@ ng serve --open
 | API Gateway | http://localhost:8080 | Passerelle active |
 | Service Stock | http://localhost:8081/api/categories | Réponse JSON |
 | Swagger UI | http://localhost:8081/api/swagger-ui.html | Documentation API interactive |
-| Frontend | http://localhost:4200 | Interface backoffice Angular |
+
+### Vérification du Frontend - URLs à tester
+
+#### Frontoffice (site public)
+
+| URL | Page | Ce qu'il faut vérifier |
+|-----|------|------------------------|
+| http://localhost:4200/ | Accueil | Hero section avec titre, 3 cartes stats (produits, catégories, valeur stock), grille de catégories cliquables, 6 derniers produits en cartes |
+| http://localhost:4200/catalogue | Catalogue | Grille de produits (3 colonnes), barre de recherche, filtre par catégorie (dropdown), badges de stock colorés (vert/jaune/rouge) |
+| http://localhost:4200/catalogue/1 | Détail Produit | Nom, description, prix (TND), indicateur de stock, lien catégorie cliquable, section "Produits similaires" |
+| http://localhost:4200/categories/1 | Produits par Catégorie | En-tête avec nom + description de la catégorie, grille de produits filtrés, recherche dans la catégorie |
+
+#### Backoffice (administration)
+
+| URL | Page | Ce qu'il faut vérifier |
+|-----|------|------------------------|
+| http://localhost:4200/admin | Tableau de Bord | Sidebar à gauche, 4 cartes stats, alertes stock, actions rapides, données récentes |
+| http://localhost:4200/admin/categories | Liste Catégories | Tableau avec recherche, pagination (8/page), boutons Modifier/Supprimer |
+| http://localhost:4200/admin/categories/ajouter | Nouvelle Catégorie | Formulaire avec validation (nom requis, 2-100 chars, description max 500) |
+| http://localhost:4200/admin/categories/modifier/1 | Modifier Catégorie | Formulaire pré-rempli avec les données existantes |
+| http://localhost:4200/admin/produits | Liste Produits | Tableau avec recherche, filtre catégorie, filtre stock, pagination (10/page) |
+| http://localhost:4200/admin/produits/ajouter | Nouveau Produit | Formulaire avec dropdown catégorie, validation prix/quantité |
+| http://localhost:4200/admin/produits/modifier/1 | Modifier Produit | Formulaire pré-rempli avec les données existantes |
+
+#### Navigation entre Frontoffice et Backoffice
+
+| Action | Depuis | Vers |
+|--------|--------|------|
+| Cliquer **"Administration"** dans la navbar publique | Frontoffice (n'importe quelle page) | `/admin` (tableau de bord) |
+| Cliquer **"Voir le site"** dans le footer de la sidebar | Backoffice (n'importe quelle page) | `/` (accueil frontoffice) |
+
+### Parcours de test complet
+
+1. Ouvrir `http://localhost:4200/` → page d'accueil frontoffice avec hero, stats, catégories et derniers produits
+2. Cliquer sur **"Parcourir le Catalogue"** → redirection vers `/catalogue` avec la grille de produits
+3. Taper un nom dans la barre de recherche → les produits se filtrent en temps réel
+4. Sélectionner une catégorie dans le dropdown → les produits se filtrent par catégorie
+5. Cliquer sur une carte produit → page détail `/catalogue/:id` avec infos complètes et produits similaires
+6. Cliquer sur le lien de catégorie dans le détail → page `/categories/:id` avec les produits de cette catégorie
+7. Cliquer **"Administration"** dans la navbar → redirection vers `/admin` avec le dashboard backoffice
+8. Vérifier que la sidebar affiche les liens vers `/admin/categories`, `/admin/produits`, etc.
+9. Naviguer vers `/admin/categories` → le CRUD fonctionne (ajouter, modifier, supprimer)
+10. Naviguer vers `/admin/produits` → le CRUD fonctionne (ajouter, modifier, supprimer)
+11. Cliquer **"Voir le site"** dans le footer de la sidebar → retour au frontoffice `/`
 
 ---
 
 ## 12. Captures et fonctionnalités
 
-### Page Tableau de Bord (`/`)
+### Frontoffice (site public)
+
+#### Page Accueil (`/`)
+
+- Navbar horizontale avec liens Accueil, Catalogue, Administration
+- Hero section avec gradient, titre du projet et bouton "Parcourir le Catalogue"
+- 3 cartes statistiques : nombre de produits, nombre de catégories, valeur totale du stock (TND)
+- Grille de catégories cliquables avec icône, description et nombre de produits
+- Section "Derniers Produits" : 6 cartes produits avec prix, badge de stock, lien vers le détail
+- Footer avec branding et badges technologies (Angular 17, Spring Boot, PostgreSQL)
+
+#### Page Catalogue (`/catalogue`)
+
+- Grille responsive de cartes produits (3 colonnes desktop, 2 tablette, 1 mobile)
+- Barre de recherche pour filtrer les produits par nom en temps réel
+- Dropdown de filtre par catégorie
+- Chaque carte affiche : nom, catégorie (badge), prix (TND), statut stock (En stock / Stock faible / Rupture)
+- Clic sur une carte → page détail du produit
+- État vide avec bouton de réinitialisation si aucun résultat
+- Loading spinner pendant le chargement
+
+#### Page Détail Produit (`/catalogue/:id`)
+
+- Breadcrumb : Catalogue > Nom du produit
+- Layout 2 colonnes : placeholder image + informations
+- Informations complètes : nom, description, catégorie (lien cliquable), prix (TND)
+- Indicateur de disponibilité : "En stock (X unités)" / "Stock faible (X unités)" / "Rupture de stock"
+- Bouton "Retour au catalogue"
+- Section "Produits similaires" : jusqu'à 4 produits de la même catégorie
+
+#### Page Produits par Catégorie (`/categories/:id`)
+
+- Breadcrumb : Accueil > Nom de la catégorie
+- En-tête avec icône, nom et description de la catégorie
+- Barre de recherche dans la catégorie + bouton "Tout parcourir"
+- Grille de produits identique au catalogue
+- État vide avec lien vers le catalogue complet
+
+### Backoffice (administration)
+
+#### Page Tableau de Bord (`/admin`)
 
 - Layout backoffice avec sidebar fixe (gauche) et topbar (breadcrumbs + horloge)
 - 4 cartes statistiques : catégories, produits, stock faible (≤ 10), valeur totale stock (TND)
@@ -711,7 +860,7 @@ ng serve --open
 - Aperçu des 5 dernières catégories avec nombre de produits
 - Aperçu des 5 derniers produits avec prix (TND) et indicateur de stock coloré
 
-### Page Gestion des Catégories (`/categories`)
+#### Page Gestion des Catégories (`/admin/categories`)
 
 - Barre de recherche en temps réel pour filtrer les catégories
 - Tableau paginé : ID, Nom, Description, Nombre de produits, Date de création
@@ -721,7 +870,7 @@ ng serve --open
 - Compteur de résultats dynamique
 - Message de succès/erreur après chaque opération
 
-### Page Formulaire Catégorie (`/categories/ajouter` ou `/categories/modifier/:id`)
+#### Page Formulaire Catégorie (`/admin/categories/ajouter` ou `/admin/categories/modifier/:id`)
 
 - Champs : Nom (obligatoire, 2-100 caractères), Description (optionnel, max 500)
 - Compteur de caractères en temps réel
@@ -729,7 +878,7 @@ ng serve --open
 - Loading spinner pendant le chargement en modification
 - Messages d'erreur de l'API affichés
 
-### Page Gestion des Produits (`/produits`)
+#### Page Gestion des Produits (`/admin/produits`)
 
 - Barre de recherche en temps réel
 - Filtre par catégorie (liste déroulante)
@@ -739,7 +888,7 @@ ng serve --open
 - Badges de quantité : vert (> 10), orange (1-10), rouge (0 - Rupture)
 - Actions : Modifier, Supprimer avec confirmation
 
-### Page Formulaire Produit (`/produits/ajouter` ou `/produits/modifier/:id`)
+#### Page Formulaire Produit (`/admin/produits/ajouter` ou `/admin/produits/modifier/:id`)
 
 - Champs : Nom, Description, Prix, Quantité, Catégorie (liste déroulante)
 - Validation : nom obligatoire, prix > 0, quantité >= 0, catégorie obligatoire

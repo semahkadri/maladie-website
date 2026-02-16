@@ -20,7 +20,7 @@ import { CategorieService } from '../../../services/categorie.service';
           </h2>
           <p class="page-subtitle">{{ produitsFiltres.length }} produit{{ produitsFiltres.length !== 1 ? 's' : '' }} au total</p>
         </div>
-        <a routerLink="/produits/ajouter" class="btn btn-primary">
+        <a routerLink="/admin/produits/ajouter" class="btn btn-primary">
           <i class="bi bi-plus-circle me-1"></i>Nouveau Produit
         </a>
       </div>
@@ -95,7 +95,7 @@ import { CategorieService } from '../../../services/categorie.service';
                         <p *ngIf="!recherche && filtreCategorie === 0 && filtreStock === 'tous'">Aucun produit trouvé</p>
                         <p *ngIf="recherche || filtreCategorie !== 0 || filtreStock !== 'tous'">Aucun résultat pour vos filtres</p>
                         <a *ngIf="!recherche && filtreCategorie === 0 && filtreStock === 'tous'"
-                           routerLink="/produits/ajouter" class="btn btn-primary btn-sm">
+                           routerLink="/admin/produits/ajouter" class="btn btn-primary btn-sm">
                           <i class="bi bi-plus-circle me-1"></i>Ajouter un produit
                         </a>
                         <button *ngIf="recherche || filtreCategorie !== 0 || filtreStock !== 'tous'"
@@ -125,7 +125,7 @@ import { CategorieService } from '../../../services/categorie.service';
                     <td>{{ produit.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td class="text-center">
                       <div class="btn-action-group">
-                        <a [routerLink]="['/produits/modifier', produit.id]" class="btn btn-sm btn-warning">
+                        <a [routerLink]="['/admin/produits/modifier', produit.id]" class="btn btn-sm btn-warning">
                           <i class="bi bi-pencil"></i> Modifier
                         </a>
                         <button class="btn btn-sm btn-danger" (click)="confirmerSuppression(produit)">

@@ -13,7 +13,7 @@ import { Subscription, filter } from 'rxjs';
 
     <!-- Sidebar -->
     <aside class="sidebar" [class.open]="mobileOpen">
-      <a routerLink="/" class="sidebar-brand" (click)="mobileOpen = false">
+      <a routerLink="/admin" class="sidebar-brand" (click)="mobileOpen = false">
         <div class="sidebar-brand-icon">
           <i class="bi bi-heart-pulse"></i>
         </div>
@@ -26,7 +26,7 @@ import { Subscription, filter } from 'rxjs';
       <nav class="sidebar-nav">
         <div class="sidebar-nav-label">Principal</div>
 
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+        <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
            class="sidebar-nav-item" (click)="mobileOpen = false">
           <i class="bi bi-grid-1x2-fill"></i>
           Tableau de Bord
@@ -34,13 +34,13 @@ import { Subscription, filter } from 'rxjs';
 
         <div class="sidebar-nav-label">Gestion</div>
 
-        <a routerLink="/categories" routerLinkActive="active"
+        <a routerLink="/admin/categories" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen = false">
           <i class="bi bi-tags-fill"></i>
           Catégories
         </a>
 
-        <a routerLink="/produits" routerLinkActive="active"
+        <a routerLink="/admin/produits" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen = false">
           <i class="bi bi-box-seam-fill"></i>
           Produits
@@ -48,13 +48,13 @@ import { Subscription, filter } from 'rxjs';
 
         <div class="sidebar-nav-label">Actions Rapides</div>
 
-        <a routerLink="/categories/ajouter" routerLinkActive="active"
+        <a routerLink="/admin/categories/ajouter" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen = false">
           <i class="bi bi-plus-circle"></i>
           Nouvelle Catégorie
         </a>
 
-        <a routerLink="/produits/ajouter" routerLinkActive="active"
+        <a routerLink="/admin/produits/ajouter" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen = false">
           <i class="bi bi-plus-circle"></i>
           Nouveau Produit
@@ -62,6 +62,10 @@ import { Subscription, filter } from 'rxjs';
       </nav>
 
       <div class="sidebar-footer">
+        <a routerLink="/" class="sidebar-footer-site-link">
+          <i class="bi bi-box-arrow-up-right"></i>
+          <span>Voir le site</span>
+        </a>
         <div class="sidebar-footer-info">
           <i class="bi bi-database-fill"></i>
           <span>PostgreSQL | Spring Boot</span>
@@ -76,7 +80,7 @@ import { Subscription, filter } from 'rxjs';
           <i class="bi bi-list"></i>
         </button>
         <nav class="breadcrumb-nav">
-          <a routerLink="/">Accueil</a>
+          <a routerLink="/admin">Accueil</a>
           <span *ngIf="currentPage" class="separator">/</span>
           <span *ngIf="currentPage" class="current">{{ currentPage }}</span>
         </nav>
@@ -115,17 +119,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   private updateBreadcrumb(url: string): void {
     const map: Record<string, string> = {
-      '/': '',
-      '/categories': 'Catégories',
-      '/categories/ajouter': 'Nouvelle Catégorie',
-      '/produits': 'Produits',
-      '/produits/ajouter': 'Nouveau Produit'
+      '/admin': '',
+      '/admin/categories': 'Catégories',
+      '/admin/categories/ajouter': 'Nouvelle Catégorie',
+      '/admin/produits': 'Produits',
+      '/admin/produits/ajouter': 'Nouveau Produit'
     };
     if (map[url] !== undefined) {
       this.currentPage = map[url];
-    } else if (url.startsWith('/categories/modifier')) {
+    } else if (url.startsWith('/admin/categories/modifier')) {
       this.currentPage = 'Modifier Catégorie';
-    } else if (url.startsWith('/produits/modifier')) {
+    } else if (url.startsWith('/admin/produits/modifier')) {
       this.currentPage = 'Modifier Produit';
     } else {
       this.currentPage = '';
