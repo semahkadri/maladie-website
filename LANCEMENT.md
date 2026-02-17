@@ -86,7 +86,8 @@ Vérifier : http://localhost:4200
 | Stock API (direct) | http://localhost:8081/api/tableau-de-bord | API REST du tableau de bord |
 | **Swagger UI** | **http://localhost:8081/api/swagger-ui.html** | **Documentation interactive de l'API** |
 | OpenAPI JSON | http://localhost:8081/api/v3/api-docs | Spécification OpenAPI brute |
-| **Frontend Backoffice** | **http://localhost:4200** | **Interface de gestion Angular** |
+| **Frontend Frontoffice** | **http://localhost:4200** | **Site public (accueil, catalogue)** |
+| **Frontend Backoffice** | **http://localhost:4200/admin** | **Interface d'administration Angular** |
 
 ---
 
@@ -112,28 +113,36 @@ Après le lancement du Service Stock, ouvrir **http://localhost:8081/api/swagger
 
 ---
 
-## Frontend Backoffice - Interface de gestion
+## Frontend - Interface Angular
 
-Ouvrir **http://localhost:4200** pour accéder au backoffice Angular.
+Ouvrir **http://localhost:4200** pour accéder au site.
 
-### Pages disponibles :
+### Pages Frontoffice (site public) :
 
 | Page | Fonctionnalités |
 |------|-----------------|
-| **Tableau de Bord** (`/`) | 4 cartes stats, alertes rupture de stock, actions rapides, dernières données |
-| **Catégories** (`/categories`) | Liste avec recherche, pagination, CRUD complet |
-| **Produits** (`/produits`) | Liste avec recherche, filtre catégorie, filtre stock, pagination, CRUD complet |
+| **Accueil** (`/`) | Hero section, stats, catégories, derniers produits |
+| **Catalogue** (`/catalogue`) | Grille produits, recherche, filtres, tri, pagination |
+| **Détail Produit** (`/catalogue/:id`) | Informations complètes, produits similaires |
+| **Catégorie** (`/categories/:id`) | Produits filtrés par catégorie, recherche |
+
+### Pages Backoffice (administration) :
+
+| Page | Fonctionnalités |
+|------|-----------------|
+| **Tableau de Bord** (`/admin`) | 4 cartes stats, alertes rupture, actions rapides, dernières données |
+| **Catégories** (`/admin/categories`) | Liste avec recherche, pagination, CRUD complet |
+| **Produits** (`/admin/produits`) | Liste avec recherche, filtre catégorie, filtre stock, pagination, CRUD complet |
 | **Formulaires** | Création / modification avec validation, aperçu valeur stock |
 
-### Fonctionnalités du backoffice :
+### Fonctionnalités clés :
 
+- **Bilingue FR/EN** : Bouton de langue dans la navbar et la topbar (persistance localStorage)
 - Sidebar de navigation fixe avec sections groupées
-- Topbar avec breadcrumbs dynamiques et horloge
-- Recherche en temps réel sur les listes
-- Filtres multiples (catégorie, niveau de stock)
-- Pagination côté client
+- Topbar avec breadcrumbs dynamiques, bouton FR/EN et horloge
+- Recherche en temps réel, tri (8 critères), pagination configurable (6/12/24/48)
+- Filtres multiples (catégorie, niveau de stock) avec chips de filtres actifs
 - Alertes rupture de stock sur le dashboard
-- Valeur totale du stock en TND
 - Design responsive (desktop, tablette, mobile)
 
 ---
@@ -162,13 +171,14 @@ ng serve --open
 |-------|--------|------------------|
 | 1 | Ouvrir http://localhost:8081/api/categories | JSON `[]` ou liste de catégories |
 | 2 | Ouvrir http://localhost:8081/api/swagger-ui.html | Interface Swagger avec 3 groupes d'API |
-| 3 | Ouvrir http://localhost:4200 | Backoffice Angular avec sidebar et dashboard |
-| 4 | Cliquer "Catégories" dans la sidebar | Liste des catégories avec recherche |
-| 5 | Cliquer "Nouvelle Catégorie" | Formulaire de création |
-| 6 | Créer une catégorie | Redirection vers la liste, catégorie visible |
-| 7 | Cliquer "Produits" dans la sidebar | Liste des produits avec filtres |
-| 8 | Créer un produit | Redirection vers la liste, produit visible |
-| 9 | Retour au Dashboard | Stats mises à jour (totaux, valeur stock) |
+| 3 | Ouvrir http://localhost:4200 | Frontoffice : page d'accueil avec hero, stats, catégories |
+| 4 | Cliquer "Catalogue" | Grille produits avec recherche, filtres, tri, pagination |
+| 5 | Cliquer un produit | Page détail avec prix, stock, produits similaires |
+| 6 | Cliquer bouton FR/EN | Toute l'interface bascule en anglais |
+| 7 | Cliquer "Administration" | Backoffice `/admin` avec sidebar et dashboard |
+| 8 | Créer une catégorie | CRUD catégories fonctionne |
+| 9 | Créer un produit | CRUD produits fonctionne |
+| 10 | Cliquer "Voir le site" (sidebar) | Retour au frontoffice |
 
 ---
 

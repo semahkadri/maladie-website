@@ -400,7 +400,8 @@ Réponse attendue : **400 Bad Request**.
 | Service Stock | 8081 | http://localhost:8081 |
 | **Swagger UI** | **8081** | **http://localhost:8081/api/swagger-ui.html** |
 | OpenAPI JSON | 8081 | http://localhost:8081/api/v3/api-docs |
-| **Frontend Backoffice** | **4200** | **http://localhost:4200** |
+| **Frontend (Frontoffice)** | **4200** | **http://localhost:4200** |
+| **Frontend (Backoffice)** | **4200** | **http://localhost:4200/admin** |
 | PostgreSQL | 5432 | localhost:5432 |
 
 ## Ordre de démarrage obligatoire
@@ -446,9 +447,11 @@ Après chaque étape, vérifiez que tout est OK avant de passer à la suivante :
     [ ] Dans pgAdmin : tables "categories" et "produits" créées
 
 [ ] Étape 6 : Frontend lancé
-    [ ] http://localhost:4200 → Interface backoffice Angular visible
+    [ ] http://localhost:4200 → Page d'accueil frontoffice (hero, stats, catégories)
+    [ ] Cliquer "Catalogue" → grille produits avec recherche, filtres, tri, pagination
+    [ ] Cliquer bouton FR/EN → l'interface bascule en anglais
+    [ ] http://localhost:4200/admin → Backoffice avec sidebar et dashboard
     [ ] La sidebar affiche "Tableau de Bord", "Catégories", "Produits"
-    [ ] Le Dashboard affiche les 4 cartes de statistiques
 
 [ ] Étape 7 : Tests CRUD OK (via Swagger UI ou Postman)
     [ ] Créer une catégorie → 201
@@ -688,7 +691,9 @@ Ouvrir **Postman** et suivre ces étapes dans l'ordre :
 | 13 | Ressource inexistante | GET | /api/categories/999 | 404 Not Found |
 | 14 | Tableau de bord | GET | /api/tableau-de-bord | 200 + statistiques agrégées |
 | 15 | Swagger UI | Navigateur | /api/swagger-ui.html | Documentation interactive |
-| 16 | Interface backoffice | Navigateur | http://localhost:4200 | Dashboard + CRUD visuel OK |
+| 16 | Frontoffice | Navigateur | http://localhost:4200 | Accueil + Catalogue + Détail OK |
+| 17 | Backoffice | Navigateur | http://localhost:4200/admin | Dashboard + CRUD visuel OK |
+| 18 | Traduction FR/EN | Navigateur | Bouton FR/EN | L'interface bascule en anglais/français |
 
 ---
 
