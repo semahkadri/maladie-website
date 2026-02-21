@@ -37,6 +37,17 @@ import { Commande } from '../../../modeles/commande.model';
           <h1 class="fo-page-title mb-2">{{ t.tr('confirmation.titre') }}</h1>
           <p class="text-muted mb-4">{{ t.tr('confirmation.sousTitre') }}</p>
 
+          <!-- Exhausted products alert -->
+          <div *ngIf="produitsEpuises.length > 0" class="alert alert-warning text-start d-flex align-items-start mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+            <div>
+              {{ t.tr('confirmation.produitsEpuises') }}
+              <ul class="mb-0 mt-1">
+                <li *ngFor="let nom of produitsEpuises" class="fw-semibold">{{ nom }}</li>
+              </ul>
+            </div>
+          </div>
+
           <!-- Reference Badge -->
           <div style="background: var(--primary-light); border-radius: 12px; padding: 16px 28px; display: inline-block; margin-bottom: 32px;">
             <span class="text-muted" style="font-size: 0.82rem;">{{ t.tr('confirmation.reference') }}</span>
@@ -110,6 +121,7 @@ import { Commande } from '../../../modeles/commande.model';
 export class ConfirmationCommandeComponent implements OnInit {
   commande: Commande | null = null;
   chargement = true;
+  produitsEpuises: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -118,6 +130,12 @@ export class ConfirmationCommandeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Read exhausted products from query params (passed from checkout)
+    const epuisesParam = this.route.snapshot.queryParamMap.get('epuises');
+    if (epuisesParam) {
+      this.produitsEpuises = epuisesParam.split(',').filter(n => n.trim().length > 0);
+    }
+
     const ref = this.route.snapshot.paramMap.get('ref');
     if (ref) {
       this.commandeService.obtenirParReference(ref).subscribe({

@@ -52,6 +52,8 @@ public class GestionGlobaleExceptions {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> gererExceptionGenerale(Exception ex) {
+        // Log the full stack trace to the console for debugging
+        ex.printStackTrace();
         Map<String, Object> erreur = new HashMap<>();
         erreur.put("timestamp", LocalDateTime.now());
         erreur.put("message", "Une erreur interne est survenue");

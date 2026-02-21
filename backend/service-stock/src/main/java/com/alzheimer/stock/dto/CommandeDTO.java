@@ -26,4 +26,5 @@ public class CommandeDTO {
     private int nombreArticles;
     private LocalDateTime dateCommande;
     private LocalDateTime dateModification;
+    private List<String> produitsEpuises;
 }

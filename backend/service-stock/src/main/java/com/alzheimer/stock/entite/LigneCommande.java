@@ -23,7 +23,7 @@ public class LigneCommande {
     private Commande commande;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "produit_id", nullable = false)
+    @JoinColumn(name = "produit_id")
     private Produit produit;
 
     @Column(name = "nom_produit", nullable = false, length = 100)

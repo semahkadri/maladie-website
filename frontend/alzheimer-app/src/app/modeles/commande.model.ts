@@ -1,6 +1,6 @@
 export interface LigneCommande {
   id?: number;
-  produitId: number;
+  produitId?: number | null;
   nomProduit: string;
   prixUnitaire: number;
   quantite: number;
@@ -20,6 +20,7 @@ export interface Commande {
   nombreArticles: number;
   dateCommande?: string;
   dateModification?: string;
+  produitsEpuises?: string[];
 }
 
 export interface CreerCommande {

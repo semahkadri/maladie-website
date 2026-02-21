@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface LignePanierRepository extends JpaRepository<LignePanier, Long> {
 
     Optional<LignePanier> findByPanierIdAndProduitId(Long panierId, Long produitId);
+
+    void deleteByProduitId(Long produitId);
 }

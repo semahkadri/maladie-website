@@ -78,9 +78,11 @@ import { CreerCommande } from '../../../modeles/commande.model';
                         <label for="telephone" class="form-label">{{ t.tr('checkout.telephone') }} <span class="text-danger">*</span></label>
                         <input type="tel" class="form-control" id="telephone" name="telephoneClient"
                                [(ngModel)]="commande.telephoneClient" required maxlength="20"
+                               pattern="[0-9 +]+"
                                #tel="ngModel" [placeholder]="t.tr('checkout.placeholderTel')"
                                [ngClass]="{'is-invalid': tel.invalid && tel.touched}">
-                        <div class="invalid-feedback">{{ t.tr('checkout.telephoneObligatoire') }}</div>
+                        <div *ngIf="tel.errors?.['required'] && tel.touched" class="invalid-feedback">{{ t.tr('checkout.telephoneObligatoire') }}</div>
+                        <div *ngIf="tel.errors?.['pattern'] && tel.touched" class="invalid-feedback">{{ t.tr('checkout.telephoneFormat') }}</div>
                       </div>
                     </div>
 
@@ -187,7 +189,11 @@ export class CommanderComponent implements OnInit {
     this.commandeService.creerCommande(this.commande).subscribe({
       next: (commande) => {
         this.panierService.resetApresCommande();
-        this.router.navigate(['/commande', commande.reference]);
+        const extras: any = {};
+        if (commande.produitsEpuises && commande.produitsEpuises.length > 0) {
+          extras.queryParams = { epuises: commande.produitsEpuises.join(',') };
+        }
+        this.router.navigate(['/commande', commande.reference], extras);
       },
       error: (err) => {
         this.enCours = false;

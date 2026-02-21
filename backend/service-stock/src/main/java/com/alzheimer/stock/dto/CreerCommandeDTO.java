@@ -2,6 +2,7 @@ package com.alzheimer.stock.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class CreerCommandeDTO {
     private String emailClient;
 
     @NotBlank(message = "Le téléphone est obligatoire")
+    @Pattern(regexp = "^[0-9 +]+$", message = "Le téléphone ne doit contenir que des chiffres")
     @Size(max = 20, message = "Le téléphone ne peut pas dépasser 20 caractères")
     private String telephoneClient;
 

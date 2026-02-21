@@ -322,6 +322,7 @@ const DICT: Record<string, TranslationEntry> = {
   'checkout.recapitulatif': { fr: 'Récapitulatif de commande', en: 'Order Summary' },
   'checkout.erreur': { fr: 'Erreur lors de la création de la commande.', en: 'Error creating order.' },
   'checkout.telephoneObligatoire': { fr: 'Le téléphone est obligatoire', en: 'Phone number is required' },
+  'checkout.telephoneFormat': { fr: 'Le téléphone ne doit contenir que des chiffres', en: 'Phone number must contain only digits' },
   'checkout.adresseObligatoire': { fr: 'L\'adresse de livraison est obligatoire', en: 'Delivery address is required' },
 
   // ─── Confirmation Commande ─────────────────────────────
@@ -333,6 +334,7 @@ const DICT: Record<string, TranslationEntry> = {
   'confirmation.statut': { fr: 'Statut', en: 'Status' },
   'confirmation.enAttente': { fr: 'En attente', en: 'Pending' },
   'confirmation.continuer': { fr: 'Continuer les achats', en: 'Continue shopping' },
+  'confirmation.produitsEpuises': { fr: 'Les produits suivants sont désormais en rupture de stock et ont été retirés du catalogue :', en: 'The following products are now out of stock and have been removed from the catalog:' },
 
   // ─── Liste Commandes (Backoffice) ──────────────────────
   'lcmd.titre': { fr: 'Gestion des Commandes', en: 'Order Management' },

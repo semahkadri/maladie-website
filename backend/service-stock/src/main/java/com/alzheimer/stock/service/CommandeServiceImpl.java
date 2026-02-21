@@ -8,6 +8,7 @@ import com.alzheimer.stock.exception.ResourceIntrouvableException;
 import com.alzheimer.stock.repository.CommandeRepository;
 import com.alzheimer.stock.repository.PanierRepository;
 import com.alzheimer.stock.repository.ProduitRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -27,6 +29,7 @@ public class CommandeServiceImpl implements CommandeService {
     private final CommandeRepository commandeRepository;
     private final PanierRepository panierRepository;
     private final ProduitRepository produitRepository;
+    private final EntityManager entityManager;
 
     @Override
     public CommandeDTO creerCommande(CreerCommandeDTO dto) {
@@ -89,7 +92,61 @@ public class CommandeServiceImpl implements CommandeService {
         panier.getLignes().clear();
         panierRepository.save(panier);
 
-        return convertirEnDTO(sauvegardee);
+        // Detect zero-stock products
+        List<String> nomsProduitsEpuises = new ArrayList<>();
+        List<Long> idsProduitsASupprimer = new ArrayList<>();
+
+        for (LigneCommande lc : sauvegardee.getLignes()) {
+            Produit produit = lc.getProduit();
+            if (produit != null && produit.getQuantite() == 0) {
+                Long produitId = produit.getId();
+                if (!idsProduitsASupprimer.contains(produitId)) {
+                    idsProduitsASupprimer.add(produitId);
+                    nomsProduitsEpuises.add(produit.getNom());
+                }
+            }
+        }
+
+        // Null out product references in current order lines (in-memory) for exhausted products
+        if (!idsProduitsASupprimer.isEmpty()) {
+            for (LigneCommande lc : sauvegardee.getLignes()) {
+                if (lc.getProduit() != null && idsProduitsASupprimer.contains(lc.getProduit().getId())) {
+                    lc.setProduit(null);
+                }
+            }
+        }
+
+        // Build DTO while entities are still fully managed (avoids LazyInitializationException)
+        CommandeDTO commandeDTO = convertirEnDTO(sauvegardee);
+        commandeDTO.setProduitsEpuises(nomsProduitsEpuises);
+
+        // Now perform the actual deletions using native SQL (bypasses Hibernate cache issues)
+        if (!idsProduitsASupprimer.isEmpty()) {
+            // Flush nulled FKs to DB first
+            entityManager.flush();
+
+            for (Long produitId : idsProduitsASupprimer) {
+                // Null out produit FK in ALL orders' lines (including other orders)
+                entityManager.createNativeQuery(
+                    "UPDATE lignes_commande SET produit_id = NULL WHERE produit_id = :produitId")
+                    .setParameter("produitId", produitId)
+                    .executeUpdate();
+
+                // Delete cart items referencing this product (from all users' carts)
+                entityManager.createNativeQuery(
+                    "DELETE FROM lignes_panier WHERE produit_id = :produitId")
+                    .setParameter("produitId", produitId)
+                    .executeUpdate();
+
+                // Delete the product itself
+                entityManager.createNativeQuery(
+                    "DELETE FROM produits WHERE id = :produitId")
+                    .setParameter("produitId", produitId)
+                    .executeUpdate();
+            }
+        }
+
+        return commandeDTO;
     }
 
     @Override
@@ -129,12 +186,14 @@ public class CommandeServiceImpl implements CommandeService {
         Commande commande = commandeRepository.findById(id)
                 .orElseThrow(() -> new ResourceIntrouvableException("Commande", "id", id));
 
-        // Restore stock if cancelling
+        // Restore stock if cancelling (skip lines whose product was deleted)
         if (statut == StatutCommande.ANNULEE && commande.getStatut() != StatutCommande.ANNULEE) {
             for (LigneCommande ligne : commande.getLignes()) {
                 Produit produit = ligne.getProduit();
-                produit.setQuantite(produit.getQuantite() + ligne.getQuantite());
-                produitRepository.save(produit);
+                if (produit != null) {
+                    produit.setQuantite(produit.getQuantite() + ligne.getQuantite());
+                    produitRepository.save(produit);
+                }
             }
         }
 
@@ -183,7 +242,7 @@ public class CommandeServiceImpl implements CommandeService {
     private LigneCommandeDTO convertirLigneEnDTO(LigneCommande ligne) {
         return LigneCommandeDTO.builder()
                 .id(ligne.getId())
-                .produitId(ligne.getProduit().getId())
+                .produitId(ligne.getProduit() != null ? ligne.getProduit().getId() : null)
                 .nomProduit(ligne.getNomProduit())
                 .prixUnitaire(ligne.getPrixUnitaire())
                 .quantite(ligne.getQuantite())
