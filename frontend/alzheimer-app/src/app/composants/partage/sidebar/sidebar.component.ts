@@ -47,6 +47,12 @@ import { TraductionService } from '../../../services/traduction.service';
           {{ t.tr('sidebar.produits') }}
         </a>
 
+        <a routerLink="/admin/commandes" routerLinkActive="active"
+           class="sidebar-nav-item" (click)="mobileOpen = false">
+          <i class="bi bi-receipt-cutoff"></i>
+          {{ t.tr('sidebar.commandes') }}
+        </a>
+
         <div class="sidebar-nav-label">{{ t.tr('sidebar.actionsRapides') }}</div>
 
         <a routerLink="/admin/categories/ajouter" routerLinkActive="active"
@@ -130,7 +136,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       '/admin/categories': this.t.tr('breadcrumb.categories'),
       '/admin/categories/ajouter': this.t.tr('breadcrumb.nouvelleCat'),
       '/admin/produits': this.t.tr('breadcrumb.produits'),
-      '/admin/produits/ajouter': this.t.tr('breadcrumb.nouveauProd')
+      '/admin/produits/ajouter': this.t.tr('breadcrumb.nouveauProd'),
+      '/admin/commandes': this.t.tr('breadcrumb.commandes')
     };
     if (map[url] !== undefined) {
       this.currentPage = map[url];
@@ -138,6 +145,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.currentPage = this.t.tr('breadcrumb.modifierCat');
     } else if (url.startsWith('/admin/produits/modifier')) {
       this.currentPage = this.t.tr('breadcrumb.modifierProd');
+    } else if (url.startsWith('/admin/commandes/')) {
+      this.currentPage = this.t.tr('breadcrumb.detailCommande');
     } else {
       this.currentPage = '';
     }

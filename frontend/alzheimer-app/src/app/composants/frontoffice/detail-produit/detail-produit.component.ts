@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ProduitService } from '../../../services/produit.service';
+import { PanierService } from '../../../services/panier.service';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
   selector: 'app-detail-produit',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   template: `
     <div class="fo-section" *ngIf="!loading && produit">
       <div class="fo-section-container">
@@ -56,7 +58,38 @@ import { TraductionService } from '../../../services/traduction.service';
               </div>
             </div>
 
-            <a routerLink="/catalogue" class="fo-btn fo-btn-outline" style="margin-top: 24px;">
+            <!-- Add to Cart -->
+            <div *ngIf="produit.quantite > 0" class="fo-detail-cart-actions" style="margin-top: 24px;">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <label class="fw-semibold" style="font-size: 0.88rem; white-space: nowrap;">{{ t.tr('detail.quantiteLabel') }}</label>
+                <div class="d-flex align-items-center gap-2">
+                  <button class="btn btn-sm btn-outline-secondary"
+                          (click)="quantite = quantite - 1" [disabled]="quantite <= 1"
+                          style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-dash"></i>
+                  </button>
+                  <input type="number" [(ngModel)]="quantite" min="1" [max]="produit.quantite"
+                         style="width: 60px; text-align: center; border: 1.5px solid var(--border); border-radius: 8px; padding: 4px; font-weight: 600;"
+                         (change)="quantite = Math.max(1, Math.min(quantite, produit.quantite))">
+                  <button class="btn btn-sm btn-outline-secondary"
+                          (click)="quantite = quantite + 1" [disabled]="quantite >= produit.quantite"
+                          style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-plus"></i>
+                  </button>
+                </div>
+              </div>
+              <button class="fo-btn fo-btn-primary" (click)="ajouterAuPanier()" [disabled]="ajoutEnCours">
+                <span *ngIf="ajoutEnCours" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!ajoutEnCours && !ajoutOk" class="bi bi-cart-plus me-2"></i>
+                <i *ngIf="ajoutOk" class="bi bi-check-lg me-2"></i>
+                {{ ajoutOk ? t.tr('panier.ajouterSuccess') : t.tr('detail.ajouterPanier') }}
+              </button>
+              <div *ngIf="ajoutErreur" class="alert alert-danger mt-2 mb-0 py-2" style="font-size: 0.85rem;">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ ajoutErreur }}
+              </div>
+            </div>
+
+            <a routerLink="/catalogue" class="fo-btn fo-btn-outline" style="margin-top: 16px;">
               <i class="bi bi-arrow-left me-2"></i>{{ t.tr('detail.retourCatalogue') }}
             </a>
           </div>
@@ -101,10 +134,16 @@ export class DetailProduitComponent implements OnInit {
   produit: Produit | null = null;
   relatedProducts: Produit[] = [];
   loading = true;
+  quantite = 1;
+  ajoutEnCours = false;
+  ajoutOk = false;
+  ajoutErreur = '';
+  Math = Math;
 
   constructor(
     private route: ActivatedRoute,
     private produitService: ProduitService,
+    private panierService: PanierService,
     public t: TraductionService
   ) {}
 
@@ -112,6 +151,8 @@ export class DetailProduitComponent implements OnInit {
     this.route.params.subscribe(params => {
       const id = +params['id'];
       this.loading = true;
+      this.quantite = 1;
+      this.ajoutOk = false;
       this.produitService.obtenirParId(id).subscribe({
         next: (produit) => {
           this.produit = produit;
@@ -120,6 +161,25 @@ export class DetailProduitComponent implements OnInit {
         },
         error: () => this.loading = false
       });
+    });
+  }
+
+  ajouterAuPanier(): void {
+    if (!this.produit?.id || this.ajoutEnCours) return;
+    this.ajoutEnCours = true;
+    this.ajoutOk = false;
+    this.ajoutErreur = '';
+    this.panierService.ajouterProduit(this.produit.id, this.quantite).subscribe({
+      next: () => {
+        this.ajoutEnCours = false;
+        this.ajoutOk = true;
+        setTimeout(() => this.ajoutOk = false, 2500);
+      },
+      error: (err) => {
+        this.ajoutEnCours = false;
+        this.ajoutErreur = err.error?.message || this.t.tr('panier.ajouterErreur');
+        setTimeout(() => this.ajoutErreur = '', 5000);
+      }
     });
   }
 

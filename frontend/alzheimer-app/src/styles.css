@@ -948,6 +948,112 @@ body {
   border-color: var(--primary);
 }
 
+/* ==================== FO NAVBAR CART ==================== */
+.fo-navbar-cart {
+  position: relative;
+}
+
+.fo-cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transform: translate(6px, -4px);
+}
+
+/* ==================== FO ADD TO CART BUTTON ==================== */
+.fo-add-cart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.fo-add-cart-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: #fff;
+}
+
+.fo-add-cart-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ==================== FO PRIMARY BUTTON ==================== */
+.fo-btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.fo-btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  color: #fff;
+  text-decoration: none;
+}
+
+.fo-btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ==================== FO TOAST NOTIFICATIONS ==================== */
+.fo-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  max-width: 500px;
+  width: max-content;
+}
+
+.fo-toast-error {
+  background: #fff0f0;
+  color: #c62828;
+  border: 1.5px solid #ef9a9a;
+}
+
+.fo-toast-error i {
+  color: #e53935;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
 /* ==================== FO HERO ==================== */
 .fo-hero {
   background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 50%, #00897b 100%);

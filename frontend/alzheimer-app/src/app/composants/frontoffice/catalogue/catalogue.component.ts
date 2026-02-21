@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProduitService } from '../../../services/produit.service';
 import { CategorieService } from '../../../services/categorie.service';
+import { PanierService } from '../../../services/panier.service';
 import { Produit } from '../../../modeles/produit.model';
 import { Categorie } from '../../../modeles/categorie.model';
 import { TraductionService } from '../../../services/traduction.service';
@@ -102,6 +103,14 @@ import { TraductionService } from '../../../services/traduction.service';
                   {{ prod.quantite > 10 ? t.tr('common.enStock') : prod.quantite > 0 ? t.tr('common.stockFaible') : t.tr('common.rupture') }}
                 </span>
               </div>
+              <button *ngIf="prod.quantite > 0" class="fo-add-cart-btn mt-2"
+                      (click)="ajouterAuPanier($event, prod)"
+                      [disabled]="ajoutEnCours === prod.id">
+                <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
+                <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
+                {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+              </button>
             </div>
           </a>
         </div>
@@ -136,6 +145,12 @@ import { TraductionService } from '../../../services/traduction.service';
               <option [ngValue]="48">48</option>
             </select>
           </div>
+        </div>
+
+        <!-- Cart Error Toast -->
+        <div *ngIf="ajoutErreur" class="fo-toast fo-toast-error fade-in">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ ajoutErreur }}
+          <button (click)="ajoutErreur = ''" style="background: none; border: none; color: inherit; margin-left: 12px; cursor: pointer; font-size: 1.1rem;"><i class="bi bi-x-lg"></i></button>
         </div>
 
         <!-- Empty State -->
@@ -181,10 +196,14 @@ export class CatalogueComponent implements OnInit {
   endIndex = 0;
 
   loading = true;
+  ajoutEnCours: number | null = null;
+  ajoutOk: number | null = null;
+  ajoutErreur = '';
 
   constructor(
     private produitService: ProduitService,
     private categorieService: CategorieService,
+    private panierService: PanierService,
     public t: TraductionService
   ) {}
 
@@ -300,5 +319,26 @@ export class CatalogueComponent implements OnInit {
       'rupture': this.t.tr('common.rupture')
     };
     return labels[value] || value;
+  }
+
+  ajouterAuPanier(event: Event, produit: Produit): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!produit.id || this.ajoutEnCours) return;
+    this.ajoutEnCours = produit.id;
+    this.ajoutOk = null;
+    this.ajoutErreur = '';
+    this.panierService.ajouterProduit(produit.id, 1).subscribe({
+      next: () => {
+        this.ajoutEnCours = null;
+        this.ajoutOk = produit.id!;
+        setTimeout(() => { if (this.ajoutOk === produit.id) this.ajoutOk = null; }, 2000);
+      },
+      error: (err) => {
+        this.ajoutEnCours = null;
+        this.ajoutErreur = err.error?.message || this.t.tr('panier.ajouterErreur');
+        setTimeout(() => this.ajoutErreur = '', 5000);
+      }
+    });
   }
 }

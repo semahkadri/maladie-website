@@ -261,6 +261,108 @@ const DICT: Record<string, TranslationEntry> = {
   'fp.erreurCategories': { fr: 'Impossible de charger les catégories', en: 'Unable to load categories' },
   'fp.erreurModification': { fr: 'Erreur lors de la modification', en: 'Error during update' },
   'fp.erreurCreation': { fr: 'Erreur lors de la création', en: 'Error during creation' },
+
+  // ─── Navbar (Panier) ───────────────────────────────────
+  'nav.panier': { fr: 'Panier', en: 'Cart' },
+
+  // ─── Sidebar (Commandes) ───────────────────────────────
+  'sidebar.commandes': { fr: 'Commandes', en: 'Orders' },
+  'breadcrumb.commandes': { fr: 'Commandes', en: 'Orders' },
+  'breadcrumb.detailCommande': { fr: 'Détail Commande', en: 'Order Detail' },
+
+  // ─── Panier (Cart) ─────────────────────────────────────
+  'panier.titre': { fr: 'Mon Panier', en: 'My Cart' },
+  'panier.sousTitre': { fr: 'Gérez les articles de votre panier avant de passer commande.', en: 'Manage your cart items before placing an order.' },
+  'panier.vide': { fr: 'Votre panier est vide.', en: 'Your cart is empty.' },
+  'panier.parcourir': { fr: 'Parcourir le catalogue', en: 'Browse catalog' },
+  'panier.viderPanier': { fr: 'Vider le panier', en: 'Empty cart' },
+  'panier.stock': { fr: 'Stock', en: 'Stock' },
+  'panier.resume': { fr: 'Récapitulatif', en: 'Summary' },
+  'panier.articles': { fr: 'Articles', en: 'Items' },
+  'panier.sousTotal': { fr: 'Sous-total', en: 'Subtotal' },
+  'panier.total': { fr: 'Total', en: 'Total' },
+  'panier.commander': { fr: 'Passer la commande', en: 'Place order' },
+  'panier.continuer': { fr: 'Continuer les achats', en: 'Continue shopping' },
+  'panier.erreurChargement': { fr: 'Impossible de charger le panier.', en: 'Unable to load cart.' },
+  'panier.erreurModif': { fr: 'Erreur lors de la modification de la quantité.', en: 'Error updating quantity.' },
+  'panier.erreurSupp': { fr: 'Erreur lors de la suppression du produit.', en: 'Error removing product.' },
+  'panier.erreurVider': { fr: 'Erreur lors du vidage du panier.', en: 'Error emptying cart.' },
+  'panier.ajouterSuccess': { fr: 'Produit ajouté au panier !', en: 'Product added to cart!' },
+  'panier.ajouterErreur': { fr: 'Erreur lors de l\'ajout au panier.', en: 'Error adding to cart.' },
+
+  // ─── Catalogue (Add to Cart) ───────────────────────────
+  'catalogue.ajouterPanier': { fr: 'Ajouter au panier', en: 'Add to cart' },
+
+  // ─── Detail Produit (Add to Cart) ──────────────────────
+  'detail.ajouterPanier': { fr: 'Ajouter au panier', en: 'Add to cart' },
+  'detail.quantiteLabel': { fr: 'Quantité', en: 'Quantity' },
+
+  // ─── Checkout ──────────────────────────────────────────
+  'checkout.titre': { fr: 'Finaliser la commande', en: 'Complete Order' },
+  'checkout.sousTitre': { fr: 'Remplissez vos informations pour valider votre commande.', en: 'Fill in your information to confirm your order.' },
+  'checkout.infosClient': { fr: 'Informations du Client', en: 'Client Information' },
+  'checkout.nom': { fr: 'Nom complet', en: 'Full name' },
+  'checkout.placeholderNom': { fr: 'Ex: Ahmed Ben Salah', en: 'E.g.: Ahmed Ben Salah' },
+  'checkout.nomObligatoire': { fr: 'Le nom est obligatoire (min. 2 caractères)', en: 'Name is required (min. 2 characters)' },
+  'checkout.email': { fr: 'Email', en: 'Email' },
+  'checkout.placeholderEmail': { fr: 'Ex: ahmed@example.com', en: 'E.g.: ahmed@example.com' },
+  'checkout.emailInvalide': { fr: 'Adresse email invalide', en: 'Invalid email address' },
+  'checkout.telephone': { fr: 'Téléphone', en: 'Phone' },
+  'checkout.placeholderTel': { fr: 'Ex: +216 XX XXX XXX', en: 'E.g.: +216 XX XXX XXX' },
+  'checkout.adresse': { fr: 'Adresse de livraison', en: 'Delivery address' },
+  'checkout.placeholderAdresse': { fr: 'Adresse complète...', en: 'Full address...' },
+  'checkout.confirmer': { fr: 'Confirmer la commande', en: 'Confirm order' },
+  'checkout.recapitulatif': { fr: 'Récapitulatif de commande', en: 'Order Summary' },
+  'checkout.erreur': { fr: 'Erreur lors de la création de la commande.', en: 'Error creating order.' },
+
+  // ─── Confirmation Commande ─────────────────────────────
+  'confirmation.introuvable': { fr: 'Commande introuvable.', en: 'Order not found.' },
+  'confirmation.titre': { fr: 'Commande confirmée !', en: 'Order confirmed!' },
+  'confirmation.sousTitre': { fr: 'Votre commande a été enregistrée avec succès. Vous recevrez une confirmation prochainement.', en: 'Your order has been successfully recorded. You will receive a confirmation shortly.' },
+  'confirmation.reference': { fr: 'Référence de commande', en: 'Order reference' },
+  'confirmation.details': { fr: 'Détails de la commande', en: 'Order Details' },
+  'confirmation.statut': { fr: 'Statut', en: 'Status' },
+  'confirmation.enAttente': { fr: 'En attente', en: 'Pending' },
+  'confirmation.continuer': { fr: 'Continuer les achats', en: 'Continue shopping' },
+
+  // ─── Liste Commandes (Backoffice) ──────────────────────
+  'lcmd.titre': { fr: 'Gestion des Commandes', en: 'Order Management' },
+  'lcmd.commandes': { fr: 'commandes', en: 'orders' },
+  'lcmd.commande': { fr: 'commande', en: 'order' },
+  'lcmd.rechercher': { fr: 'Rechercher par référence, client...', en: 'Search by reference, client...' },
+  'lcmd.tousStatuts': { fr: 'Tous les statuts', en: 'All statuses' },
+  'lcmd.enAttente': { fr: 'En attente', en: 'Pending' },
+  'lcmd.confirmee': { fr: 'Confirmée', en: 'Confirmed' },
+  'lcmd.enPreparation': { fr: 'En préparation', en: 'In preparation' },
+  'lcmd.expediee': { fr: 'Expédiée', en: 'Shipped' },
+  'lcmd.livree': { fr: 'Livrée', en: 'Delivered' },
+  'lcmd.annulee': { fr: 'Annulée', en: 'Cancelled' },
+  'lcmd.reference': { fr: 'Référence', en: 'Reference' },
+  'lcmd.client': { fr: 'Client', en: 'Client' },
+  'lcmd.articles': { fr: 'Articles', en: 'Items' },
+  'lcmd.montant': { fr: 'Montant', en: 'Amount' },
+  'lcmd.statutCol': { fr: 'Statut', en: 'Status' },
+  'lcmd.date': { fr: 'Date', en: 'Date' },
+  'lcmd.aucune': { fr: 'Aucune commande trouvée.', en: 'No orders found.' },
+  'lcmd.voir': { fr: 'Voir', en: 'View' },
+  'lcmd.erreurChargement': { fr: 'Erreur lors du chargement des commandes.', en: 'Error loading orders.' },
+
+  // ─── Détail Commande (Backoffice) ──────────────────────
+  'dcmd.titre': { fr: 'Détail de la Commande', en: 'Order Detail' },
+  'dcmd.reference': { fr: 'Réf.', en: 'Ref.' },
+  'dcmd.infos': { fr: 'Informations de la commande', en: 'Order Information' },
+  'dcmd.client': { fr: 'Client', en: 'Client' },
+  'dcmd.dateCommande': { fr: 'Date de commande', en: 'Order date' },
+  'dcmd.adresse': { fr: 'Adresse de livraison', en: 'Delivery address' },
+  'dcmd.articles': { fr: 'Articles commandés', en: 'Ordered Items' },
+  'dcmd.prixUnit': { fr: 'Prix unitaire', en: 'Unit price' },
+  'dcmd.sousTotal': { fr: 'Sous-total', en: 'Subtotal' },
+  'dcmd.changerStatut': { fr: 'Changer le statut', en: 'Change Status' },
+  'dcmd.appliquer': { fr: 'Appliquer', en: 'Apply' },
+  'dcmd.retourListe': { fr: 'Retour à la liste', en: 'Back to list' },
+  'dcmd.erreurChargement': { fr: 'Impossible de charger la commande.', en: 'Unable to load order.' },
+  'dcmd.statutModifie': { fr: 'Statut modifié avec succès.', en: 'Status updated successfully.' },
+  'dcmd.erreurStatut': { fr: 'Erreur lors de la modification du statut.', en: 'Error updating status.' },
 };
 
 @Injectable({ providedIn: 'root' })

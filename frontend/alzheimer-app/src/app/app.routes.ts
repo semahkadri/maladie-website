@@ -30,6 +30,24 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./composants/frontoffice/categorie-produits/categorie-produits.component')
             .then(m => m.CategorieProduitsComponent)
+      },
+      {
+        path: 'panier',
+        loadComponent: () =>
+          import('./composants/frontoffice/panier/panier.component')
+            .then(m => m.PanierComponent)
+      },
+      {
+        path: 'commander',
+        loadComponent: () =>
+          import('./composants/frontoffice/commander/commander.component')
+            .then(m => m.CommanderComponent)
+      },
+      {
+        path: 'commande/:ref',
+        loadComponent: () =>
+          import('./composants/frontoffice/confirmation-commande/confirmation-commande.component')
+            .then(m => m.ConfirmationCommandeComponent)
       }
     ]
   },
@@ -80,6 +98,18 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./composants/produit/formulaire-produit/formulaire-produit.component')
             .then(m => m.FormulaireProduitComponent)
+      },
+      {
+        path: 'commandes',
+        loadComponent: () =>
+          import('./composants/commande/liste-commandes/liste-commandes.component')
+            .then(m => m.ListeCommandesComponent)
+      },
+      {
+        path: 'commandes/:id',
+        loadComponent: () =>
+          import('./composants/commande/detail-commande/detail-commande.component')
+            .then(m => m.DetailCommandeComponent)
       }
     ]
   },

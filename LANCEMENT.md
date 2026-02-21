@@ -84,6 +84,8 @@ Vérifier : http://localhost:4200
 | Stock API (direct) | http://localhost:8081/api/categories | API REST des catégories |
 | Stock API (direct) | http://localhost:8081/api/produits | API REST des produits |
 | Stock API (direct) | http://localhost:8081/api/tableau-de-bord | API REST du tableau de bord |
+| Panier API (direct) | http://localhost:8081/api/panier/{sessionId} | API REST du panier |
+| Commandes API (direct) | http://localhost:8081/api/commandes | API REST des commandes |
 | **Swagger UI** | **http://localhost:8081/api/swagger-ui.html** | **Documentation interactive de l'API** |
 | OpenAPI JSON | http://localhost:8081/api/v3/api-docs | Spécification OpenAPI brute |
 | **Frontend Frontoffice** | **http://localhost:4200** | **Site public (accueil, catalogue)** |
@@ -110,6 +112,8 @@ Après le lancement du Service Stock, ouvrir **http://localhost:8081/api/swagger
 | **Tableau de Bord** | `GET /api/tableau-de-bord` - Statistiques agrégées (totaux, stock bas, ruptures, valeur totale) |
 | **Catégories** | `GET`, `POST`, `PUT`, `DELETE` sur `/api/categories` |
 | **Produits** | `GET`, `POST`, `PUT`, `DELETE` sur `/api/produits` + filtre par catégorie |
+| **Panier** | `GET`, `POST`, `PUT`, `DELETE` sur `/api/panier/{sessionId}` - Gestion du panier d'achat |
+| **Commandes** | `GET`, `POST`, `PATCH` sur `/api/commandes` - Création et gestion des commandes |
 
 ---
 
@@ -122,9 +126,12 @@ Ouvrir **http://localhost:4200** pour accéder au site.
 | Page | Fonctionnalités |
 |------|-----------------|
 | **Accueil** (`/`) | Hero section, stats, catégories, derniers produits |
-| **Catalogue** (`/catalogue`) | Grille produits, recherche, filtres, tri, pagination |
-| **Détail Produit** (`/catalogue/:id`) | Informations complètes, produits similaires |
+| **Catalogue** (`/catalogue`) | Grille produits, recherche, filtres, tri, pagination, bouton "Ajouter au panier" |
+| **Détail Produit** (`/catalogue/:id`) | Informations complètes, sélecteur quantité, ajout panier, produits similaires |
 | **Catégorie** (`/categories/:id`) | Produits filtrés par catégorie, recherche |
+| **Panier** (`/panier`) | Liste articles, contrôles quantité +/-, suppression, total, passage commande |
+| **Commander** (`/commander`) | Formulaire client (nom, email, tél, adresse) + récapitulatif commande |
+| **Confirmation** (`/commande/:ref`) | Page succès avec référence, détails, boutons navigation |
 
 ### Pages Backoffice (administration) :
 
@@ -133,15 +140,20 @@ Ouvrir **http://localhost:4200** pour accéder au site.
 | **Tableau de Bord** (`/admin`) | 4 cartes stats, alertes rupture, actions rapides, dernières données |
 | **Catégories** (`/admin/categories`) | Liste avec recherche, pagination, CRUD complet |
 | **Produits** (`/admin/produits`) | Liste avec recherche, filtre catégorie, filtre stock, pagination, CRUD complet |
+| **Commandes** (`/admin/commandes`) | Liste avec recherche, filtre par statut, pagination, accès au détail |
+| **Détail Commande** (`/admin/commandes/:id`) | Infos client, articles commandés, changement de statut |
 | **Formulaires** | Création / modification avec validation, aperçu valeur stock |
 
 ### Fonctionnalités clés :
 
 - **Bilingue FR/EN** : Bouton de langue dans la navbar et la topbar (persistance localStorage)
-- Sidebar de navigation fixe avec sections groupées
+- **Panier d'achat** : Ajout depuis le catalogue/détail, badge compteur dans la navbar, gestion quantités
+- **Commande complète** : Checkout avec formulaire client, validation stock, confirmation avec référence
+- **Gestion des commandes** : 6 statuts (En attente → Livrée ou Annulée), restauration stock sur annulation
+- Sidebar de navigation fixe avec sections groupées (catégories, produits, commandes)
 - Topbar avec breadcrumbs dynamiques, bouton FR/EN et horloge
 - Recherche en temps réel, tri (8 critères), pagination configurable (6/12/24/48)
-- Filtres multiples (catégorie, niveau de stock) avec chips de filtres actifs
+- Filtres multiples (catégorie, niveau de stock, statut commande) avec chips de filtres actifs
 - Alertes rupture de stock sur le dashboard
 - Design responsive (desktop, tablette, mobile)
 
@@ -170,15 +182,21 @@ ng serve --open
 | Étape | Action | Résultat attendu |
 |-------|--------|------------------|
 | 1 | Ouvrir http://localhost:8081/api/categories | JSON `[]` ou liste de catégories |
-| 2 | Ouvrir http://localhost:8081/api/swagger-ui.html | Interface Swagger avec 3 groupes d'API |
+| 2 | Ouvrir http://localhost:8081/api/swagger-ui.html | Interface Swagger avec 5 groupes d'API |
 | 3 | Ouvrir http://localhost:4200 | Frontoffice : page d'accueil avec hero, stats, catégories |
-| 4 | Cliquer "Catalogue" | Grille produits avec recherche, filtres, tri, pagination |
-| 5 | Cliquer un produit | Page détail avec prix, stock, produits similaires |
-| 6 | Cliquer bouton FR/EN | Toute l'interface bascule en anglais |
-| 7 | Cliquer "Administration" | Backoffice `/admin` avec sidebar et dashboard |
-| 8 | Créer une catégorie | CRUD catégories fonctionne |
-| 9 | Créer un produit | CRUD produits fonctionne |
-| 10 | Cliquer "Voir le site" (sidebar) | Retour au frontoffice |
+| 4 | Cliquer "Catalogue" | Grille produits avec recherche, filtres, tri, pagination, bouton panier |
+| 5 | Cliquer "Ajouter au panier" | Badge panier s'incrémente dans la navbar |
+| 6 | Cliquer un produit | Page détail avec prix, stock, quantité, ajout panier, similaires |
+| 7 | Cliquer "Panier" dans la navbar | Page panier avec articles, quantités, total |
+| 8 | Cliquer "Passer la commande" | Page checkout avec formulaire client |
+| 9 | Remplir le nom et confirmer | Page confirmation avec référence CMD-xxx |
+| 10 | Cliquer bouton FR/EN | Toute l'interface bascule en anglais |
+| 11 | Cliquer "Administration" | Backoffice `/admin` avec sidebar et dashboard |
+| 12 | Naviguer vers "Commandes" | La commande créée apparaît dans la liste |
+| 13 | Cliquer "Voir" sur la commande | Détail avec changement de statut |
+| 14 | Créer une catégorie | CRUD catégories fonctionne |
+| 15 | Créer un produit | CRUD produits fonctionne |
+| 16 | Cliquer "Voir le site" (sidebar) | Retour au frontoffice |
 
 ---
 

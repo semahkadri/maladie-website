@@ -1,11 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { TraductionService } from '../../../services/traduction.service';
+import { PanierService } from '../../../services/panier.service';
 
 @Component({
   selector: 'app-layout-frontoffice',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <!-- Navbar -->
     <nav class="fo-navbar">
@@ -29,6 +32,11 @@ import { TraductionService } from '../../../services/traduction.service';
           <a routerLink="/catalogue" routerLinkActive="active"
              class="fo-navbar-link" (click)="menuOpen = false">
             <i class="bi bi-grid-3x3-gap"></i> {{ t.tr('nav.catalogue') }}
+          </a>
+          <a routerLink="/panier" routerLinkActive="active"
+             class="fo-navbar-link fo-navbar-cart" (click)="menuOpen = false">
+            <i class="bi bi-cart3"></i> {{ t.tr('nav.panier') }}
+            <span *ngIf="nombreArticles > 0" class="fo-cart-badge">{{ nombreArticles }}</span>
           </a>
           <a routerLink="/admin" class="fo-navbar-link fo-navbar-admin" (click)="menuOpen = false">
             <i class="bi bi-gear"></i> {{ t.tr('nav.admin') }}
@@ -68,9 +76,22 @@ import { TraductionService } from '../../../services/traduction.service';
     </footer>
   `
 })
-export class LayoutFrontofficeComponent {
+export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   annee = new Date().getFullYear();
   menuOpen = false;
+  nombreArticles = 0;
+  private panierSub!: Subscription;
 
-  constructor(public t: TraductionService) {}
+  constructor(public t: TraductionService, private panierService: PanierService) {}
+
+  ngOnInit(): void {
+    this.panierService.chargerPanier().subscribe();
+    this.panierSub = this.panierService.panier$.subscribe(panier => {
+      this.nombreArticles = panier?.nombreArticles || 0;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.panierSub?.unsubscribe();
+  }
 }
