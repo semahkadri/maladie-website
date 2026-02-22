@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TraductionService } from '../../../services/traduction.service';
+import { ThemeService } from '../../../services/theme.service';
 import { PanierService } from '../../../services/panier.service';
 
 @Component({
@@ -48,6 +49,10 @@ import { PanierService } from '../../../services/panier.service';
             <button [class.active]="t.isFr" (click)="t.setLang('fr')">FR</button>
             <button [class.active]="t.isEn" (click)="t.setLang('en')">EN</button>
           </div>
+          <!-- Theme Toggle -->
+          <button class="theme-toggle theme-toggle-fo" (click)="th.toggle()" [attr.title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
+            <i class="bi" [class.bi-moon-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
+          </button>
         </div>
       </div>
     </nav>
@@ -82,7 +87,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   nombreArticles = 0;
   private panierSub!: Subscription;
 
-  constructor(public t: TraductionService, private panierService: PanierService) {}
+  constructor(public t: TraductionService, public th: ThemeService, private panierService: PanierService) {}
 
   ngOnInit(): void {
     this.panierService.chargerPanier().subscribe();

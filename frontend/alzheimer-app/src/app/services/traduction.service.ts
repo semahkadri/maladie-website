@@ -33,6 +33,10 @@ const DICT: Record<string, TranslationEntry> = {
   'common.id': { fr: 'ID', en: 'ID' },
   'common.tnd': { fr: 'TND', en: 'TND' },
 
+  // ─── Theme ──────────────────────────────────────────────
+  'theme.dark': { fr: 'Mode sombre', en: 'Dark mode' },
+  'theme.light': { fr: 'Mode clair', en: 'Light mode' },
+
   // ─── Navbar (Frontoffice) ────────────────────────────────
   'nav.brand': { fr: 'Gestion de Stock', en: 'Stock Management' },
   'nav.accueil': { fr: 'Accueil', en: 'Home' },

@@ -35,6 +35,457 @@
   --topbar-height: 64px;
 }
 
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html[data-theme="dark"] {
+  --primary: #5b9bf5;
+  --primary-dark: #4a8ae4;
+  --primary-light: rgba(91,155,245,0.12);
+  --secondary: #9aa0a6;
+  --accent: #4db6ac;
+  --accent-light: rgba(77,182,172,0.12);
+  --danger: #f28b82;
+  --danger-light: rgba(242,139,130,0.12);
+  --warning: #fdd663;
+  --warning-light: rgba(253,214,99,0.12);
+  --success: #81c995;
+  --success-light: rgba(129,201,149,0.12);
+  --bg: #1a1d23;
+  --bg-card: #23272e;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --border: #3c4043;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  --sidebar-bg: #111318;
+  --sidebar-hover: rgba(255,255,255,0.06);
+  --sidebar-active: rgba(91,155,245,0.18);
+  --sidebar-text: rgba(255,255,255,0.6);
+  --sidebar-text-active: #ffffff;
+}
+
+/* Dark mode overrides for hardcoded colors */
+html[data-theme="dark"] body {
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .btn-secondary {
+  background: #3c4043;
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .btn-secondary:hover {
+  background: #4a4e54;
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .table {
+  --bs-table-bg: var(--bg-card);
+  --bs-table-color: var(--text-primary);
+  --bs-table-border-color: var(--border);
+  --bs-table-hover-bg: rgba(255,255,255,0.04);
+  --bs-table-hover-color: var(--text-primary);
+  --bs-table-striped-bg: rgba(255,255,255,0.03);
+  --bs-table-striped-color: var(--text-primary);
+  color: var(--text-primary);
+  background-color: var(--bg-card);
+}
+
+html[data-theme="dark"] .table thead th {
+  background: linear-gradient(135deg, #2d4a7a, #1e3a5f);
+  color: #fff;
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .table tbody td {
+  border-color: var(--border);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .table tbody tr {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .table-hover tbody tr:hover td {
+  background-color: rgba(255,255,255,0.04);
+}
+
+html[data-theme="dark"] .fo-product-card-img {
+  background: linear-gradient(135deg, #2a2d35, #1e2028);
+}
+
+html[data-theme="dark"] .fo-product-detail-img {
+  background: linear-gradient(135deg, #2a2d35, #1e2028);
+}
+
+html[data-theme="dark"] .empty-state i,
+html[data-theme="dark"] .fo-empty-state i {
+  color: #5f6368;
+}
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select {
+  background-color: var(--bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus {
+  background-color: var(--bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(91,155,245,0.2);
+}
+
+html[data-theme="dark"] .form-control::placeholder,
+html[data-theme="dark"] .form-select::placeholder,
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+}
+
+html[data-theme="dark"] .form-label {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .invalid-feedback {
+  color: var(--danger);
+}
+
+html[data-theme="dark"] .search-input input,
+html[data-theme="dark"] .fo-search-box input {
+  background-color: var(--bg) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .search-input input::placeholder,
+html[data-theme="dark"] .fo-search-box input::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+}
+
+/* Bootstrap alerts dark mode */
+html[data-theme="dark"] .alert-danger {
+  background-color: rgba(242,139,130,0.12);
+  color: var(--danger);
+  border-color: rgba(242,139,130,0.3);
+}
+
+html[data-theme="dark"] .alert-success {
+  background-color: rgba(129,201,149,0.12);
+  color: var(--success);
+  border-color: rgba(129,201,149,0.3);
+}
+
+html[data-theme="dark"] .alert-warning {
+  background-color: rgba(253,214,99,0.12);
+  color: var(--warning);
+  border-color: rgba(253,214,99,0.3);
+}
+
+/* Textarea dark mode */
+html[data-theme="dark"] textarea.form-control {
+  background-color: var(--bg) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .modal-content {
+  background: var(--bg-card);
+}
+
+html[data-theme="dark"] .fo-toast {
+  background: var(--bg-card);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+html[data-theme="dark"] .fo-toast-error {
+  background: rgba(242,139,130,0.12);
+  color: #f28b82;
+  border-color: rgba(242,139,130,0.3);
+}
+
+/* Bootstrap list-group dark overrides */
+html[data-theme="dark"] .list-group-item {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .list-group-item-action:hover,
+html[data-theme="dark"] .list-group-item-action:focus {
+  background-color: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+}
+
+/* Bootstrap progress bar track */
+html[data-theme="dark"] .progress {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* Bootstrap table row highlight dark overrides */
+html[data-theme="dark"] .table-warning {
+  --bs-table-bg: rgba(253,214,99,0.1);
+  --bs-table-border-color: var(--border);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .table-danger {
+  --bs-table-bg: rgba(242,139,130,0.1);
+  --bs-table-border-color: var(--border);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .table tfoot td {
+  border-color: var(--border);
+}
+
+/* Bootstrap btn-close dark mode */
+html[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Ensure text-muted is readable in dark mode */
+html[data-theme="dark"] .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Ensure .text-dark is readable in dark mode */
+html[data-theme="dark"] .text-dark {
+  color: var(--text-primary) !important;
+}
+
+/* Bootstrap dropdown/select dark backgrounds */
+html[data-theme="dark"] .fo-filter-select {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .fo-sort-control select {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+/* Mobile navbar menu dark bg */
+html[data-theme="dark"] .fo-navbar-menu {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+/* Modal body/footer dark mode */
+html[data-theme="dark"] .modal-header {
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .modal-body {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .modal-footer {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+/* Card header text inherits properly */
+html[data-theme="dark"] .card-header {
+  color: var(--text-primary);
+}
+
+/* Pagination dark */
+html[data-theme="dark"] .pagination-wrapper {
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .pagination-controls button {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* FO pagination dark */
+html[data-theme="dark"] .fo-pagination-controls button {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .fo-pagination-size select {
+  background: var(--bg);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* Stat icon backgrounds that use hardcoded colors in inline styles —
+   we override via !important so inline styles are overridden */
+html[data-theme="dark"] .stat-icon[style*="#e8f5e9"],
+html[data-theme="dark"] .stat-icon[style*="#e3f2fd"],
+html[data-theme="dark"] .stat-icon[style*="#fff3e0"],
+html[data-theme="dark"] .stat-icon[style*="#ffebee"],
+html[data-theme="dark"] .stat-icon[style*="#e8eaf6"] {
+  background: rgba(255,255,255,0.08) !important;
+}
+
+html[data-theme="dark"] [style*="color: #2e7d32"] {
+  color: var(--success) !important;
+}
+
+html[data-theme="dark"] [style*="color: #1565c0"] {
+  color: var(--primary) !important;
+}
+
+html[data-theme="dark"] [style*="color: #e65100"] {
+  color: var(--warning) !important;
+}
+
+html[data-theme="dark"] [style*="color: #3949ab"] {
+  color: var(--primary) !important;
+}
+
+/* Quick action icon backgrounds */
+html[data-theme="dark"] .quick-action i[style*="#e3f2fd"] {
+  background: rgba(91,155,245,0.12) !important;
+  color: var(--primary) !important;
+}
+
+/* Chart bar light color override */
+html[data-theme="dark"] .chart-bar[style*="#bbdefb"] {
+  background: rgba(91,155,245,0.3) !important;
+}
+
+/* Fix fw-semibold / fw-bold text visibility */
+html[data-theme="dark"] .fw-semibold,
+html[data-theme="dark"] .fw-bold {
+  color: var(--text-primary);
+}
+
+/* Badge text remains white on colored backgrounds */
+html[data-theme="dark"] .bg-success,
+html[data-theme="dark"] .bg-danger,
+html[data-theme="dark"] .bg-warning,
+html[data-theme="dark"] .bg-info,
+html[data-theme="dark"] .bg-primary,
+html[data-theme="dark"] .bg-secondary {
+  color: #fff !important;
+}
+
+html[data-theme="dark"] .bg-warning {
+  color: #1a1d23 !important;
+}
+
+/* FO navbar link dark mode */
+html[data-theme="dark"] .fo-navbar-link {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .fo-navbar-link:hover,
+html[data-theme="dark"] .fo-navbar-link.active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+/* FO navbar admin border */
+html[data-theme="dark"] .fo-navbar-admin {
+  border-color: var(--border);
+}
+
+/* FO category card hover */
+html[data-theme="dark"] .fo-category-card:hover {
+  color: var(--text-primary);
+}
+
+/* FO product card hover */
+html[data-theme="dark"] .fo-product-card:hover {
+  color: var(--text-primary);
+}
+
+/* Topbar clock dark */
+html[data-theme="dark"] .topbar-clock {
+  background: rgba(255,255,255,0.06);
+}
+
+/* FO hero button dark */
+html[data-theme="dark"] .fo-hero-btn {
+  background: rgba(255,255,255,0.95);
+}
+
+/* Lang toggle FO dark override */
+html[data-theme="dark"] .lang-toggle {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .lang-toggle-bo {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .lang-toggle-bo .lang-toggle-icon {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .lang-toggle-bo button {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .lang-toggle-bo button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Card header with inline gradient — soften in dark mode */
+html[data-theme="dark"] .card-header[style*="linear-gradient"] {
+  background: linear-gradient(135deg, #2d4a7a, #1e3a5f) !important;
+}
+
+/* Table header gradient soften in dark mode */
+html[data-theme="dark"] .table thead th {
+  background: linear-gradient(135deg, #2d4a7a, #1e3a5f);
+}
+
+/* Dashboard header gradient soften in dark mode */
+html[data-theme="dark"] .dashboard-header {
+  background: linear-gradient(135deg, #1e3a6e 0%, #162d54 50%, #0d4a45 100%);
+}
+
+/* FO hero gradient soften */
+html[data-theme="dark"] .fo-hero {
+  background: linear-gradient(135deg, #1e3a6e 0%, #162d54 50%, #0d4a45 100%);
+}
+
+/* Ensure .card-body text is readable */
+html[data-theme="dark"] .card-body {
+  color: var(--text-primary);
+}
+
+/* Fix Bootstrap .form-select option dropdown */
+html[data-theme="dark"] .form-select option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* Fix frontoffice detail-produit quantity input */
+html[data-theme="dark"] input[style*="border"] {
+  background-color: var(--bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* FO footer dark — already dark, but ensure consistency */
+html[data-theme="dark"] .fo-footer {
+  background: var(--sidebar-bg);
+}
+
+/* Fix low-stock color in dark (#b45309 too dark) */
+html[data-theme="dark"] .fo-product-stock.low-stock {
+  color: var(--warning);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -2023,35 +2474,35 @@ body {
   display: flex;
   align-items: center;
   gap: 0;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: 50px;
   padding: 3px;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid var(--border);
   backdrop-filter: blur(8px);
   transition: var(--transition);
   margin-left: 12px;
 }
 
 .lang-toggle:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.18);
+  border-color: var(--primary);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .lang-toggle-icon {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   margin: 0 6px 0 8px;
   transition: var(--transition);
 }
 
 .lang-toggle:hover .lang-toggle-icon {
-  color: #fff;
+  color: var(--primary);
 }
 
 .lang-toggle button {
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -2065,13 +2516,13 @@ body {
 }
 
 .lang-toggle button:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
 }
 
 .lang-toggle button.active {
-  background: #fff;
-  color: var(--primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
   transform: scale(1.02);
 }
 
@@ -2115,4 +2566,52 @@ body {
   display: flex;
   align-items: center;
   gap: 0;
+}
+
+/* ==================== THEME TOGGLE ==================== */
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+  transform: scale(1.08);
+}
+
+.theme-toggle i {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle:hover i {
+  transform: rotate(30deg);
+}
+
+/* Frontoffice variant — inherits from .theme-toggle,
+   no extra overrides needed since FO navbar is light bg */
+
+html[data-theme="dark"] .theme-toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+  color: #fdd663;
+}
+
+html[data-theme="dark"] .theme-toggle:hover {
+  background: rgba(253, 214, 99, 0.12);
+  border-color: #fdd663;
+  color: #fdd663;
 }

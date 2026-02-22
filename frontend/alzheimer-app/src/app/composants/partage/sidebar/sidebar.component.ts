@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 import { TraductionService } from '../../../services/traduction.service';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -107,6 +108,10 @@ import { TraductionService } from '../../../services/traduction.service';
           <button [class.active]="t.isFr" (click)="t.setLang('fr')">FR</button>
           <button [class.active]="t.isEn" (click)="t.setLang('en')">EN</button>
         </div>
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" (click)="th.toggle()" [attr.title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
+          <i class="bi" [class.bi-moon-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
+        </button>
         <span class="topbar-clock">
           <i class="bi bi-clock me-1"></i>{{ currentTime }}
         </span>
@@ -121,7 +126,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private routerSub!: Subscription;
   private timerInterval: any;
 
-  constructor(private router: Router, public t: TraductionService) {}
+  constructor(private router: Router, public t: TraductionService, public th: ThemeService) {}
 
   ngOnInit(): void {
     this.updateBreadcrumb(this.router.url);

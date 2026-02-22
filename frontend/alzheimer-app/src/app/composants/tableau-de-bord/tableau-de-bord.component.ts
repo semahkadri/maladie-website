@@ -85,7 +85,7 @@ import { TraductionService } from '../../services/traduction.service';
           <div class="col-lg-3 col-md-6">
             <div class="stat-card">
               <div class="d-flex align-items-center">
-                <div class="stat-icon me-3" style="background: #e8f5e9; color: #2e7d32;">
+                <div class="stat-icon me-3" style="background: var(--success-light); color: var(--success);">
                   <i class="bi bi-cash-stack"></i>
                 </div>
                 <div>
@@ -102,7 +102,7 @@ import { TraductionService } from '../../services/traduction.service';
           <div class="col-lg-4 col-md-6">
             <a routerLink="/admin/commandes" class="stat-card">
               <div class="d-flex align-items-center">
-                <div class="stat-icon me-3" style="background: #e3f2fd; color: #1565c0;">
+                <div class="stat-icon me-3" style="background: var(--primary-light); color: var(--primary);">
                   <i class="bi bi-receipt-cutoff"></i>
                 </div>
                 <div>
@@ -115,7 +115,7 @@ import { TraductionService } from '../../services/traduction.service';
           <div class="col-lg-4 col-md-6">
             <a routerLink="/admin/commandes" class="stat-card">
               <div class="d-flex align-items-center">
-                <div class="stat-icon me-3" style="background: #fff3e0; color: #e65100;">
+                <div class="stat-icon me-3" style="background: var(--warning-light); color: var(--warning);">
                   <i class="bi bi-hourglass-split"></i>
                 </div>
                 <div>
@@ -128,7 +128,7 @@ import { TraductionService } from '../../services/traduction.service';
           <div class="col-lg-4 col-md-6">
             <div class="stat-card">
               <div class="d-flex align-items-center">
-                <div class="stat-icon me-3" style="background: #e8f5e9; color: #2e7d32;">
+                <div class="stat-icon me-3" style="background: var(--success-light); color: var(--success);">
                   <i class="bi bi-currency-dollar"></i>
                 </div>
                 <div>
@@ -180,7 +180,7 @@ import { TraductionService } from '../../services/traduction.service';
           </div>
           <div class="col-md-3">
             <a routerLink="/admin/commandes" class="quick-action">
-              <i class="bi bi-receipt-cutoff" style="background: #e3f2fd; color: #1565c0;"></i>
+              <i class="bi bi-receipt-cutoff" style="background: var(--primary-light); color: var(--primary);"></i>
               <div>
                 <span>{{ t.tr('tdb.voirCommandes') }}</span>
                 <small>{{ t.tr('tdb.gererCommandes') }}</small>

@@ -54,8 +54,8 @@ import { TraductionService } from '../../services/traduction.service';
           </div>
           <div class="col-lg-3 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" style="background: #fff3e0;">
-                <i class="bi bi-receipt" style="color: #e65100;"></i>
+              <div class="stat-icon" style="background: var(--warning-light);">
+                <i class="bi bi-receipt" style="color: var(--warning);"></i>
               </div>
               <div>
                 <div class="stat-number">{{ data.indicateursGlobaux.totalCommandes90j }}</div>
@@ -76,7 +76,7 @@ import { TraductionService } from '../../services/traduction.service';
           </div>
           <div class="col-lg-3 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" [style.background]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success-light)' : '#ffebee'">
+              <div class="stat-icon" [style.background]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success-light)' : 'var(--danger-light)'">
                 <i class="bi" [class.bi-graph-up-arrow]="data.indicateursGlobaux.croissanceMensuelle >= 0"
                    [class.bi-graph-down-arrow]="data.indicateursGlobaux.croissanceMensuelle < 0"
                    [style.color]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success)' : 'var(--danger)'"></i>
@@ -95,7 +95,7 @@ import { TraductionService } from '../../services/traduction.service';
         <div class="row g-3 mb-4">
           <div class="col-lg-4 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" style="background: #fff3e0;">
+              <div class="stat-icon" style="background: var(--warning-light);">
                 <i class="bi bi-exclamation-triangle-fill" style="color: var(--warning);"></i>
               </div>
               <div>
@@ -106,7 +106,7 @@ import { TraductionService } from '../../services/traduction.service';
           </div>
           <div class="col-lg-4 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" style="background: #ffebee;">
+              <div class="stat-icon" style="background: var(--danger-light);">
                 <i class="bi bi-x-circle-fill" style="color: var(--danger);"></i>
               </div>
               <div>
@@ -117,8 +117,8 @@ import { TraductionService } from '../../services/traduction.service';
           </div>
           <div class="col-lg-4 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" style="background: #e8eaf6;">
-                <i class="bi bi-arrow-repeat" style="color: #3949ab;"></i>
+              <div class="stat-icon" style="background: var(--primary-light);">
+                <i class="bi bi-arrow-repeat" style="color: var(--primary);"></i>
               </div>
               <div>
                 <div class="stat-number">{{ data.indicateursGlobaux.tauxRotationMoyen }}x</div>
@@ -143,12 +143,12 @@ import { TraductionService } from '../../services/traduction.service';
                 <!-- ABC Visual Bars -->
                 <div class="mb-3">
                   <div class="d-flex align-items-center mb-2">
-                    <span class="badge me-2" style="background: #1a73e8; width: 32px;">A</span>
+                    <span class="badge me-2" style="background: var(--primary); width: 32px;">A</span>
                     <div class="flex-grow-1">
                       <div class="progress" style="height: 24px; border-radius: 6px;">
                         <div class="progress-bar" role="progressbar"
                              [style.width.%]="data.resumeABC.pourcentageCA_A"
-                             style="background: #1a73e8; font-size: 0.75rem; font-weight: 600;">
+                             style="background: var(--primary); font-size: 0.75rem; font-weight: 600;">
                           {{ data.resumeABC.pourcentageCA_A }}%
                         </div>
                       </div>
@@ -156,12 +156,12 @@ import { TraductionService } from '../../services/traduction.service';
                     <span class="ms-2 fw-bold small" style="min-width: 45px;">{{ data.resumeABC.produitsA }} {{ t.tr('analyse.prod') }}</span>
                   </div>
                   <div class="d-flex align-items-center mb-2">
-                    <span class="badge me-2" style="background: #f9ab00; width: 32px;">B</span>
+                    <span class="badge me-2" style="background: var(--warning); width: 32px;">B</span>
                     <div class="flex-grow-1">
                       <div class="progress" style="height: 24px; border-radius: 6px;">
                         <div class="progress-bar" role="progressbar"
                              [style.width.%]="data.resumeABC.pourcentageCA_B"
-                             style="background: #f9ab00; font-size: 0.75rem; font-weight: 600;">
+                             style="background: var(--warning); font-size: 0.75rem; font-weight: 600;">
                           {{ data.resumeABC.pourcentageCA_B }}%
                         </div>
                       </div>
@@ -169,12 +169,12 @@ import { TraductionService } from '../../services/traduction.service';
                     <span class="ms-2 fw-bold small" style="min-width: 45px;">{{ data.resumeABC.produitsB }} {{ t.tr('analyse.prod') }}</span>
                   </div>
                   <div class="d-flex align-items-center">
-                    <span class="badge me-2" style="background: #9e9e9e; width: 32px;">C</span>
+                    <span class="badge me-2" style="background: var(--text-secondary); width: 32px;">C</span>
                     <div class="flex-grow-1">
                       <div class="progress" style="height: 24px; border-radius: 6px;">
                         <div class="progress-bar" role="progressbar"
                              [style.width.%]="data.resumeABC.pourcentageCA_C"
-                             style="background: #9e9e9e; font-size: 0.75rem; font-weight: 600;">
+                             style="background: var(--text-secondary); font-size: 0.75rem; font-weight: 600;">
                           {{ data.resumeABC.pourcentageCA_C }}%
                         </div>
                       </div>
@@ -184,9 +184,9 @@ import { TraductionService } from '../../services/traduction.service';
                 </div>
 
                 <div class="small text-muted mt-3" style="line-height: 1.6;">
-                  <div><span class="badge me-1" style="background: #1a73e8;">A</span> {{ t.tr('analyse.abcA') }}</div>
-                  <div><span class="badge me-1" style="background: #f9ab00;">B</span> {{ t.tr('analyse.abcB') }}</div>
-                  <div><span class="badge me-1" style="background: #9e9e9e;">C</span> {{ t.tr('analyse.abcC') }}</div>
+                  <div><span class="badge me-1" style="background: var(--primary);">A</span> {{ t.tr('analyse.abcA') }}</div>
+                  <div><span class="badge me-1" style="background: var(--warning);">B</span> {{ t.tr('analyse.abcB') }}</div>
+                  <div><span class="badge me-1" style="background: var(--text-secondary);">C</span> {{ t.tr('analyse.abcC') }}</div>
                 </div>
               </div>
             </div>
@@ -200,7 +200,7 @@ import { TraductionService } from '../../services/traduction.service';
               </div>
               <div class="card-body">
                 <div *ngIf="data.tendanceVentes.length === 0" class="empty-state py-4">
-                  <i class="bi bi-bar-chart" style="font-size: 2rem; color: var(--text-light);"></i>
+                  <i class="bi bi-bar-chart" style="font-size: 2rem; color: var(--text-secondary);"></i>
                   <p class="text-muted mt-2">{{ t.tr('analyse.aucuneVente') }}</p>
                 </div>
 
@@ -214,7 +214,7 @@ import { TraductionService } from '../../services/traduction.service';
                       </small>
                       <div class="chart-bar"
                            [style.height.%]="getBarHeight(tv.chiffreAffaires)"
-                           [style.background]="i === tendanceVisibles.length - 1 ? 'var(--primary)' : '#bbdefb'"
+                           [style.background]="i === tendanceVisibles.length - 1 ? 'var(--primary)' : 'var(--primary-light)'"
                            style="width: 100%; max-width: 50px; border-radius: 6px 6px 0 0; transition: height 0.5s ease; min-height: 4px;">
                       </div>
                       <small class="mt-1 text-muted" style="font-size: 0.65rem;">{{ tv.periode.substring(5) }}</small>
@@ -275,7 +275,7 @@ import { TraductionService } from '../../services/traduction.service';
                   <tr *ngIf="produitsFiltres.length === 0">
                     <td colspan="11" class="text-center py-4">
                       <div class="empty-state">
-                        <i class="bi bi-funnel" style="font-size: 2rem; color: var(--text-light);"></i>
+                        <i class="bi bi-funnel" style="font-size: 2rem; color: var(--text-secondary);"></i>
                         <p class="text-muted mt-2">{{ t.tr('analyse.aucunResultat') }}</p>
                       </div>
                     </td>
@@ -317,7 +317,7 @@ import { TraductionService } from '../../services/traduction.service';
                       <i class="bi" [class.bi-arrow-up-circle-fill]="p.tendance === 'HAUSSE'"
                          [class.bi-dash-circle-fill]="p.tendance === 'STABLE'"
                          [class.bi-arrow-down-circle-fill]="p.tendance === 'BAISSE'"
-                         [style.color]="p.tendance === 'HAUSSE' ? 'var(--success)' : p.tendance === 'BAISSE' ? 'var(--danger)' : '#9e9e9e'"
+                         [style.color]="p.tendance === 'HAUSSE' ? 'var(--success)' : p.tendance === 'BAISSE' ? 'var(--danger)' : 'var(--text-secondary)'"
                          style="font-size: 1.1rem;"></i>
                     </td>
                     <!-- Score -->
@@ -448,15 +448,15 @@ export class AnalyseStockComponent implements OnInit {
 
   getABCColor(abc: string): string {
     switch (abc) {
-      case 'A': return '#1a73e8';
-      case 'B': return '#f9ab00';
-      default: return '#9e9e9e';
+      case 'A': return 'var(--primary)';
+      case 'B': return 'var(--warning)';
+      default: return 'var(--text-secondary)';
     }
   }
 
   getScoreColor(score: number): string {
-    if (score >= 70) return '#1e8e3e';
-    if (score >= 40) return '#f9ab00';
-    return '#d93025';
+    if (score >= 70) return 'var(--success)';
+    if (score >= 40) return 'var(--warning)';
+    return 'var(--danger)';
   }
 }
