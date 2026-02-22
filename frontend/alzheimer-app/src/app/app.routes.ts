@@ -110,6 +110,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./composants/commande/detail-commande/detail-commande.component')
             .then(m => m.DetailCommandeComponent)
+      },
+      {
+        path: 'analyse-stock',
+        loadComponent: () =>
+          import('./composants/analyse-stock/analyse-stock.component')
+            .then(m => m.AnalyseStockComponent)
       }
     ]
   },

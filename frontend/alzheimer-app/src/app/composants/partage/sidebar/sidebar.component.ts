@@ -53,6 +53,14 @@ import { TraductionService } from '../../../services/traduction.service';
           {{ t.tr('sidebar.commandes') }}
         </a>
 
+        <div class="sidebar-nav-label">{{ t.tr('sidebar.analyse') }}</div>
+
+        <a routerLink="/admin/analyse-stock" routerLinkActive="active"
+           class="sidebar-nav-item" (click)="mobileOpen = false">
+          <i class="bi bi-graph-up"></i>
+          {{ t.tr('sidebar.analyseStock') }}
+        </a>
+
         <div class="sidebar-nav-label">{{ t.tr('sidebar.actionsRapides') }}</div>
 
         <a routerLink="/admin/categories/ajouter" routerLinkActive="active"
@@ -137,7 +145,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       '/admin/categories/ajouter': this.t.tr('breadcrumb.nouvelleCat'),
       '/admin/produits': this.t.tr('breadcrumb.produits'),
       '/admin/produits/ajouter': this.t.tr('breadcrumb.nouveauProd'),
-      '/admin/commandes': this.t.tr('breadcrumb.commandes')
+      '/admin/commandes': this.t.tr('breadcrumb.commandes'),
+      '/admin/analyse-stock': this.t.tr('breadcrumb.analyseStock')
     };
     if (map[url] !== undefined) {
       this.currentPage = map[url];

@@ -374,6 +374,77 @@ const DICT: Record<string, TranslationEntry> = {
   'dcmd.erreurChargement': { fr: 'Impossible de charger la commande.', en: 'Unable to load order.' },
   'dcmd.statutModifie': { fr: 'Statut modifié avec succès.', en: 'Status updated successfully.' },
   'dcmd.erreurStatut': { fr: 'Erreur lors de la modification du statut.', en: 'Error updating status.' },
+
+  // ─── Sidebar / Breadcrumb (Analyse) ──────────────────────
+  'sidebar.analyse': { fr: 'Analyse', en: 'Analytics' },
+  'sidebar.analyseStock': { fr: 'Analyse de Stock', en: 'Stock Analytics' },
+  'breadcrumb.analyseStock': { fr: 'Analyse de Stock', en: 'Stock Analytics' },
+
+  // ─── Analyse de Stock ────────────────────────────────────
+  'analyse.titre': { fr: 'Analyse Avancée du Stock', en: 'Advanced Stock Analytics' },
+  'analyse.sousTitre': { fr: 'Classification ABC, prévisions de demande, indicateurs de performance et alertes de réapprovisionnement.', en: 'ABC classification, demand forecasting, performance indicators and reorder alerts.' },
+  'analyse.chargement': { fr: 'Calcul des indicateurs...', en: 'Calculating indicators...' },
+  'analyse.erreur': { fr: 'Impossible de charger l\'analyse. Vérifiez que le serveur est démarré.', en: 'Unable to load analysis. Please check that the server is running.' },
+
+  // KPI Cards
+  'analyse.totalProduits': { fr: 'Produits en stock', en: 'Products in stock' },
+  'analyse.commandes90j': { fr: 'Commandes (90j)', en: 'Orders (90d)' },
+  'analyse.ca90j': { fr: 'CA 90 jours (TND)', en: 'Revenue 90d (TND)' },
+  'analyse.croissance': { fr: 'Croissance mensuelle', en: 'Monthly growth' },
+  'analyse.enAlerte': { fr: 'Produits en alerte', en: 'Products in alert' },
+  'analyse.enRupture': { fr: 'Ruptures de stock', en: 'Out of stock' },
+  'analyse.rotationMoyenne': { fr: 'Rotation moyenne (90j)', en: 'Avg turnover (90d)' },
+
+  // ABC Analysis
+  'analyse.abcTitre': { fr: 'Classification ABC (Pareto)', en: 'ABC Classification (Pareto)' },
+  'analyse.abcDesc': { fr: 'Répartition des produits selon leur contribution au chiffre d\'affaires (Principe de Pareto 80/20).', en: 'Product distribution by revenue contribution (Pareto Principle 80/20).' },
+  'analyse.prod': { fr: 'prod.', en: 'prod.' },
+  'analyse.abcA': { fr: 'Produits stratégiques — 80% du CA', en: 'Strategic products — 80% of revenue' },
+  'analyse.abcB': { fr: 'Produits intermédiaires — 15% du CA', en: 'Intermediate products — 15% of revenue' },
+  'analyse.abcC': { fr: 'Produits courants — 5% du CA', en: 'Standard products — 5% of revenue' },
+
+  // Sales Trend
+  'analyse.tendanceTitre': { fr: 'Tendance des Ventes', en: 'Sales Trend' },
+  'analyse.aucuneVente': { fr: 'Aucune donnée de vente disponible.', en: 'No sales data available.' },
+  'analyse.mois': { fr: 'Mois', en: 'Month' },
+  'analyse.caEnTND': { fr: 'Chiffre d\'affaires en TND', en: 'Revenue in TND' },
+
+  // Product Table
+  'analyse.tableTitre': { fr: 'Analyse par Produit', en: 'Product Analysis' },
+  'analyse.tousABC': { fr: 'Toutes classes', en: 'All classes' },
+  'analyse.classeA': { fr: 'Classe A', en: 'Class A' },
+  'analyse.classeB': { fr: 'Classe B', en: 'Class B' },
+  'analyse.classeC': { fr: 'Classe C', en: 'Class C' },
+  'analyse.tousEtats': { fr: 'Tous les états', en: 'All states' },
+  'analyse.alerteSeulement': { fr: 'En alerte seulement', en: 'Alerts only' },
+  'analyse.sainSeulement': { fr: 'Sains seulement', en: 'Healthy only' },
+  'analyse.triScore': { fr: 'Tri: Score santé', en: 'Sort: Health score' },
+  'analyse.triCA': { fr: 'Tri: Chiffre d\'affaires', en: 'Sort: Revenue' },
+  'analyse.triRotation': { fr: 'Tri: Taux de rotation', en: 'Sort: Turnover rate' },
+  'analyse.triStock': { fr: 'Tri: Stock', en: 'Sort: Stock' },
+
+  // Table Columns
+  'analyse.colProduit': { fr: 'Produit', en: 'Product' },
+  'analyse.colABC': { fr: 'ABC', en: 'ABC' },
+  'analyse.colStock': { fr: 'Stock', en: 'Stock' },
+  'analyse.colVendu': { fr: 'Vendu (90j)', en: 'Sold (90d)' },
+  'analyse.colCA': { fr: 'CA (TND)', en: 'Rev (TND)' },
+  'analyse.colRotation': { fr: 'Rotation', en: 'Turnover' },
+  'analyse.colJours': { fr: 'Jours', en: 'Days' },
+  'analyse.colReappro': { fr: 'Réappro.', en: 'Reorder' },
+  'analyse.colPrevision': { fr: 'Prévision', en: 'Forecast' },
+  'analyse.colTendance': { fr: 'Tendance', en: 'Trend' },
+  'analyse.colScore': { fr: 'Santé', en: 'Health' },
+  'analyse.aucunResultat': { fr: 'Aucun produit ne correspond aux filtres.', en: 'No products match the filters.' },
+
+  // Legend
+  'analyse.legendeTitre': { fr: 'Légende des Indicateurs', en: 'Indicator Legend' },
+  'analyse.legendeRotation': { fr: 'Taux de Rotation', en: 'Turnover Rate' },
+  'analyse.legendeRotationDesc': { fr: 'Quantité vendue (90j) / Stock actuel. Un taux élevé indique une forte demande. ≥2x = bon, <1x = lent.', en: 'Quantity sold (90d) / Current stock. High rate means strong demand. ≥2x = good, <1x = slow.' },
+  'analyse.legendeReappro': { fr: 'Point de Réapprovisionnement', en: 'Reorder Point' },
+  'analyse.legendeReapproDesc': { fr: 'Seuil de stock minimum calculé : (demande moyenne × délai livraison) + stock de sécurité. Commander quand le stock atteint ce niveau.', en: 'Calculated minimum stock threshold: (avg demand × lead time) + safety stock. Reorder when stock reaches this level.' },
+  'analyse.legendeScore': { fr: 'Score de Santé (0-100)', en: 'Health Score (0-100)' },
+  'analyse.legendeScoreDesc': { fr: 'Indicateur composite : niveau de stock (30pts), rotation (25pts), classe ABC (20pts), tendance (15pts), couverture stock (10pts). ≥70 = sain, 40-69 = attention, <40 = critique.', en: 'Composite indicator: stock level (30pts), turnover (25pts), ABC class (20pts), trend (15pts), stock coverage (10pts). ≥70 = healthy, 40-69 = caution, <40 = critical.' },
 };
 
 @Injectable({ providedIn: 'root' })
