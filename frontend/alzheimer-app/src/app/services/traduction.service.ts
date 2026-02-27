@@ -272,6 +272,15 @@ const DICT: Record<string, TranslationEntry> = {
   'fp.erreurCategories': { fr: 'Impossible de charger les catégories', en: 'Unable to load categories' },
   'fp.erreurModification': { fr: 'Erreur lors de la modification', en: 'Error during update' },
   'fp.erreurCreation': { fr: 'Erreur lors de la création', en: 'Error during creation' },
+  'fp.imageLabel': { fr: 'Image du produit', en: 'Product image' },
+  'fp.placeholderImage': { fr: 'Cliquez ou glissez une image ici', en: 'Click or drag an image here' },
+  'fp.uploadImage': { fr: 'Uploader une image', en: 'Upload an image' },
+  'fp.changeImage': { fr: 'Changer', en: 'Change' },
+  'fp.removeImage': { fr: 'Supprimer', en: 'Remove' },
+  'fp.formatImage': { fr: 'JPEG, PNG, GIF ou WebP — 5 Mo max', en: 'JPEG, PNG, GIF or WebP — 5 MB max' },
+  'fp.erreurUpload': { fr: 'Erreur lors de l\'upload de l\'image', en: 'Error uploading image' },
+  'fp.erreurTaille': { fr: 'Le fichier dépasse la taille maximale (5 Mo)', en: 'File exceeds maximum size (5 MB)' },
+  'fp.erreurFormat': { fr: 'Format non supporté. Utilisez JPEG, PNG, GIF ou WebP', en: 'Unsupported format. Use JPEG, PNG, GIF or WebP' },
 
   // ─── Navbar (Panier) ───────────────────────────────────
   'nav.panier': { fr: 'Panier', en: 'Cart' },
@@ -300,6 +309,9 @@ const DICT: Record<string, TranslationEntry> = {
   'panier.erreurVider': { fr: 'Erreur lors du vidage du panier.', en: 'Error emptying cart.' },
   'panier.ajouterSuccess': { fr: 'Produit ajouté au panier !', en: 'Product added to cart!' },
   'panier.ajouterErreur': { fr: 'Erreur lors de l\'ajout au panier.', en: 'Error adding to cart.' },
+  'panier.expireDans': { fr: 'Votre panier expire dans', en: 'Your cart expires in' },
+  'panier.expire': { fr: 'Votre panier a expiré', en: 'Your cart has expired' },
+  'panier.expireInfo': { fr: 'Finalisez votre commande avant l\'expiration pour ne pas perdre vos articles.', en: 'Complete your order before expiration to avoid losing your items.' },
 
   // ─── Catalogue (Add to Cart) ───────────────────────────
   'catalogue.ajouterPanier': { fr: 'Ajouter au panier', en: 'Add to cart' },

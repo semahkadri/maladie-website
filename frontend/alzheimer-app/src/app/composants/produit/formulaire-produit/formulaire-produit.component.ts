@@ -86,6 +86,46 @@ import { TraductionService } from '../../../services/traduction.service';
                   </div>
                 </div>
 
+                <div class="mb-3">
+                  <label class="form-label">{{ t.tr('fp.imageLabel') }}</label>
+
+                  <!-- Drop zone (no image) -->
+                  <div *ngIf="!previewUrl && (!produit.imageUrl || imageSupprimee)"
+                       class="upload-zone"
+                       [class.drag-over]="isDragOver"
+                       (click)="fileInput.click()"
+                       (dragover)="onDragOver($event)"
+                       (dragleave)="onDragLeave($event)"
+                       (drop)="onDrop($event)">
+                    <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: var(--primary, #1a73e8);"></i>
+                    <p class="mb-1 mt-2" style="font-weight: 500;">{{ t.tr('fp.placeholderImage') }}</p>
+                    <small class="text-muted">{{ t.tr('fp.formatImage') }}</small>
+                  </div>
+
+                  <!-- Image preview -->
+                  <div *ngIf="previewUrl || (produit.imageUrl && !imageSupprimee)" class="upload-preview">
+                    <img [src]="previewUrl || produit.imageUrl" alt="Aperçu"
+                         style="max-height: 160px; border-radius: 8px; object-fit: cover;">
+                    <div class="mt-2 d-flex gap-2">
+                      <button type="button" class="btn btn-sm btn-outline-primary" (click)="fileInput.click()">
+                        <i class="bi bi-arrow-repeat me-1"></i>{{ t.tr('fp.changeImage') }}
+                      </button>
+                      <button type="button" class="btn btn-sm btn-outline-danger" (click)="supprimerImageLocale()">
+                        <i class="bi bi-trash me-1"></i>{{ t.tr('fp.removeImage') }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Hidden file input -->
+                  <input type="file" #fileInput accept="image/jpeg,image/png,image/gif,image/webp"
+                         style="display: none;" (change)="onFichierSelectionne($event)">
+
+                  <!-- Error -->
+                  <div *ngIf="erreurImage" class="text-danger mt-2" style="font-size: 0.85rem;">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ erreurImage }}
+                  </div>
+                </div>
+
                 <div class="mb-4">
                   <label for="categorie" class="form-label">{{ t.tr('fp.categorieLabel') }} <span class="text-danger">*</span></label>
                   <select class="form-select" id="categorie" name="categorieId"
@@ -130,7 +170,29 @@ import { TraductionService } from '../../../services/traduction.service';
         </div>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .upload-zone {
+      border: 2px dashed var(--border, #ccc);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--bg-secondary, #f8f9fa);
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--primary, #1a73e8);
+      background: rgba(26, 115, 232, 0.05);
+    }
+    .upload-preview {
+      text-align: center;
+      padding: 1rem;
+      border: 1px solid var(--border, #ddd);
+      border-radius: 12px;
+      background: var(--bg-secondary, #f8f9fa);
+    }
+  `]
 })
 export class FormulaireProduitComponent implements OnInit {
   produit: Produit = {
@@ -138,6 +200,7 @@ export class FormulaireProduitComponent implements OnInit {
     description: '',
     prix: 0,
     quantite: 0,
+    imageUrl: '',
     categorieId: 0
   };
   categories: Categorie[] = [];
@@ -146,6 +209,13 @@ export class FormulaireProduitComponent implements OnInit {
   chargement = false;
   erreur = '';
   produitId: number | null = null;
+
+  // Image upload state
+  fichierSelectionne: File | null = null;
+  previewUrl: string | null = null;
+  imageSupprimee = false;
+  isDragOver = false;
+  erreurImage = '';
 
   constructor(
     private produitService: ProduitService,
@@ -183,26 +253,113 @@ export class FormulaireProduitComponent implements OnInit {
     });
   }
 
+  // ─── Image handling ─────────────────────────────────────
+
+  onFichierSelectionne(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.traiterFichier(input.files[0]);
+      input.value = ''; // reset so same file can be re-selected
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+      this.traiterFichier(event.dataTransfer.files[0]);
+    }
+  }
+
+  private traiterFichier(fichier: File): void {
+    this.erreurImage = '';
+
+    const typesAcceptes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!typesAcceptes.includes(fichier.type)) {
+      this.erreurImage = this.t.tr('fp.erreurFormat');
+      return;
+    }
+    if (fichier.size > 5 * 1024 * 1024) {
+      this.erreurImage = this.t.tr('fp.erreurTaille');
+      return;
+    }
+
+    this.fichierSelectionne = fichier;
+    this.imageSupprimee = false;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.previewUrl = reader.result as string;
+    };
+    reader.readAsDataURL(fichier);
+  }
+
+  supprimerImageLocale(): void {
+    this.fichierSelectionne = null;
+    this.previewUrl = null;
+    this.erreurImage = '';
+    this.imageSupprimee = true;
+  }
+
+  // ─── Save (two-step: JSON then image) ─────────────────
+
   sauvegarder(): void {
     this.enCours = true;
     this.erreur = '';
 
+    const produitData = { ...this.produit };
+
     if (this.estModification && this.produitId) {
-      this.produitService.modifier(this.produitId, this.produit).subscribe({
-        next: () => this.router.navigate(['/admin/produits']),
+      this.produitService.modifier(this.produitId, produitData).subscribe({
+        next: (saved) => this.gererImageApresSauvegarde(saved.id!),
         error: (err) => {
           this.enCours = false;
           this.erreur = err.error?.message || this.t.tr('fp.erreurModification');
         }
       });
     } else {
-      this.produitService.creer(this.produit).subscribe({
-        next: () => this.router.navigate(['/admin/produits']),
+      this.produitService.creer(produitData).subscribe({
+        next: (saved) => this.gererImageApresSauvegarde(saved.id!),
         error: (err) => {
           this.enCours = false;
           this.erreur = err.error?.message || this.t.tr('fp.erreurCreation');
         }
       });
+    }
+  }
+
+  private gererImageApresSauvegarde(produitId: number): void {
+    if (this.fichierSelectionne) {
+      this.produitService.uploaderImage(produitId, this.fichierSelectionne).subscribe({
+        next: () => this.router.navigate(['/admin/produits']),
+        error: () => {
+          this.erreur = this.t.tr('fp.erreurUpload');
+          this.enCours = false;
+        }
+      });
+    } else if (this.imageSupprimee) {
+      this.produitService.supprimerImage(produitId).subscribe({
+        next: () => this.router.navigate(['/admin/produits']),
+        error: () => {
+          this.erreur = this.t.tr('fp.erreurUpload');
+          this.enCours = false;
+        }
+      });
+    } else {
+      this.router.navigate(['/admin/produits']);
     }
   }
 }
