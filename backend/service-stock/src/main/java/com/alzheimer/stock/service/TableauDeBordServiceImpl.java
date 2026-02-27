@@ -38,12 +38,13 @@ public class TableauDeBordServiceImpl implements TableauDeBordService {
                 .map(p -> p.getPrix().multiply(BigDecimal.valueOf(p.getQuantite())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        PageRequest derniers5 = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "dateCreation"));
-
-        List<CategorieDTO> dernieresCategories = categorieRepository.findAll(derniers5)
-                .getContent().stream()
+        // Use JOIN FETCH to guarantee nombreProduits is computed correctly
+        List<CategorieDTO> dernieresCategories = categorieRepository.findAllWithProduits()
+                .stream()
                 .map(this::convertirCategorieEnDTO)
                 .collect(Collectors.toList());
+
+        PageRequest derniers5 = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "dateCreation"));
 
         List<ProduitDTO> derniersProduits = produitRepository.findAll(derniers5)
                 .getContent().stream()
@@ -115,6 +116,7 @@ public class TableauDeBordServiceImpl implements TableauDeBordService {
                 .description(produit.getDescription())
                 .prix(produit.getPrix())
                 .quantite(produit.getQuantite())
+                .imageUrl(produit.getImageUrl())
                 .categorieId(produit.getCategorie().getId())
                 .categorieNom(produit.getCategorie().getNom())
                 .dateCreation(produit.getDateCreation())
