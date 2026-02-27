@@ -42,6 +42,9 @@ package-lock.json
 # Environment (ne pas partager si secrets)
 # src/environments/environment.prod.ts
 
+# ===================== Uploads =====================
+**/uploads/
+
 # ===================== Database =====================
 
 # Dump files
