@@ -32,9 +32,10 @@ Le module actuellement développé est la **Gestion de Stock** (Catégorie / Pro
 
 - Gérer les **catégories** de produits médicaux (CRUD complet)
 - Gérer les **produits** associés à chaque catégorie (CRUD complet)
-- Gérer un **panier d'achat** (ajout, modification quantité, suppression) avec sessions anonymes
+- **Uploader des images produit** par glisser-déposer (drag & drop) avec stockage sur disque, validation (JPEG/PNG/GIF/WebP, 5 Mo max) et aperçu instantané
+- Gérer un **panier d'achat** (ajout, modification quantité, suppression) avec sessions anonymes et **expiration automatique** des paniers inactifs
 - Gérer les **commandes** (création depuis le panier, suivi de statut, gestion administrative)
-- Fournir un **tableau de bord** avec statistiques agrégées (totaux, stock bas, ruptures, valeur totale)
+- Fournir un **tableau de bord** avec statistiques agrégées (totaux, stock bas, ruptures, valeur totale, commandes, chiffre d'affaires)
 - Assurer la **traçabilité** avec dates de création et de modification
 - Fournir une **interface backoffice** professionnelle pour les administrateurs (sous `/admin`)
 - Fournir une **interface frontoffice** publique avec catalogue, panier et passage de commande (sous `/`)
@@ -42,6 +43,7 @@ Le module actuellement développé est la **Gestion de Stock** (Catégorie / Pro
 - Proposer une **interface bilingue FR/EN** avec bouton de changement de langue et persistance du choix
 - Offrir un **mode sombre / clair** (Dark / Light mode) avec persistance du choix dans `localStorage`
 - Exposer des **API REST documentées** (Swagger/OpenAPI) pour l'intégration avec les autres modules
+- **Servir les images uploadées** via un endpoint statique (`/uploads/**`) avec configuration CORS
 
 ---
 
@@ -75,12 +77,15 @@ Le projet suit une architecture **microservices** avec les composants suivants :
                  └─────────────┘    │  Swagger UI       │
                                     └────────┬──────────┘
                                              │
-                                             ▼
-                                    ┌──────────────────┐
-                                    │   PostgreSQL      │
-                                    │   alzheimer_stock │
-                                    │   Port : 5432     │
-                                    └──────────────────┘
+                                    ┌────────┴─────────┐
+                                    │                  │
+                                    ▼                  ▼
+                           ┌──────────────┐   ┌──────────────┐
+                           │  PostgreSQL   │   │   uploads/   │
+                           │  alzheimer_  │   │  (images     │
+                           │  stock       │   │   produits)   │
+                           │  Port: 5432  │   │              │
+                           └──────────────┘   └──────────────┘
 ```
 
 ### Rôle de chaque composant
@@ -89,9 +94,10 @@ Le projet suit une architecture **microservices** avec les composants suivants :
 |-----------|------|------|
 | **Eureka Server** | Registre de découverte de services. Tous les microservices s'y enregistrent automatiquement au démarrage. Permet la résolution dynamique des adresses. | 8761 |
 | **API Gateway** | Point d'entrée unique pour le frontend en production. Route les requêtes vers les microservices. Gère le CORS et le load balancing. | 8080 |
-| **Service Stock** | Microservice métier responsable de la gestion des catégories, produits, panier, commandes, tableau de bord et analyse de stock. Expose les API REST CRUD, l'analyse avancée (KPIs, ABC, tendances) et la documentation Swagger. | 8081 |
-| **Frontend Angular** | Interface web comprenant un **frontoffice** public (catalogue, panier, commande, détail produit, catégories) et un **backoffice** d'administration (sidebar, tableau de bord, CRUD catégories/produits, gestion commandes, analyse de stock). Supporte le mode sombre/clair et le bilingue FR/EN. | 4200 |
-| **PostgreSQL** | Système de gestion de base de données relationnelle stockant les catégories et produits. | 5432 |
+| **Service Stock** | Microservice métier responsable de la gestion des catégories, produits (avec upload d'images), panier (avec expiration automatique), commandes, tableau de bord et analyse de stock. Expose les API REST CRUD, l'upload de fichiers, l'analyse avancée (KPIs, ABC, tendances) et la documentation Swagger. Sert les images uploadées via `/uploads/**`. | 8081 |
+| **Frontend Angular** | Interface web comprenant un **frontoffice** public (catalogue, panier, commande, détail produit, catégories) et un **backoffice** d'administration (sidebar, tableau de bord, CRUD catégories/produits avec upload d'images drag & drop, gestion commandes, analyse de stock). Supporte le mode sombre/clair et le bilingue FR/EN. | 4200 |
+| **PostgreSQL** | Système de gestion de base de données relationnelle stockant les catégories, produits, paniers, commandes et leurs lignes. | 5432 |
+| **uploads/** | Répertoire de stockage physique des images produit sur le disque. Créé automatiquement au démarrage du service. Les fichiers sont nommés avec un UUID pour éviter les collisions. | - |
 
 ---
 
@@ -106,6 +112,7 @@ Le projet suit une architecture **microservices** avec les composants suivants :
 | Spring Cloud | 2023.0.1 | Écosystème microservices (Eureka, Gateway) |
 | Spring Data JPA | 3.2.4 | Couche d'accès aux données (ORM) |
 | Spring Validation | 3.2.4 | Validation des données entrantes |
+| Spring Multipart | 3.2.4 | Upload de fichiers (images produit, 5 Mo max) |
 | Netflix Eureka | 4.1.0 | Découverte et enregistrement de services |
 | Spring Cloud Gateway | 4.1.0 | Passerelle API et routage |
 | SpringDoc OpenAPI | 2.5.0 | Documentation Swagger UI automatique |
@@ -160,24 +167,27 @@ alzheimer-detection/
 │   │
 │   └── service-stock/                                   # Microservice Stock
 │       ├── pom.xml
+│       ├── uploads/                                     # Images produit (gitignored, créé auto)
 │       └── src/main/
 │           ├── java/com/alzheimer/stock/
 │           │   ├── ServiceStockApplication.java         # Point d'entrée
 │           │   ├── config/
-│           │   │   └── OpenApiConfig.java               # Configuration Swagger/OpenAPI
+│           │   │   ├── OpenApiConfig.java               # Configuration Swagger/OpenAPI
+│           │   │   ├── WebConfig.java                   # Servir /uploads/** + CORS images
+│           │   │   └── SchedulingConfig.java            # Activation des tâches planifiées
 │           │   ├── entite/
 │           │   │   ├── Categorie.java                   # Entité JPA Catégorie
-│           │   │   ├── Produit.java                     # Entité JPA Produit
-│           │   │   ├── Panier.java                      # Entité JPA Panier (session)
+│           │   │   ├── Produit.java                     # Entité JPA Produit (avec imageUrl)
+│           │   │   ├── Panier.java                      # Entité JPA Panier (session + expiration)
 │           │   │   ├── LignePanier.java                 # Entité JPA Ligne de panier
 │           │   │   ├── Commande.java                    # Entité JPA Commande
 │           │   │   ├── LigneCommande.java               # Entité JPA Ligne de commande
 │           │   │   └── StatutCommande.java              # Enum des statuts de commande
 │           │   ├── dto/
 │           │   │   ├── CategorieDTO.java                # Objet de transfert Catégorie
-│           │   │   ├── ProduitDTO.java                  # Objet de transfert Produit
+│           │   │   ├── ProduitDTO.java                  # Objet de transfert Produit (avec imageUrl)
 │           │   │   ├── TableauDeBordDTO.java            # Objet de transfert Dashboard
-│           │   │   ├── PanierDTO.java                   # Objet de transfert Panier
+│           │   │   ├── PanierDTO.java                   # Objet de transfert Panier (avec expiration)
 │           │   │   ├── LignePanierDTO.java              # Objet de transfert Ligne Panier
 │           │   │   ├── CommandeDTO.java                 # Objet de transfert Commande
 │           │   │   ├── LigneCommandeDTO.java            # Objet de transfert Ligne Commande
@@ -186,34 +196,38 @@ alzheimer-detection/
 │           │   ├── repository/
 │           │   │   ├── CategorieRepository.java         # Accès données Catégorie
 │           │   │   ├── ProduitRepository.java           # Accès données Produit
-│           │   │   ├── PanierRepository.java            # Accès données Panier
+│           │   │   ├── PanierRepository.java            # Accès données Panier (+ requêtes expiration)
 │           │   │   ├── LignePanierRepository.java       # Accès données Ligne Panier
+│           │   │   ├── LigneCommandeRepository.java     # Accès données Ligne Commande (nullify refs)
 │           │   │   └── CommandeRepository.java          # Accès données Commande
 │           │   ├── service/
 │           │   │   ├── CategorieService.java            # Interface service Catégorie
 │           │   │   ├── CategorieServiceImpl.java        # Implémentation Catégorie
-│           │   │   ├── ProduitService.java              # Interface service Produit
-│           │   │   ├── ProduitServiceImpl.java          # Implémentation Produit
+│           │   │   ├── ProduitService.java              # Interface service Produit (+ image upload)
+│           │   │   ├── ProduitServiceImpl.java          # Implémentation Produit (+ image upload)
+│           │   │   ├── FichierStorageService.java       # Stockage fichiers (upload, validation, suppression)
 │           │   │   ├── TableauDeBordService.java        # Interface service Dashboard
 │           │   │   ├── TableauDeBordServiceImpl.java    # Implémentation Dashboard
 │           │   │   ├── PanierService.java               # Interface service Panier
-│           │   │   ├── PanierServiceImpl.java           # Implémentation Panier
+│           │   │   ├── PanierServiceImpl.java           # Implémentation Panier (+ expiration)
+│           │   │   ├── PanierExpirationTache.java       # Tâche planifiée : purge paniers expirés
 │           │   │   ├── CommandeService.java             # Interface service Commande
 │           │   │   ├── CommandeServiceImpl.java         # Implémentation Commande
 │           │   │   ├── AnalyseStockService.java         # Interface service Analyse Stock
 │           │   │   └── AnalyseStockServiceImpl.java     # Implémentation Analyse Stock (ABC, KPIs, prévisions)
 │           │   ├── controleur/
 │           │   │   ├── CategorieControleur.java         # REST Controller Catégorie
-│           │   │   ├── ProduitControleur.java           # REST Controller Produit
+│           │   │   ├── ProduitControleur.java           # REST Controller Produit (+ upload image)
 │           │   │   ├── TableauDeBordControleur.java     # REST Controller Dashboard
 │           │   │   ├── PanierControleur.java            # REST Controller Panier
 │           │   │   ├── CommandeControleur.java          # REST Controller Commande
 │           │   │   └── AnalyseStockControleur.java      # REST Controller Analyse Stock
 │           │   └── exception/
 │           │       ├── ResourceIntrouvableException.java # Exception 404
-│           │       └── GestionGlobaleExceptions.java     # Gestionnaire global d'erreurs
+│           │       └── GestionGlobaleExceptions.java     # Gestionnaire global d'erreurs (+ MaxUploadSize)
 │           └── resources/
-│               └── application.yml                      # Configuration + DB + Swagger
+│               ├── application.yml                      # Configuration + DB + Swagger + Multipart
+│               └── data.sql                             # Données initiales de test
 │
 ├── frontend/
 │   └── alzheimer-app/
@@ -233,19 +247,19 @@ alzheimer-detection/
 │               ├── app.routes.ts                        # Routes : frontoffice (/) + backoffice (/admin)
 │               ├── modeles/
 │               │   ├── categorie.model.ts               # Interface Catégorie
-│               │   ├── produit.model.ts                 # Interface Produit
+│               │   ├── produit.model.ts                 # Interface Produit (avec imageUrl)
 │               │   ├── tableau-de-bord.model.ts         # Interface Tableau de Bord
-│               │   ├── panier.model.ts                  # Interface Panier + LignePanier
+│               │   ├── panier.model.ts                  # Interface Panier + LignePanier (avec expiration)
 │               │   ├── commande.model.ts                # Interface Commande + CreerCommande
 │               │   └── analyse-stock.model.ts           # Interfaces AnalyseStock, AnalyseProduit, KPIs
 │               ├── services/
 │               │   ├── categorie.service.ts             # Service HTTP Catégorie
-│               │   ├── produit.service.ts               # Service HTTP Produit
+│               │   ├── produit.service.ts               # Service HTTP Produit (+ uploaderImage, supprimerImage)
 │               │   ├── tableau-de-bord.service.ts       # Service HTTP Dashboard
-│               │   ├── panier.service.ts                # Service HTTP Panier (BehaviorSubject)
+│               │   ├── panier.service.ts                # Service HTTP Panier (BehaviorSubject + expiration)
 │               │   ├── commande.service.ts              # Service HTTP Commande
 │               │   ├── analyse-stock.service.ts         # Service HTTP Analyse Stock
-│               │   ├── traduction.service.ts            # Service i18n FR/EN (dictionnaire + toggle)
+│               │   ├── traduction.service.ts            # Service i18n FR/EN (dictionnaire ~460 clés + toggle)
 │               │   └── theme.service.ts                 # Service Dark/Light mode (localStorage + CSS)
 │               └── composants/
 │                   ├── layouts/                          # Wrappers de mise en page
@@ -263,7 +277,7 @@ alzheimer-detection/
 │                   │   ├── categorie-produits/
 │                   │   │   └── categorie-produits.component.ts  # Produits par catégorie
 │                   │   ├── panier/
-│                   │   │   └── panier.component.ts       # Panier d'achat (quantités, total)
+│                   │   │   └── panier.component.ts       # Panier d'achat (quantités, total, expiration)
 │                   │   ├── commander/
 │                   │   │   └── commander.component.ts    # Formulaire de commande (checkout)
 │                   │   └── confirmation-commande/
@@ -287,13 +301,14 @@ alzheimer-detection/
 │                   │   ├── liste-produits/
 │                   │   │   └── liste-produits.component.ts  # Liste (recherche, filtres, pagination)
 │                   │   └── formulaire-produit/
-│                   │       └── formulaire-produit.component.ts  # Formulaire CRUD
+│                   │       └── formulaire-produit.component.ts  # Formulaire CRUD + upload image drag & drop
 │                   └── analyse-stock/
 │                       └── analyse-stock.component.ts   # Dashboard analyse stock (KPIs, ABC, tendances)
 │
 ├── database/
 │   └── init.sql                                         # Script d'initialisation SQL
 │
+├── .gitignore                                           # Exclusions (node_modules, target, uploads/, etc.)
 ├── GUIDE-INSTALLATION.md                                # Guide d'installation détaillé
 ├── LANCEMENT.md                                         # Guide de lancement rapide
 └── README.md                                            # Ce fichier
@@ -351,22 +366,62 @@ Requête HTTP
          │
          ▼
 ┌──────────────────┐
-│   Service        │  ← Logique métier, conversion DTO ↔ Entité, agrégations
+│   Service        │  ← Logique métier, conversion DTO ↔ Entité, stockage fichiers
 │   (service/)     │
 └────────┬─────────┘
          │
-         ▼
-┌──────────────────┐
-│   Repository     │  ← Accès base de données via Spring Data JPA
-│   (repository/)  │
-└────────┬─────────┘
-         │
-         ▼
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+┌────────┐ ┌──────────────┐
+│ Repo   │ │  Fichier     │
+│ JPA    │ │  Storage     │
+│        │ │  (uploads/)  │
+└────┬───┘ └──────────────┘
+     │
+     ▼
 ┌──────────────────┐
 │   PostgreSQL     │  ← Stockage persistant
 │   (alzheimer_stock)
 └──────────────────┘
 ```
+
+#### Configuration Multipart (upload de fichiers)
+
+```yaml
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+app:
+  upload:
+    dir: uploads
+```
+
+#### Service de stockage de fichiers (`FichierStorageService`)
+
+| Méthode | Description |
+|---------|-------------|
+| `sauvegarder(MultipartFile)` | Valide le fichier, génère un nom UUID, sauvegarde dans `uploads/`, retourne le nom de fichier |
+| `supprimer(String)` | Supprime un fichier du disque (avec protection contre le path traversal) |
+| `valider(MultipartFile)` | Vérifie le type MIME (JPEG, PNG, GIF, WebP) et la taille (max 5 Mo) |
+| `@PostConstruct init()` | Crée automatiquement le répertoire `uploads/` au démarrage |
+
+**Sécurité** : chaque chemin résolu est vérifié pour rester dans le répertoire d'upload (protection path traversal).
+
+#### Configuration Web (`WebConfig`)
+
+- Mappe `/uploads/**` vers le répertoire physique `uploads/` pour servir les images statiquement
+- Configure CORS pour `/uploads/**` depuis `http://localhost:4200`
+
+#### Tâche planifiée (`PanierExpirationTache`)
+
+- Exécutée périodiquement via `@Scheduled`
+- Purge automatiquement les paniers inactifs depuis trop longtemps
+- Libère les ressources et maintient la base de données propre
 
 #### Entités JPA
 
@@ -390,6 +445,7 @@ Requête HTTP
 | `description` | String | Optionnel, max 500 caractères |
 | `prix` | BigDecimal | Obligatoire, précision (10,2) |
 | `quantite` | Integer | Obligatoire |
+| `imageUrl` | String | URL complète de l'image uploadée (ex: `http://localhost:8081/uploads/uuid.jpg`) |
 | `categorie` | Categorie | ManyToOne, obligatoire |
 | `dateCreation` | LocalDateTime | Automatique, non modifiable |
 | `dateModification` | LocalDateTime | Automatique |
@@ -401,6 +457,7 @@ Requête HTTP
 | `id` | Long | Clé primaire, auto-générée |
 | `sessionId` | String | Obligatoire, unique (identifiant session anonyme) |
 | `lignes` | List\<LignePanier\> | Relation OneToMany, cascade ALL |
+| `derniereActivite` | LocalDateTime | Timestamp de la dernière interaction (pour expiration) |
 | `dateCreation` | LocalDateTime | Automatique, non modifiable |
 | `dateModification` | LocalDateTime | Automatique |
 
@@ -436,7 +493,7 @@ Requête HTTP
 |-------|------|-------------|
 | `id` | Long | Clé primaire, auto-générée |
 | `commande` | Commande | ManyToOne, obligatoire |
-| `produit` | Produit | ManyToOne, obligatoire |
+| `produit` | Produit | ManyToOne, nullable (nullifié si le produit est supprimé) |
 | `nomProduit` | String | Snapshot du nom au moment de la commande |
 | `prixUnitaire` | BigDecimal | Snapshot du prix au moment de la commande |
 | `quantite` | Integer | Obligatoire |
@@ -464,6 +521,7 @@ Requête HTTP
 │ description  │                 │ description  │
 │ dateCreation │                 │ prix         │
 │ dateMod...   │                 │ quantite     │
+│              │                 │ imageUrl     │
 │              │                 │ categorie_id │
 └──────────────┘                 │ dateCreation │
                                  │ dateMod...   │
@@ -474,12 +532,13 @@ Requête HTTP
 │              │                 │              │                  │              │
 │ id           │                 │ id           │                  │              │
 │ sessionId    │                 │ panier_id    │                  │              │
-│ dateCreation │                 │ produit_id   │                  │              │
-│ dateMod...   │                 │ quantite     │                  │              │
-│              │                 │ dateAjout    │                  │              │
-└──────────────┘                 └──────────────┘                  └──────────────┘
+│ derniere     │                 │ produit_id   │                  │              │
+│  Activite    │                 │ quantite     │                  │              │
+│ dateCreation │                 │ dateAjout    │                  │              │
+│ dateMod...   │                 └──────────────┘                  └──────────────┘
+└──────────────┘
 
-┌──────────────┐       1    *    ┌───────────────┐        *    1    ┌──────────────┐
+┌──────────────┐       1    *    ┌───────────────┐        *   0..1  ┌──────────────┐
 │  Commande    │ ───────────────►│LigneCommande  │ ◄───────────────│   Produit    │
 │              │                 │               │                  │              │
 │ id           │                 │ id            │                  │              │
@@ -495,11 +554,14 @@ Requête HTTP
 - Une catégorie peut contenir plusieurs produits (OneToMany)
 - Un produit appartient à une seule catégorie (ManyToOne)
 - La suppression d'une catégorie entraîne la suppression de ses produits (CASCADE)
+- La suppression d'un produit supprime aussi son image du disque
 - Un panier contient plusieurs lignes de panier (OneToMany)
 - Chaque ligne de panier référence un produit avec une quantité
+- Les paniers inactifs sont purgés automatiquement par une tâche planifiée
 - Une commande contient plusieurs lignes de commande (snapshots du nom et du prix)
+- La suppression d'un produit nullifie la référence dans les lignes de commande existantes (préservation de l'historique)
 - L'annulation d'une commande restaure automatiquement le stock des produits
-- L'analyse de stock est calculée dynamiquement à partir des tables `produits`, `commandes` et `lignes_commande` (pas de table dédiée)
+- L'analyse de stock est calculée dynamiquement à partir des tables produits, commandes et lignes_commande (pas de table dédiée)
 ```
 
 #### Pattern DTO (Data Transfer Object)
@@ -608,15 +670,16 @@ Le projet implémente un gestionnaire global d'exceptions (`@RestControllerAdvic
 |-----------|-----------|-------------|
 | `ResourceIntrouvableException` | 404 | Ressource non trouvée |
 | `MethodArgumentNotValidException` | 400 | Erreur de validation des champs |
-| `IllegalArgumentException` | 400 | Erreur de logique métier (stock insuffisant, panier vide, etc.) |
+| `IllegalArgumentException` | 400 | Erreur de logique métier (stock insuffisant, panier vide, format fichier invalide, etc.) |
+| `MaxUploadSizeExceededException` | 400 | Fichier uploadé dépasse la taille maximale (5 Mo) |
 | `Exception` (générique) | 500 | Erreur interne du serveur |
 
 Format de réponse d'erreur :
 ```json
 {
-  "timestamp": "2026-02-16T14:30:00",
-  "message": "Catégorie introuvable avec id : '999'",
-  "statut": 404
+  "timestamp": "2026-02-28T14:30:00",
+  "message": "Le fichier dépasse la taille maximale autorisée (5 Mo).",
+  "statut": 400
 }
 ```
 
@@ -633,6 +696,7 @@ Le frontend utilise **Angular 17** en mode **Standalone Components** (sans NgMod
 - **Template-driven Forms** : Formulaires avec validation côté client
 - **Routing** : Navigation SPA (Single Page Application)
 - **Layout Wrapper Pattern** : Chaque partie (frontoffice/backoffice) a son propre composant layout
+- **FileReader API** : Aperçu instantané des images avant upload
 
 ### 6.2 - Architecture Frontoffice / Backoffice
 
@@ -646,7 +710,7 @@ http://localhost:4200/
 │   ├── /catalogue              → CatalogueComponent (grille de produits, ajout au panier)
 │   ├── /catalogue/:id          → DetailProduitComponent (détail produit, ajout au panier)
 │   ├── /categories/:id         → CategorieProduitsComponent (produits par catégorie)
-│   ├── /panier                 → PanierComponent (panier d'achat)
+│   ├── /panier                 → PanierComponent (panier d'achat avec expiration)
 │   ├── /commander              → CommanderComponent (formulaire de commande)
 │   └── /commande/:ref          → ConfirmationCommandeComponent (confirmation)
 │
@@ -656,8 +720,8 @@ http://localhost:4200/
 │   ├── /admin/categories/ajouter       → FormulaireCategorieComponent
 │   ├── /admin/categories/modifier/:id  → FormulaireCategorieComponent
 │   ├── /admin/produits         → ListeProduitsComponent (CRUD)
-│   ├── /admin/produits/ajouter         → FormulaireProduitComponent
-│   ├── /admin/produits/modifier/:id    → FormulaireProduitComponent
+│   ├── /admin/produits/ajouter         → FormulaireProduitComponent (+ upload image)
+│   ├── /admin/produits/modifier/:id    → FormulaireProduitComponent (+ upload image)
 │   ├── /admin/commandes        → ListeCommandesComponent (gestion)
 │   ├── /admin/commandes/:id    → DetailCommandeComponent (détail + changement statut)
 │   └── /admin/analyse-stock    → AnalyseStockComponent (KPIs, ABC, tendances)
@@ -686,12 +750,12 @@ http://localhost:4200/
 | Composant | Route | Description |
 |-----------|-------|-------------|
 | `LayoutFrontofficeComponent` | - | Shell public : navbar horizontale (panier badge, bouton FR/EN, bouton dark/light mode) + router-outlet + footer |
-| `AccueilComponent` | `/` | Page d'accueil : hero section, 3 stats (produits, catégories, valeur stock), grille catégories, 6 derniers produits |
-| `CatalogueComponent` | `/catalogue` | Grille de produits responsive (3/2/1 colonnes), recherche, filtre catégorie, badges stock, bouton "Ajouter au panier" |
-| `DetailProduitComponent` | `/catalogue/:id` | Détail complet : prix, stock, catégorie, description, sélecteur quantité + "Ajouter au panier", produits similaires |
-| `CategorieProduitsComponent` | `/categories/:id` | En-tête catégorie + grille de produits filtrés, recherche dans la catégorie |
-| `PanierComponent` | `/panier` | Panier d'achat : liste articles avec contrôles quantité +/-, suppression, sous-totaux, total, bouton "Commander" |
-| `CommanderComponent` | `/commander` | Formulaire checkout : nom (requis), email, téléphone, adresse + récapitulatif commande |
+| `AccueilComponent` | `/` | Page d'accueil : hero section, 3 stats (produits, catégories, valeur stock), grille catégories, 6 derniers produits avec images |
+| `CatalogueComponent` | `/catalogue` | Grille de produits responsive (3/2/1 colonnes), recherche, filtre catégorie, badges stock, bouton "Ajouter au panier", images produit |
+| `DetailProduitComponent` | `/catalogue/:id` | Détail complet : image produit, prix, stock, catégorie, description, sélecteur quantité + "Ajouter au panier", produits similaires |
+| `CategorieProduitsComponent` | `/categories/:id` | En-tête catégorie + grille de produits filtrés avec images, recherche dans la catégorie |
+| `PanierComponent` | `/panier` | Panier d'achat : liste articles avec images, contrôles quantité +/-, suppression, sous-totaux, total, compteur d'expiration, bouton "Commander" |
+| `CommanderComponent` | `/commander` | Formulaire checkout : nom (requis), email, téléphone, adresse + récapitulatif commande avec images |
 | `ConfirmationCommandeComponent` | `/commande/:ref` | Page de confirmation : icône succès, référence commande, détails, boutons "Continuer" / "Accueil" |
 
 #### Backoffice (administration, CRUD)
@@ -700,13 +764,13 @@ http://localhost:4200/
 |-----------|-------|-------------|
 | `LayoutBackofficeComponent` | - | Shell admin : sidebar + topbar + router-outlet + footer |
 | `SidebarComponent` | - | Sidebar de navigation + topbar avec breadcrumbs, bouton FR/EN, bouton dark/light mode et horloge |
-| `TableauDeBordComponent` | `/admin` | Dashboard avec 4 cartes stats, alertes rupture, actions rapides, dernières données |
+| `TableauDeBordComponent` | `/admin` | Dashboard avec 4+ cartes stats, alertes rupture, actions rapides, dernières données |
 | `ListeCategoriesComponent` | `/admin/categories` | Tableau avec recherche, pagination, actions CRUD |
 | `FormulaireCategorieComponent` | `/admin/categories/ajouter` | Formulaire de création de catégorie |
 | `FormulaireCategorieComponent` | `/admin/categories/modifier/:id` | Formulaire de modification de catégorie |
-| `ListeProduitsComponent` | `/admin/produits` | Tableau avec recherche, filtres (catégorie, stock), pagination, actions CRUD |
-| `FormulaireProduitComponent` | `/admin/produits/ajouter` | Formulaire de création de produit avec aperçu valeur stock |
-| `FormulaireProduitComponent` | `/admin/produits/modifier/:id` | Formulaire de modification de produit |
+| `ListeProduitsComponent` | `/admin/produits` | Tableau avec recherche, filtres (catégorie, stock), pagination, images miniatures, actions CRUD |
+| `FormulaireProduitComponent` | `/admin/produits/ajouter` | Formulaire de création avec **upload image drag & drop**, aperçu, validation |
+| `FormulaireProduitComponent` | `/admin/produits/modifier/:id` | Formulaire de modification avec **changement / suppression d'image** |
 | `ListeCommandesComponent` | `/admin/commandes` | Tableau avec recherche, filtre par statut, pagination, bouton "Voir" pour chaque commande |
 | `DetailCommandeComponent` | `/admin/commandes/:id` | Détail commande : infos client, lignes articles, total + changement de statut (dropdown + bouton "Appliquer") |
 | `AnalyseStockComponent` | `/admin/analyse-stock` | Dashboard d'analyse avancée : 7 KPIs, classification ABC, graphique tendance des ventes, tableau produits avec filtres/tri, scores de santé |
@@ -716,12 +780,12 @@ http://localhost:4200/
 | Service | Méthodes | Description |
 |---------|----------|-------------|
 | `CategorieService` | `listerTout()`, `obtenirParId()`, `creer()`, `modifier()`, `supprimer()` | Appels HTTP vers `/api/categories` |
-| `ProduitService` | `listerTout()`, `listerParCategorie()`, `obtenirParId()`, `creer()`, `modifier()`, `supprimer()` | Appels HTTP vers `/api/produits` |
+| `ProduitService` | `listerTout()`, `listerParCategorie()`, `obtenirParId()`, `creer()`, `modifier()`, `supprimer()`, **`uploaderImage()`**, **`supprimerImage()`** | Appels HTTP vers `/api/produits` (+ upload multipart pour les images) |
 | `TableauDeBordService` | `obtenirTableauDeBord()` | Appel HTTP unique vers `/api/tableau-de-bord` |
-| `PanierService` | `chargerPanier()`, `ajouterProduit()`, `modifierQuantite()`, `supprimerProduit()`, `viderPanier()` | Appels HTTP vers `/api/panier` + état réactif via `BehaviorSubject` |
+| `PanierService` | `chargerPanier()`, `ajouterProduit()`, `modifierQuantite()`, `supprimerProduit()`, `viderPanier()` | Appels HTTP vers `/api/panier` + état réactif via `BehaviorSubject` + gestion expiration |
 | `CommandeService` | `creerCommande()`, `listerTout()`, `obtenirParId()`, `obtenirParReference()`, `modifierStatut()` | Appels HTTP vers `/api/commandes` |
 | `AnalyseStockService` | `analyserStock()` | Appel HTTP vers `/api/analyse-stock` — retourne les KPIs, ABC, tendances et analyses par produit |
-| `TraductionService` | `tr()`, `setLang()`, `toggleLang()` | Service i18n FR/EN : dictionnaire centralisé (~450 clés), persistance localStorage |
+| `TraductionService` | `tr()`, `setLang()`, `toggleLang()` | Service i18n FR/EN : dictionnaire centralisé (~460 clés), persistance localStorage |
 | `ThemeService` | `toggle()`, `setTheme()`, `isDark`, `isLight` | Gestion du mode sombre/clair : attribut `data-theme` sur `<html>`, persistance localStorage |
 
 ### 6.5 - Environnements
@@ -734,20 +798,21 @@ http://localhost:4200/
 ### 6.6 - Fonctionnalités de l'interface
 
 **Frontoffice (site public)** :
-- Page d'accueil avec hero section, statistiques, catégories et produits récents
-- Catalogue de produits en grille responsive avec recherche, filtre par catégorie et bouton "Ajouter au panier"
-- Page détail produit avec informations complètes, sélecteur de quantité, bouton "Ajouter au panier" et produits similaires
-- Page catégorie avec produits filtrés et recherche
-- Panier d'achat avec contrôles quantité, suppression, sous-totaux et total
+- Page d'accueil avec hero section, statistiques, catégories et produits récents avec images
+- Catalogue de produits en grille responsive avec recherche, filtre par catégorie, images produit et bouton "Ajouter au panier"
+- Page détail produit avec image, informations complètes, sélecteur de quantité, bouton "Ajouter au panier" et produits similaires
+- Page catégorie avec produits filtrés, images et recherche
+- Panier d'achat avec images miniatures, contrôles quantité, suppression, sous-totaux, total et **compteur d'expiration**
 - Formulaire de commande (checkout) avec validation et récapitulatif
 - Page de confirmation de commande avec référence et détails
 - Navigation : navbar horizontale avec icône panier (badge compteur), bouton "Administration" vers le backoffice
 
 **Backoffice - Tableau de bord** :
-- 4 cartes statistiques : catégories, produits, stock faible (≤ 10), valeur totale du stock (TND)
+- 4+ cartes statistiques : catégories, produits, stock faible (≤ 10), valeur totale du stock (TND), commandes, chiffre d'affaires
 - Alerte rouge si des produits sont en rupture de stock
 - 3 boutons d'actions rapides (nouvelle catégorie, nouveau produit, voir le stock)
 - Aperçu des 5 dernières catégories et 5 derniers produits
+- Aperçu des 5 dernières commandes
 - Loading spinner pendant le chargement
 - Gestion d'erreur avec bouton "Réessayer"
 
@@ -756,15 +821,21 @@ http://localhost:4200/
 - Filtre par catégorie (produits)
 - Filtre par niveau de stock : normal, faible, rupture (produits)
 - Pagination client-side (8 catégories / 10 produits par page)
+- Images miniatures dans la liste des produits
 - Bouton de réinitialisation des filtres
 - Loading spinner pendant le chargement
 - États vides illustrés avec boutons d'action
 
-**Backoffice - Formulaires** :
+**Backoffice - Formulaire Produit (avec upload d'image)** :
 - Validation en temps réel (champs obligatoires, longueur, format)
-- Compteur de caractères (description)
-- Aperçu de la valeur en stock en temps réel (formulaire produit)
-- Indicateur de stock faible / rupture (formulaire produit)
+- **Zone de glisser-déposer (drag & drop)** pour l'upload d'image : cliquer ou glisser un fichier
+- **Aperçu instantané** de l'image sélectionnée avant sauvegarde (via `FileReader`)
+- **Boutons "Changer" et "Supprimer"** quand une image existe déjà
+- **Validation côté client** : formats acceptés (JPEG, PNG, GIF, WebP), taille maximale (5 Mo)
+- **Messages d'erreur** dédiés pour format invalide ou taille dépassée
+- **Sauvegarde en deux étapes** : 1) Enregistrement des données JSON, 2) Upload du fichier image via endpoint dédié
+- Aperçu de la valeur en stock en temps réel (prix × quantité)
+- Indicateur de stock faible / rupture
 - Spinner sur le bouton pendant la soumission
 - Messages d'erreur de l'API affichés à l'utilisateur
 
@@ -780,8 +851,8 @@ http://localhost:4200/
 
 **Traduction FR/EN (i18n)** :
 - Bouton pill-shaped avec globe icon (FR | EN) dans la navbar frontoffice et la topbar backoffice
-- **Tous les textes** de l'application traduits : titres, labels, messages, placeholders, validations, alertes, pagination
-- `TraductionService` centralisé avec dictionnaire de ~450 clés organisées par composant
+- **Tous les textes** de l'application traduits : titres, labels, messages, placeholders, validations, alertes, pagination, messages d'upload
+- `TraductionService` centralisé avec dictionnaire de ~460 clés organisées par composant
 - Persistance du choix de langue dans `localStorage` (survit au rechargement de page)
 - Interpolation de paramètres dynamiques : `{nom}`, `{n}`, etc.
 - Format de date adapté au locale (`fr-FR` / `en-US`) dans la topbar
@@ -802,6 +873,7 @@ http://localhost:4200/
 - Styles frontoffice isolés avec préfixe `.fo-*` (pas de conflit avec le backoffice)
 - Animations : fade-in pages, slide-down alertes, animation modale, rotation icône thème
 - Badges colorés pour les quantités : vert (> 10), orange (1-10), rouge (0)
+- Zone d'upload d'image avec effet de survol et de glissement (drag-over highlight)
 - Modale de confirmation avant chaque suppression
 - Messages de succès/erreur après chaque opération
 - Design responsive (desktop, tablette, mobile) pour les deux parties
@@ -835,6 +907,7 @@ http://localhost:4200/
 | `description` | VARCHAR(500) | - |
 | `prix` | DECIMAL(10,2) | NOT NULL, CHECK > 0 |
 | `quantite` | INTEGER | NOT NULL, CHECK >= 0 |
+| `image_url` | VARCHAR(500) | URL complète de l'image uploadée (nullable) |
 | `categorie_id` | BIGINT | FOREIGN KEY → categories(id) ON DELETE CASCADE |
 | `date_creation` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 | `date_modification` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
@@ -845,6 +918,7 @@ http://localhost:4200/
 |---------|------|------------|
 | `id` | BIGSERIAL | PRIMARY KEY |
 | `session_id` | VARCHAR(100) | NOT NULL, UNIQUE |
+| `derniere_activite` | TIMESTAMP | Dernière interaction (utilisé pour l'expiration) |
 | `date_creation` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 | `date_modification` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
@@ -880,7 +954,7 @@ http://localhost:4200/
 |---------|------|------------|
 | `id` | BIGSERIAL | PRIMARY KEY |
 | `commande_id` | BIGINT | FOREIGN KEY → commandes(id) ON DELETE CASCADE |
-| `produit_id` | BIGINT | FOREIGN KEY → produits(id) |
+| `produit_id` | BIGINT | FOREIGN KEY → produits(id), NULLABLE (nullifié si produit supprimé) |
 | `nom_produit` | VARCHAR(100) | NOT NULL (snapshot) |
 | `prix_unitaire` | DECIMAL(10,2) | NOT NULL (snapshot) |
 | `quantite` | INTEGER | NOT NULL, CHECK > 0 |
@@ -904,6 +978,17 @@ http://localhost:4200/
 Le projet utilise `hibernate.ddl-auto: update`, ce qui signifie que **Hibernate crée et met à jour automatiquement** les tables au démarrage du microservice. Aucune exécution manuelle de script SQL n'est nécessaire.
 
 Le fichier `database/init.sql` est fourni à titre de **référence** et contient des données de test.
+
+### 7.3 - Stockage des images
+
+Les images produit sont **stockées sur le disque** dans le répertoire `uploads/` (au même niveau que `src/`), pas en base de données. Seule l'**URL complète** est enregistrée dans la colonne `image_url` de la table `produits`.
+
+Exemple de valeur stockée : `http://localhost:8081/uploads/774d1ebc-d75c-4c50-bf8a-c327413c11d9.png`
+
+Le répertoire `uploads/` est :
+- Créé automatiquement au démarrage du service (`@PostConstruct`)
+- Exclu du contrôle de version (`.gitignore`)
+- Servi statiquement via `/uploads/**` (configuré dans `WebConfig`)
 
 ---
 
@@ -930,11 +1015,17 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
   "produitsStockBas": 3,
   "produitsEnRupture": 0,
   "valeurTotaleStock": 2547100.00,
+  "totalCommandes": 15,
+  "commandesEnAttente": 3,
+  "chiffreAffaires": 125000.00,
   "dernieresCategories": [
     { "id": 4, "nom": "Matériel de Rééducation", "nombreProduits": 2 }
   ],
   "derniersProduits": [
-    { "id": 9, "nom": "Tablette Cognitive", "prix": 35000.00, "quantite": 20 }
+    { "id": 9, "nom": "Tablette Cognitive", "prix": 35000.00, "quantite": 20, "imageUrl": "http://localhost:8081/uploads/abc123.jpg" }
+  ],
+  "dernieresCommandes": [
+    { "id": 5, "reference": "CMD-20260228-A7B3", "nomClient": "Ahmed", "montantTotal": 9000.00, "statut": "EN_ATTENTE" }
   ]
 }
 ```
@@ -963,22 +1054,24 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
   "id": 1,
   "nom": "Médicaments",
   "description": "Médicaments pour le traitement de la maladie d'Alzheimer",
-  "dateCreation": "2026-02-16T14:30:00",
-  "dateModification": "2026-02-16T14:30:00",
+  "dateCreation": "2026-02-28T14:30:00",
+  "dateModification": "2026-02-28T14:30:00",
   "nombreProduits": 3
 }
 ```
 
 ### 8.3 - Produits (`/api/produits`)
 
-| Méthode | Endpoint | Description | Corps de la requête | Réponse |
-|---------|----------|-------------|---------------------|---------|
+| Méthode | Endpoint | Description | Corps / Params | Réponse |
+|---------|----------|-------------|----------------|---------|
 | `GET` | `/api/produits` | Lister tous les produits | - | 200 + JSON Array |
 | `GET` | `/api/produits/{id}` | Obtenir un produit par ID | - | 200 + JSON Object |
 | `GET` | `/api/produits/categorie/{categorieId}` | Lister les produits d'une catégorie | - | 200 + JSON Array |
 | `POST` | `/api/produits` | Créer un nouveau produit | JSON ProduitDTO | 201 + JSON Object |
 | `PUT` | `/api/produits/{id}` | Modifier un produit | JSON ProduitDTO | 200 + JSON Object |
-| `DELETE` | `/api/produits/{id}` | Supprimer un produit | - | 204 No Content |
+| `DELETE` | `/api/produits/{id}` | Supprimer un produit (+ image sur disque) | - | 204 No Content |
+| `POST` | `/api/produits/{id}/image` | **Uploader une image** | `multipart/form-data` (champ `fichier`) | 200 + JSON Object |
+| `DELETE` | `/api/produits/{id}/image` | **Supprimer l'image** d'un produit | - | 200 + JSON Object |
 
 **Exemple de corps JSON (POST/PUT)** :
 ```json
@@ -990,6 +1083,39 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
   "categorieId": 1
 }
 ```
+
+**Exemple de réponse (GET)** :
+```json
+{
+  "id": 1,
+  "nom": "Donépézil 10mg",
+  "description": "Inhibiteur de la cholinestérase - boîte de 30",
+  "prix": 4500.00,
+  "quantite": 150,
+  "imageUrl": "http://localhost:8081/uploads/774d1ebc-d75c-4c50-bf8a-c327413c11d9.jpg",
+  "categorieId": 1,
+  "categorieNom": "Médicaments",
+  "dateCreation": "2026-02-28T14:30:00",
+  "dateModification": "2026-02-28T14:30:00"
+}
+```
+
+**Upload d'image — Détails techniques** :
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Content-Type | `multipart/form-data` |
+| Nom du champ | `fichier` |
+| Formats acceptés | JPEG, PNG, GIF, WebP |
+| Taille maximale | 5 Mo |
+| Nommage | UUID + extension originale (ex: `774d1ebc-...-.jpg`) |
+| Stockage | Répertoire `uploads/` sur le disque |
+| URL retournée | `http://localhost:8081/uploads/<uuid>.<ext>` (générée dynamiquement via `ServletUriComponentsBuilder`) |
+
+**Comportement de l'upload** :
+- Si le produit a déjà une image, l'**ancien fichier est supprimé** du disque avant de sauvegarder le nouveau
+- La suppression d'un produit (`DELETE /api/produits/{id}`) supprime aussi son **fichier image du disque**
+- La suppression de l'image (`DELETE /api/produits/{id}/image`) supprime le fichier et met `imageUrl` à `null`
 
 ### 8.4 - Panier (`/api/panier`)
 
@@ -1011,13 +1137,15 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
       "produitNom": "Donépézil 10mg",
       "produitPrix": 4500.00,
       "produitQuantiteStock": 150,
+      "produitImageUrl": "http://localhost:8081/uploads/774d1ebc.jpg",
       "categorieNom": "Médicaments",
       "quantite": 2,
       "sousTotal": 9000.00
     }
   ],
   "nombreArticles": 2,
-  "montantTotal": 9000.00
+  "montantTotal": 9000.00,
+  "expireA": "2026-02-28T16:30:00"
 }
 ```
 
@@ -1026,6 +1154,9 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
 - La quantité est validée contre le stock disponible
 - L'ajout d'un produit déjà dans le panier incrémente la quantité
 - La session est identifiée par un ID généré côté client (stocké dans `localStorage`)
+- Le champ `derniereActivite` est mis à jour à chaque interaction
+- Les **paniers inactifs** sont purgés automatiquement par une tâche planifiée (`PanierExpirationTache`)
+- Le frontend affiche un **compteur d'expiration** pour informer l'utilisateur
 
 ### 8.5 - Commandes (`/api/commandes`)
 
@@ -1052,7 +1183,7 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
 ```json
 {
   "id": 1,
-  "reference": "CMD-20260221-A7B3",
+  "reference": "CMD-20260228-A7B3",
   "nomClient": "Ahmed Ben Salah",
   "emailClient": "ahmed@example.com",
   "telephoneClient": "+216 55 123 456",
@@ -1060,7 +1191,7 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
   "statut": "EN_ATTENTE",
   "montantTotal": 13500.00,
   "nombreArticles": 3,
-  "dateCommande": "2026-02-21T14:30:00",
+  "dateCommande": "2026-02-28T14:30:00",
   "lignes": [
     {
       "produitId": 1,
@@ -1076,6 +1207,7 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
 **Logique métier** :
 - La création de commande valide le stock de chaque produit, décrémente les quantités, génère une référence unique (`CMD-yyyyMMdd-XXXX`), crée des snapshots des lignes, et vide le panier
 - L'annulation d'une commande (`statut = ANNULEE`) restaure automatiquement le stock des produits
+- La suppression d'un produit nullifie la référence (`produit_id = NULL`) dans les lignes de commande existantes, préservant l'historique (le `nomProduit` et `prixUnitaire` sont des snapshots)
 - Les statuts possibles : `EN_ATTENTE` → `CONFIRMEE` → `EN_PREPARATION` → `EXPEDIEE` → `LIVREE` (ou `ANNULEE` à tout moment)
 
 ### 8.6 - Analyse Stock (`/api/analyse-stock`)
@@ -1129,14 +1261,22 @@ Le fichier `database/init.sql` est fourni à titre de **référence** et contien
 }
 ```
 
-### 8.7 - Codes de réponse HTTP
+### 8.7 - Fichiers statiques (`/uploads/**`)
+
+| Méthode | Endpoint | Description | Réponse |
+|---------|----------|-------------|---------|
+| `GET` | `/uploads/{filename}` | Récupérer une image produit uploadée | 200 + fichier image |
+
+Les images sont servies directement par Spring via `WebMvcConfigurer.addResourceHandlers()`. Le CORS est configuré pour permettre l'accès depuis `http://localhost:4200`.
+
+### 8.8 - Codes de réponse HTTP
 
 | Code | Signification | Quand |
 |------|---------------|-------|
-| `200` | Succès | GET, PUT réussis |
-| `201` | Créé | POST réussi |
+| `200` | Succès | GET, PUT, POST image réussis |
+| `201` | Créé | POST réussi (produit, catégorie, commande) |
 | `204` | Pas de contenu | DELETE réussi |
-| `400` | Requête invalide | Erreur de validation |
+| `400` | Requête invalide | Erreur de validation, fichier trop gros, format non supporté |
 | `404` | Non trouvé | Ressource inexistante |
 | `500` | Erreur serveur | Erreur interne |
 
@@ -1159,7 +1299,7 @@ Le Service Stock intègre **SpringDoc OpenAPI** qui génère automatiquement une
 |-----|-------------|-----------|
 | **Tableau de Bord** | Statistiques agrégées du stock | `GET /api/tableau-de-bord` |
 | **Catégories** | CRUD des catégories de stock | 5 endpoints |
-| **Produits** | CRUD des produits de stock | 6 endpoints |
+| **Produits** | CRUD des produits de stock + upload/suppression d'image | 8 endpoints |
 | **Panier** | Gestion du panier d'achat par session | 5 endpoints |
 | **Commandes** | Gestion des commandes et statuts | 5 endpoints |
 | **Analyse Stock** | Analyse avancée du stock (KPIs, ABC, tendances) | 1 endpoint |
@@ -1168,6 +1308,7 @@ Le Service Stock intègre **SpringDoc OpenAPI** qui génère automatiquement une
 
 - **Try it out** : Tester chaque endpoint directement depuis le navigateur
 - **Modèles** : Visualiser la structure des DTOs (CategorieDTO, ProduitDTO, TableauDeBordDTO)
+- **Upload** : Tester l'upload d'image directement via le formulaire Swagger (multipart/form-data)
 - **Validation** : Voir les contraintes de validation sur chaque champ
 - **Serveurs** : Basculer entre le service direct (port 8081) et l'API Gateway (port 8080)
 
@@ -1209,6 +1350,7 @@ mvn spring-boot:run
 # 4. Terminal 3 - Service Stock
 cd backend/service-stock
 mvn spring-boot:run
+# → Le répertoire uploads/ est créé automatiquement au démarrage
 
 # 5. Terminal 4 - Frontend Angular
 cd frontend/alzheimer-app
@@ -1223,7 +1365,9 @@ ng serve --open
 | Eureka | http://localhost:8761 | Dashboard avec les services enregistrés |
 | API Gateway | http://localhost:8080 | Passerelle active |
 | Service Stock | http://localhost:8081/api/categories | Réponse JSON |
+| Uploads | http://localhost:8081/uploads/ | Répertoire créé automatiquement au démarrage |
 | Swagger UI | http://localhost:8081/api/swagger-ui.html | Documentation API interactive |
+| Répertoire uploads | `backend/service-stock/uploads/` | Répertoire créé automatiquement |
 
 ### Vérification du Frontend - URLs à tester
 
@@ -1231,28 +1375,27 @@ ng serve --open
 
 | URL | Page | Ce qu'il faut vérifier |
 |-----|------|------------------------|
-| http://localhost:4200/ | Accueil | Hero section avec titre, 3 cartes stats (produits, catégories, valeur stock), grille de catégories cliquables, 6 derniers produits en cartes |
-| http://localhost:4200/catalogue | Catalogue | Grille de produits (3 colonnes), barre de recherche, filtre par catégorie (dropdown), badges de stock colorés (vert/jaune/rouge) |
-| http://localhost:4200/catalogue/1 | Détail Produit | Nom, description, prix (TND), indicateur de stock, lien catégorie cliquable, section "Produits similaires" |
-| http://localhost:4200/categories/1 | Produits par Catégorie | En-tête avec nom + description de la catégorie, grille de produits filtrés, recherche dans la catégorie |
-| http://localhost:4200/panier | Panier | Liste des articles avec contrôles quantité +/-, suppression, sous-totaux, total, bouton "Commander" |
-| http://localhost:4200/commander | Commande | Formulaire client (nom*, email, téléphone, adresse) + récapitulatif commande |
-| http://localhost:4200/commande/CMD-xxx | Confirmation | Page de succès avec référence, détails commande, boutons "Continuer" / "Accueil" |
+| http://localhost:4200/ | Accueil | Hero section avec titre, 3 cartes stats, grille de catégories cliquables, 6 derniers produits avec images |
+| http://localhost:4200/catalogue | Catalogue | Grille de produits avec images, barre de recherche, filtre par catégorie, badges de stock colorés |
+| http://localhost:4200/catalogue/1 | Détail Produit | Image produit, nom, description, prix, indicateur de stock, produits similaires, bouton panier |
+| http://localhost:4200/categories/1 | Produits par Catégorie | En-tête catégorie, grille de produits avec images, recherche |
+| http://localhost:4200/panier | Panier | Liste des articles avec images, contrôles quantité +/-, total, compteur d'expiration |
+| http://localhost:4200/commander | Commande | Formulaire client (nom*, email, téléphone, adresse) + récapitulatif |
+| http://localhost:4200/commande/CMD-xxx | Confirmation | Page de succès avec référence et détails commande |
 
 #### Backoffice (administration)
 
 | URL | Page | Ce qu'il faut vérifier |
 |-----|------|------------------------|
-| http://localhost:4200/admin | Tableau de Bord | Sidebar à gauche, 4 cartes stats, alertes stock, actions rapides, données récentes |
-| http://localhost:4200/admin/categories | Liste Catégories | Tableau avec recherche, pagination (8/page), boutons Modifier/Supprimer |
-| http://localhost:4200/admin/categories/ajouter | Nouvelle Catégorie | Formulaire avec validation (nom requis, 2-100 chars, description max 500) |
-| http://localhost:4200/admin/categories/modifier/1 | Modifier Catégorie | Formulaire pré-rempli avec les données existantes |
-| http://localhost:4200/admin/produits | Liste Produits | Tableau avec recherche, filtre catégorie, filtre stock, pagination (10/page) |
-| http://localhost:4200/admin/produits/ajouter | Nouveau Produit | Formulaire avec dropdown catégorie, validation prix/quantité |
-| http://localhost:4200/admin/produits/modifier/1 | Modifier Produit | Formulaire pré-rempli avec les données existantes |
-| http://localhost:4200/admin/commandes | Commandes | Tableau avec recherche, filtre par statut (6 statuts), pagination, bouton "Voir" |
-| http://localhost:4200/admin/commandes/1 | Détail Commande | Infos client, lignes articles, total + dropdown changement de statut |
-| http://localhost:4200/admin/analyse-stock | Analyse Stock | 7 KPIs, classification ABC, graphique tendances, tableau produits avec filtres |
+| http://localhost:4200/admin | Tableau de Bord | Sidebar, cartes stats, alertes stock, actions rapides, données récentes |
+| http://localhost:4200/admin/categories | Liste Catégories | Tableau avec recherche, pagination, boutons Modifier/Supprimer |
+| http://localhost:4200/admin/categories/ajouter | Nouvelle Catégorie | Formulaire avec validation |
+| http://localhost:4200/admin/produits | Liste Produits | Tableau avec images miniatures, recherche, filtres, pagination |
+| http://localhost:4200/admin/produits/ajouter | Nouveau Produit | Formulaire avec **zone d'upload drag & drop**, aperçu image |
+| http://localhost:4200/admin/produits/modifier/1 | Modifier Produit | Formulaire avec image existante, boutons **Changer / Supprimer** |
+| http://localhost:4200/admin/commandes | Commandes | Tableau avec recherche, filtre par statut, pagination |
+| http://localhost:4200/admin/commandes/1 | Détail Commande | Infos client, articles, total + changement de statut |
+| http://localhost:4200/admin/analyse-stock | Analyse Stock | 7 KPIs, classification ABC, graphique tendances, tableau produits |
 
 #### Navigation entre Frontoffice et Backoffice
 
@@ -1264,39 +1407,43 @@ ng serve --open
 ### Parcours de test complet
 
 1. Ouvrir `http://localhost:4200/` → page d'accueil frontoffice avec hero, stats, catégories et derniers produits
-2. Cliquer sur **"Parcourir le Catalogue"** → redirection vers `/catalogue` avec la grille de produits
+2. Cliquer sur **"Parcourir le Catalogue"** → redirection vers `/catalogue` avec la grille de produits et images
 3. Taper un nom dans la barre de recherche → les produits se filtrent en temps réel
 4. Sélectionner une catégorie dans le dropdown → les produits se filtrent par catégorie
 5. Cliquer sur **"Ajouter au panier"** sur une carte produit → le badge du panier dans la navbar s'incrémente
-6. Cliquer sur une carte produit → page détail `/catalogue/:id` avec infos complètes, sélecteur de quantité et bouton "Ajouter au panier"
-7. Ajuster la quantité et cliquer **"Ajouter au panier"** → confirmation visuelle (icône check)
-8. Cliquer sur **"Panier"** dans la navbar → page `/panier` avec la liste des articles, contrôles quantité +/-, total
+6. Cliquer sur une carte produit → page détail `/catalogue/:id` avec image, infos complètes, sélecteur de quantité
+7. Ajuster la quantité et cliquer **"Ajouter au panier"** → confirmation visuelle
+8. Cliquer sur **"Panier"** dans la navbar → page `/panier` avec images, contrôles quantité, total et compteur d'expiration
 9. Modifier une quantité avec les boutons +/- → le sous-total et le total se mettent à jour
 10. Cliquer **"Passer la commande"** → page `/commander` avec formulaire client et récapitulatif
-11. Remplir le nom (obligatoire) et cliquer **"Confirmer la commande"** → redirection vers `/commande/CMD-xxx` avec confirmation
+11. Remplir le nom (obligatoire), téléphone, adresse et cliquer **"Confirmer la commande"** → redirection vers `/commande/CMD-xxx`
 12. Vérifier la page de confirmation : icône succès, référence, détails de la commande
-13. Cliquer sur le lien de catégorie dans un détail → page `/categories/:id` avec les produits de cette catégorie
-14. Cliquer **"Administration"** dans la navbar → redirection vers `/admin` avec le dashboard backoffice
-15. Vérifier que la sidebar affiche les liens vers `/admin/categories`, `/admin/produits`, `/admin/commandes`
-16. Naviguer vers `/admin/commandes` → la commande créée apparaît avec le statut "En attente"
-17. Cliquer **"Voir"** sur une commande → page détail avec infos client, articles, total
-18. Changer le statut en "Confirmée" et cliquer **"Appliquer"** → message de succès, badge mis à jour
-19. Changer le statut en "Annulée" → le stock des produits est restauré automatiquement
-20. Naviguer vers `/admin/categories` → le CRUD fonctionne (ajouter, modifier, supprimer)
-21. Naviguer vers `/admin/produits` → le CRUD fonctionne (ajouter, modifier, supprimer)
-22. Cliquer **"Voir le site"** dans le footer de la sidebar → retour au frontoffice `/`
-23. Cliquer le bouton **FR/EN** dans la navbar → toute l'interface bascule en anglais (titres, labels, panier, commande, filtres, messages)
-24. Naviguer vers `/admin` → le backoffice est aussi en anglais (dashboard, sidebar, commandes, breadcrumbs, formulaires)
-25. Recharger la page → la langue anglaise est conservée (persistance localStorage)
-26. Cliquer **EN → FR** → retour au français immédiat sans rechargement
-27. Cliquer le bouton **lune** (🌙) dans la navbar → l'interface passe en **mode sombre**, l'icône devient un soleil (☀️)
-28. Naviguer entre les pages (catalogue, panier, admin) → le thème sombre est conservé sur toutes les pages
-29. Recharger la page → le mode sombre est conservé (persistance localStorage)
-30. Cliquer le bouton **soleil** (☀️) → retour au mode clair immédiat
-31. Naviguer vers `/admin/analyse-stock` → le dashboard d'analyse s'affiche avec 7 KPIs, classification ABC, graphique de tendance
-32. Filtrer les produits par classification **A** → seuls les produits de catégorie A s'affichent
-33. Changer le tri par **Chiffre d'affaires** → les produits sont triés par CA décroissant
-34. Vérifier les scores de santé → barres de progression colorées (vert ≥ 70, orange ≥ 40, rouge < 40)
+13. Cliquer **"Administration"** dans la navbar → redirection vers `/admin` avec le dashboard backoffice
+14. Naviguer vers `/admin/produits` → vérifier que les produits avec images les affichent en miniature
+15. Cliquer **"Nouveau Produit"** → formulaire avec zone de glisser-déposer pour l'image
+16. **Glisser une image** sur la zone → aperçu instantané apparaît
+17. Remplir les champs et sauvegarder → le produit est créé, l'image est uploadée, fichier visible dans `uploads/`
+18. **Modifier le produit** → l'image existante s'affiche avec boutons "Changer" et "Supprimer"
+19. Cliquer **"Changer"** → sélectionner une nouvelle image → l'ancien fichier est supprimé, le nouveau est sauvegardé
+20. Cliquer **"Supprimer"** → la zone de drop réapparaît, l'image est supprimée du disque
+21. **Supprimer le produit** → vérifier que le fichier image est aussi supprimé de `uploads/`
+22. Tenter d'uploader un fichier **non-image** (ex: `.pdf`) → message d'erreur "Format non supporté"
+23. Tenter d'uploader une image **> 5 Mo** → message d'erreur "Taille maximale dépassée"
+24. Naviguer vers `/admin/commandes` → la commande créée apparaît avec le statut "En attente"
+25. Cliquer **"Voir"** → page détail avec infos client, articles, total
+26. Changer le statut en "Confirmée" et cliquer **"Appliquer"** → message de succès
+27. Changer le statut en "Annulée" → le stock des produits est restauré automatiquement
+28. Cliquer le bouton **FR/EN** dans la navbar → toute l'interface bascule en anglais (tous les textes, y compris les messages d'upload)
+29. Naviguer vers `/admin` → le backoffice est aussi en anglais
+30. Recharger la page → la langue anglaise est conservée (persistance localStorage)
+31. Cliquer **EN → FR** → retour au français immédiat sans rechargement
+32. Cliquer le bouton **lune** dans la navbar → l'interface passe en **mode sombre**, l'icône devient un soleil
+33. Naviguer entre les pages → le thème sombre est conservé partout (y compris la zone d'upload)
+34. Recharger la page → le mode sombre est conservé (persistance localStorage)
+35. Cliquer le bouton **soleil** → retour au mode clair immédiat
+36. Naviguer vers `/admin/analyse-stock` → dashboard d'analyse avec 7 KPIs, classification ABC, graphique de tendance
+37. Filtrer par classification **A** → seuls les produits de catégorie A s'affichent
+38. Vérifier les scores de santé → barres de progression colorées (vert ≥ 70, orange ≥ 40, rouge < 40)
 
 ---
 
@@ -1310,15 +1457,15 @@ ng serve --open
 - Hero section avec gradient, titre du projet et bouton "Parcourir le Catalogue"
 - 3 cartes statistiques : nombre de produits, nombre de catégories, valeur totale du stock (TND)
 - Grille de catégories cliquables avec icône, description et nombre de produits
-- Section "Derniers Produits" : 6 cartes produits avec prix, badge de stock, lien vers le détail
+- Section "Derniers Produits" : 6 cartes produits avec **images**, prix, badge de stock, lien vers le détail
 - Footer avec branding et badges technologies (Angular 17, Spring Boot, PostgreSQL)
 
 #### Page Catalogue (`/catalogue`)
 
-- Grille responsive de cartes produits (3 colonnes desktop, 2 tablette, 1 mobile)
+- Grille responsive de cartes produits (3 colonnes desktop, 2 tablette, 1 mobile) avec **images produit**
 - Barre de recherche pour filtrer les produits par nom en temps réel
 - Dropdown de filtre par catégorie
-- Chaque carte affiche : nom, catégorie (badge), prix (TND), statut stock (En stock / Stock faible / Rupture)
+- Chaque carte affiche : **image**, nom, catégorie (badge), prix (TND), statut stock, bouton "Ajouter au panier"
 - Clic sur une carte → page détail du produit
 - État vide avec bouton de réinitialisation si aucun résultat
 - Loading spinner pendant le chargement
@@ -1326,25 +1473,27 @@ ng serve --open
 #### Page Détail Produit (`/catalogue/:id`)
 
 - Breadcrumb : Catalogue > Nom du produit
-- Layout 2 colonnes : placeholder image + informations
+- Layout 2 colonnes : **image du produit** (uploadée ou placeholder) + informations
 - Informations complètes : nom, description, catégorie (lien cliquable), prix (TND)
 - Indicateur de disponibilité : "En stock (X unités)" / "Stock faible (X unités)" / "Rupture de stock"
+- Sélecteur de quantité + bouton "Ajouter au panier"
 - Bouton "Retour au catalogue"
-- Section "Produits similaires" : jusqu'à 4 produits de la même catégorie
+- Section "Produits similaires" : jusqu'à 4 produits de la même catégorie avec images
 
 #### Page Produits par Catégorie (`/categories/:id`)
 
 - Breadcrumb : Accueil > Nom de la catégorie
 - En-tête avec icône, nom et description de la catégorie
 - Barre de recherche dans la catégorie + bouton "Tout parcourir"
-- Grille de produits identique au catalogue
+- Grille de produits avec **images** identique au catalogue
 - État vide avec lien vers le catalogue complet
 
 #### Page Panier (`/panier`)
 
 - Breadcrumb : Accueil > Mon Panier
-- Liste des articles avec icône produit, nom, catégorie, prix unitaire, stock disponible
+- Liste des articles avec **image produit**, nom, catégorie, prix unitaire, stock disponible
 - Contrôles quantité : boutons +/- avec limites (min 1, max stock disponible)
+- **Compteur d'expiration** : affiche le temps restant avant l'expiration du panier
 - Bouton de suppression par article + bouton "Vider le panier"
 - Sidebar récapitulatif : nombre d'articles, sous-total, total (TND)
 - Bouton "Passer la commande" → `/commander`
@@ -1354,9 +1503,9 @@ ng serve --open
 #### Page Commander (`/commander`)
 
 - Breadcrumb : Accueil > Panier > Finaliser la commande
-- Formulaire client : nom complet (requis), email (validation format), téléphone, adresse de livraison
+- Formulaire client : nom complet (requis), email (validation format), téléphone (requis), adresse de livraison (requis)
 - Validation en temps réel avec messages d'erreur
-- Sidebar récapitulatif : liste des produits avec quantités et prix, total
+- Sidebar récapitulatif : liste des produits avec **images**, quantités et prix, total
 - Bouton "Confirmer la commande" avec spinner pendant le traitement
 - Gestion d'erreurs (stock insuffisant, erreur serveur)
 
@@ -1372,11 +1521,11 @@ ng serve --open
 #### Page Tableau de Bord (`/admin`)
 
 - Layout backoffice avec sidebar fixe (gauche) et topbar (breadcrumbs + **bouton FR/EN** + **bouton dark/light mode** + horloge)
-- 4 cartes statistiques : catégories, produits, stock faible (≤ 10), valeur totale stock (TND)
+- Cartes statistiques : catégories, produits, stock faible (≤ 10), valeur totale stock (TND), commandes, en attente, chiffre d'affaires
 - Alerte rouge si produits en rupture de stock
 - 3 boutons d'actions rapides : Nouvelle Catégorie, Nouveau Produit, Voir tout le Stock
-- Aperçu des 5 dernières catégories avec nombre de produits
-- Aperçu des 5 derniers produits avec prix (TND) et indicateur de stock coloré
+- Aperçu des 5 dernières catégories, 5 derniers produits (avec images) et 5 dernières commandes
+- Loading spinner et gestion d'erreur avec bouton "Réessayer"
 
 #### Page Gestion des Catégories (`/admin/categories`)
 
@@ -1388,7 +1537,7 @@ ng serve --open
 - Compteur de résultats dynamique
 - Message de succès/erreur après chaque opération
 
-#### Page Formulaire Catégorie (`/admin/categories/ajouter` ou `/admin/categories/modifier/:id`)
+#### Page Formulaire Catégorie (`/admin/categories/ajouter` ou `modifier/:id`)
 
 - Champs : Nom (obligatoire, 2-100 caractères), Description (optionnel, max 500)
 - Compteur de caractères en temps réel
@@ -1401,18 +1550,24 @@ ng serve --open
 - Barre de recherche en temps réel
 - Filtre par catégorie (liste déroulante)
 - Filtre par niveau de stock : Tout, Normal (> 10), Faible (1-10), Rupture (0)
-- Tableau paginé : ID, Nom, Description, Prix, Quantité (badge coloré), Catégorie, Date
+- Tableau paginé : ID, **Image miniature**, Nom, Description, Prix, Quantité (badge coloré), Catégorie, Date
 - Bouton de réinitialisation des filtres
 - Badges de quantité : vert (> 10), orange (1-10), rouge (0 - Rupture)
 - Actions : Modifier, Supprimer avec confirmation
 
-#### Page Formulaire Produit (`/admin/produits/ajouter` ou `/admin/produits/modifier/:id`)
+#### Page Formulaire Produit (`/admin/produits/ajouter` ou `modifier/:id`)
 
-- Champs : Nom, Description, Prix, Quantité, Catégorie (liste déroulante)
-- Validation : nom obligatoire, prix > 0, quantité >= 0, catégorie obligatoire
-- Aperçu de la valeur en stock en temps réel (prix x quantité)
+- Champs : Nom, Description, Prix, Quantité, **Image**, Catégorie (liste déroulante)
+- **Zone de glisser-déposer (drag & drop)** : bordure en pointillés, icône cloud, texte d'invitation
+- **Effet visuel au survol** : la zone change de couleur quand un fichier est glissé au-dessus
+- **Aperçu instantané** : l'image sélectionnée s'affiche immédiatement (via `FileReader`)
+- **Boutons "Changer" et "Supprimer"** visibles quand une image existe
+- **Validation côté client** : formats acceptés (JPEG, PNG, GIF, WebP), taille max (5 Mo)
+- **Messages d'erreur bilingues** pour format invalide ou fichier trop gros
+- Validation standard : nom obligatoire, prix > 0, quantité >= 0, catégorie obligatoire
+- Aperçu de la valeur en stock en temps réel (prix × quantité)
 - Indicateur d'alerte si stock faible ou en rupture
-- Loading spinner et gestion d'erreurs
+- Spinner sur le bouton et gestion d'erreurs
 
 #### Page Gestion des Commandes (`/admin/commandes`)
 
@@ -1420,8 +1575,6 @@ ng serve --open
 - Filtre par statut : Tous, En attente, Confirmée, En préparation, Expédiée, Livrée, Annulée
 - Tableau paginé : Référence, Client (nom + email), Articles, Montant (TND), Statut (badge coloré), Date
 - Bouton "Voir" pour accéder au détail de chaque commande
-- Compteur de résultats dynamique
-- Loading spinner pendant le chargement
 
 #### Page Détail Commande (`/admin/commandes/:id`)
 
@@ -1433,30 +1586,29 @@ ng serve --open
 
 #### Page Analyse Stock (`/admin/analyse-stock`)
 
-- **Ligne 1** : 4 cartes KPI — total produits, commandes (90 jours), chiffre d'affaires (90j), taux de croissance mensuelle (avec indicateur tendance ↑↓)
+- **Ligne 1** : 4 cartes KPI — total produits, commandes (90 jours), chiffre d'affaires (90j), taux de croissance mensuelle (avec indicateur tendance)
 - **Ligne 2** : 3 cartes KPI — produits en alerte, produits en rupture, taux de rotation moyen
-- **Carte Classification ABC** : barres de progression montrant la répartition A/B/C avec nombre de produits et pourcentage du CA pour chaque catégorie
-- **Graphique Tendance des Ventes** : barres horizontales représentant le chiffre d'affaires des 12 derniers mois, responsive et proportionnel
-- **Tableau Analyse par Produit** :
-  - En-tête avec 3 filtres (classification ABC, alerte stock, critère de tri)
-  - Colonnes : produit, classe ABC (badge coloré), stock actuel, unités vendues, CA (TND), rotation, jours restants, point réappro, prévision demande, tendance (↑/→/↓), score de santé (barre de progression)
-  - Lignes colorées : rouge si rupture, orange si alerte
+- **Carte Classification ABC** : barres de progression montrant la répartition A/B/C avec nombre de produits et pourcentage du CA
+- **Graphique Tendance des Ventes** : barres horizontales représentant le chiffre d'affaires des 12 derniers mois
+- **Tableau Analyse par Produit** : filtres (ABC, alerte), tri (score, CA, rotation, stock), colonnes complètes avec scores de santé (barres colorées)
 - **Carte Légende** : explication du taux de rotation, point de réapprovisionnement et score de santé
 
 #### Mode Sombre / Clair (Dark / Light mode)
 
-- **Bouton toggle** circulaire (38px) avec icône Bootstrap : `bi-moon-fill` (lune) en mode clair, `bi-sun-fill` (soleil) en mode sombre
-- Présent dans la **navbar frontoffice** (à côté du bouton FR/EN) et la **topbar backoffice** (entre le bouton FR/EN et l'horloge)
-- **Transition fluide** : `background-color 0.3s ease` sur `<html>` pour une animation douce
+- **Bouton toggle** circulaire avec icône Bootstrap : `bi-moon-fill` (lune) en mode clair, `bi-sun-fill` (soleil) en mode sombre
+- Présent dans la **navbar frontoffice** et la **topbar backoffice**
+- **Transition fluide** : `background-color 0.3s ease` sur `<html>`
 - **Variables CSS dark** : ~20 variables surchargées (`--bg`, `--bg-card`, `--text-primary`, `--border`, `--shadow`, `--sidebar-bg`, etc.)
-- **Composants Bootstrap** surchargés : tables (`--bs-table-bg`), formulaires (`.form-control`), modales, pagination, alertes, badges, dropdowns
-- **Persistance** : choix stocké dans `localStorage`, appliqué dès le chargement initial
-- **Toutes les pages** adaptées : frontoffice et backoffice, incluant les formulaires, tableaux, graphiques et cartes
+- **Composants Bootstrap** surchargés : tables, formulaires, modales, pagination, alertes, badges, dropdowns
+- **Zone d'upload** adaptée au mode sombre (bordures et arrière-plan)
+- **Persistance** : choix stocké dans `localStorage`, appliqué dès le chargement
+- **Toutes les pages** adaptées : frontoffice et backoffice
 
 ### Swagger UI (`/api/swagger-ui.html`)
 
 - Documentation interactive de tous les endpoints
 - 6 groupes : Tableau de Bord, Catégories, Produits, Panier, Commandes, Analyse Stock
+- **Test d'upload d'image** directement depuis l'interface Swagger
 - Bouton "Try it out" pour tester directement
 - Visualisation des modèles de données et contraintes de validation
 
