@@ -8,12 +8,14 @@ import com.alzheimer.stock.repository.CategorieRepository;
 import com.alzheimer.stock.repository.LigneCommandeRepository;
 import com.alzheimer.stock.repository.LignePanierRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -22,6 +24,7 @@ public class CategorieServiceImpl implements CategorieService {
     private final CategorieRepository categorieRepository;
     private final LignePanierRepository lignePanierRepository;
     private final LigneCommandeRepository ligneCommandeRepository;
+    private final FichierStorageService fichierStorageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -67,15 +70,24 @@ public class CategorieServiceImpl implements CategorieService {
         Categorie categorie = categorieRepository.findById(id)
                 .orElseThrow(() -> new ResourceIntrouvableException("Catégorie", "id", id));
 
-        // Clean up FK references for all products in this category before cascade delete
+        // Clean up FK references and image files for all products before cascade delete
         if (categorie.getProduits() != null) {
             for (Produit produit : categorie.getProduits()) {
+                // Delete product image file from disk
+                supprimerFichierImage(produit.getImageUrl());
                 ligneCommandeRepository.nullifyProduitReference(produit.getId());
                 lignePanierRepository.deleteByProduitId(produit.getId());
             }
         }
 
         categorieRepository.delete(categorie);
+    }
+
+    private void supprimerFichierImage(String imageUrl) {
+        if (imageUrl != null && imageUrl.contains("/uploads/")) {
+            String nomFichier = imageUrl.substring(imageUrl.lastIndexOf("/uploads/") + "/uploads/".length());
+            fichierStorageService.supprimer(nomFichier);
+        }
     }
 
     private CategorieDTO convertirEnDTO(Categorie categorie) {

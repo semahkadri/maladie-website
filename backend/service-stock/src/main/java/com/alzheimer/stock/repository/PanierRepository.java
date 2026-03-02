@@ -17,6 +17,6 @@ public interface PanierRepository extends JpaRepository<Panier, Long> {
 
     boolean existsBySessionId(String sessionId);
 
-    @Query("SELECT p FROM Panier p WHERE p.derniereActivite < :seuil AND SIZE(p.lignes) > 0")
+    @Query("SELECT DISTINCT p FROM Panier p LEFT JOIN FETCH p.lignes WHERE p.derniereActivite < :seuil AND SIZE(p.lignes) > 0")
     List<Panier> findExpiredPaniersWithItems(@Param("seuil") LocalDateTime seuil);
 }

@@ -168,7 +168,7 @@ public class CommandeServiceImpl implements CommandeService {
 
     private String genererReference() {
         String datePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        int randomPart = ThreadLocalRandom.current().nextInt(1000, 9999);
+        String randomPart = Long.toHexString(ThreadLocalRandom.current().nextLong(0x10000, 0xFFFFF)).toUpperCase();
         return "CMD-" + datePart + "-" + randomPart;
     }
 

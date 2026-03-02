@@ -203,7 +203,9 @@ public class PanierServiceImpl implements PanierService {
 
     private boolean estExpire(Panier panier) {
         if (panier.getDerniereActivite() == null) {
-            return false;
+            // No activity recorded — treat as expired if cart has been around for a while
+            return panier.getDateCreation() != null
+                    && panier.getDateCreation().plusMinutes(EXPIRATION_MINUTES).isBefore(LocalDateTime.now());
         }
         return panier.getDerniereActivite()
                 .plusMinutes(EXPIRATION_MINUTES)

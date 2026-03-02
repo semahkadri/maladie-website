@@ -1,5 +1,6 @@
 package com.alzheimer.stock.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -49,6 +50,19 @@ public class GestionGlobaleExceptions {
         erreur.put("erreurs", erreurs);
         erreur.put("statut", HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(erreur, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> gererContrainteIntegrite(DataIntegrityViolationException ex) {
+        Map<String, Object> erreur = new HashMap<>();
+        erreur.put("timestamp", LocalDateTime.now());
+        String message = "Erreur d'intégrité des données.";
+        if (ex.getMessage() != null && ex.getMessage().contains("unique")) {
+            message = "Une entrée avec ce nom existe déjà.";
+        }
+        erreur.put("message", message);
+        erreur.put("statut", HttpStatus.CONFLICT.value());
+        return new ResponseEntity<>(erreur, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

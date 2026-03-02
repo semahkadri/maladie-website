@@ -1,6 +1,7 @@
 package com.alzheimer.stock.service;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,11 +14,15 @@ import java.nio.file.StandardCopyOption;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class FichierStorageService {
 
     private static final Set<String> TYPES_AUTORISES = Set.of(
             "image/jpeg", "image/png", "image/gif", "image/webp"
+    );
+    private static final Set<String> EXTENSIONS_AUTORISEES = Set.of(
+            ".jpg", ".jpeg", ".png", ".gif", ".webp"
     );
     private static final long TAILLE_MAX = 5 * 1024 * 1024; // 5 MB
 
@@ -56,7 +61,11 @@ public class FichierStorageService {
         String extension = "";
         String originalName = fichier.getOriginalFilename();
         if (originalName != null && originalName.contains(".")) {
-            extension = originalName.substring(originalName.lastIndexOf("."));
+            extension = originalName.substring(originalName.lastIndexOf(".")).toLowerCase();
+        }
+        // Whitelist extensions to prevent dangerous file types
+        if (!extension.isEmpty() && !EXTENSIONS_AUTORISEES.contains(extension)) {
+            extension = ".bin";
         }
         String nomFichier = UUID.randomUUID() + extension;
 
@@ -82,7 +91,7 @@ public class FichierStorageService {
             }
             Files.deleteIfExists(fichier);
         } catch (IOException e) {
-            // Log but don't fail — file may already be gone
+            log.warn("Impossible de supprimer le fichier {} : {}", nomFichier, e.getMessage());
         }
     }
 }

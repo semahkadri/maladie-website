@@ -34,9 +34,7 @@ public class TableauDeBordServiceImpl implements TableauDeBordService {
         long produitsStockBas = produitRepository.countByQuantiteLessThanEqual(10);
         long produitsEnRupture = produitRepository.countByQuantite(0);
 
-        BigDecimal valeurTotaleStock = produitRepository.findAll().stream()
-                .map(p -> p.getPrix().multiply(BigDecimal.valueOf(p.getQuantite())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal valeurTotaleStock = produitRepository.calculerValeurTotaleStock();
 
         // Use JOIN FETCH to guarantee nombreProduits is computed correctly
         List<CategorieDTO> dernieresCategories = categorieRepository.findAllWithProduits()
@@ -55,9 +53,7 @@ public class TableauDeBordServiceImpl implements TableauDeBordService {
         long totalCommandes = commandeRepository.count();
         long commandesEnAttente = commandeRepository.countByStatut(StatutCommande.EN_ATTENTE);
 
-        BigDecimal chiffreAffaires = commandeRepository.findAll().stream()
-                .map(Commande::getMontantTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal chiffreAffaires = commandeRepository.calculerChiffreAffairesTotal();
 
         PageRequest derniers5Cmd = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "dateCommande"));
         List<CommandeDTO> dernieresCommandes = commandeRepository.findAll(derniers5Cmd)
