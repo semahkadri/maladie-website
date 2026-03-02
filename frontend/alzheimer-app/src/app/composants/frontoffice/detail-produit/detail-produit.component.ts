@@ -65,11 +65,11 @@ import { TraductionService } from '../../../services/traduction.service';
                           style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
                     <i class="bi bi-dash"></i>
                   </button>
-                  <input type="number" [(ngModel)]="quantite" min="1" [max]="produit.quantite"
+                  <input type="number" [(ngModel)]="quantite" min="1" [max]="10"
                          style="width: 60px; text-align: center; border: 1.5px solid var(--border); border-radius: 8px; padding: 4px; font-weight: 600;"
-                         (change)="quantite = Math.max(1, Math.min(quantite, produit.quantite))">
+                         (change)="quantite = Math.max(1, Math.min(quantite, 10))">
                   <button class="btn btn-sm btn-outline-secondary"
-                          (click)="quantite = quantite + 1" [disabled]="quantite >= produit.quantite"
+                          (click)="quantite = quantite + 1" [disabled]="quantite >= 10"
                           style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
                     <i class="bi bi-plus"></i>
                   </button>

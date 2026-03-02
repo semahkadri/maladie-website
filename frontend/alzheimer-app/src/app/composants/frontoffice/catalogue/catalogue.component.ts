@@ -32,9 +32,7 @@ import { TraductionService } from '../../../services/traduction.service';
           </select>
           <select class="fo-filter-select fo-filter-stock" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
             <option value="tous">{{ t.tr('catalogue.toutStock') }}</option>
-            <option value="en-stock">{{ t.tr('catalogue.enStockFiltre') }}</option>
-            <option value="faible">{{ t.tr('catalogue.faibleFiltre') }}</option>
-            <option value="rupture">{{ t.tr('catalogue.ruptureFiltre') }}</option>
+            <option value="en-stock">{{ t.tr('catalogue.disponible') }}</option>
           </select>
         </div>
 
@@ -61,8 +59,6 @@ import { TraductionService } from '../../../services/traduction.service';
                 <option value="prix-desc">{{ t.tr('catalogue.prixDesc') }}</option>
                 <option value="date-desc">{{ t.tr('catalogue.dateDesc') }}</option>
                 <option value="date-asc">{{ t.tr('catalogue.dateAsc') }}</option>
-                <option value="stock-desc">{{ t.tr('catalogue.stockDesc') }}</option>
-                <option value="stock-asc">{{ t.tr('catalogue.stockAsc') }}</option>
               </select>
             </div>
           </div>
@@ -233,8 +229,6 @@ export class CatalogueComponent implements OnInit {
         p.categorieId === this.selectedCategory;
       let matchStock = true;
       if (this.selectedStock === 'en-stock') matchStock = p.quantite > 0;
-      else if (this.selectedStock === 'faible') matchStock = p.quantite > 0 && p.quantite <= 10;
-      else if (this.selectedStock === 'rupture') matchStock = p.quantite === 0;
       return matchSearch && matchCategory && matchStock;
     });
     this.applySort();
@@ -253,9 +247,6 @@ export class CatalogueComponent implements OnInit {
           break;
         case 'date':
           cmp = (a.dateCreation || '').localeCompare(b.dateCreation || '');
-          break;
-        case 'stock':
-          cmp = a.quantite - b.quantite;
           break;
       }
       return direction === 'desc' ? -cmp : cmp;
@@ -317,9 +308,7 @@ export class CatalogueComponent implements OnInit {
 
   getStockLabel(value: string): string {
     const labels: Record<string, string> = {
-      'en-stock': this.t.tr('common.enStock'),
-      'faible': this.t.tr('common.stockFaible'),
-      'rupture': this.t.tr('common.rupture')
+      'en-stock': this.t.tr('catalogue.disponible')
     };
     return labels[value] || value;
   }

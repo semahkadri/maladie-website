@@ -72,10 +72,8 @@ import { PanierService } from '../../../services/panier.service';
         <div class="fo-footer-info">
           {{ t.tr('footer.info') }} &copy; {{ annee }}
         </div>
-        <div class="fo-footer-tech">
-          <span class="fo-footer-badge">Angular 17</span>
-          <span class="fo-footer-badge">Spring Boot</span>
-          <span class="fo-footer-badge">PostgreSQL</span>
+        <div class="fo-footer-copy">
+          &copy; {{ annee }} {{ t.tr('footer.brand') }}
         </div>
       </div>
     </footer>

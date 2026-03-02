@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { TableauDeBordService } from '../../../services/tableau-de-bord.service';
 import { CategorieService } from '../../../services/categorie.service';
-import { TableauDeBord } from '../../../modeles/tableau-de-bord.model';
+import { ProduitService } from '../../../services/produit.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
@@ -24,29 +23,6 @@ import { TraductionService } from '../../../services/traduction.service';
       </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="fo-section" *ngIf="dashboard">
-      <div class="fo-section-container">
-        <h2 class="fo-section-title">{{ t.tr('accueil.enChiffres') }}</h2>
-        <div class="fo-stats-grid">
-          <div class="fo-stat-card">
-            <div class="fo-stat-icon" style="background: var(--primary-light); color: var(--primary);">
-              <i class="bi bi-box-seam-fill"></i>
-            </div>
-            <div class="fo-stat-number">{{ dashboard.totalProduits }}</div>
-            <div class="fo-stat-label">{{ t.tr('accueil.statProduits') }}</div>
-          </div>
-          <div class="fo-stat-card">
-            <div class="fo-stat-icon" style="background: var(--accent-light); color: var(--accent);">
-              <i class="bi bi-tags-fill"></i>
-            </div>
-            <div class="fo-stat-number">{{ dashboard.totalCategories }}</div>
-            <div class="fo-stat-label">{{ t.tr('accueil.statCategories') }}</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Categories Section -->
     <section class="fo-section" *ngIf="categories.length > 0">
       <div class="fo-section-container">
@@ -58,7 +34,7 @@ import { TraductionService } from '../../../services/traduction.service';
             </div>
             <h3>{{ cat.nom }}</h3>
             <p>{{ cat.description | slice:0:80 }}{{ cat.description && cat.description.length > 80 ? '...' : '' }}</p>
-            <span class="fo-category-count">{{ cat.nombreProduits || 0 }} {{ (cat.nombreProduits || 0) !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}</span>
+            <span class="fo-category-count">{{ t.tr('accueil.voirProduits') }}</span>
           </a>
         </div>
       </div>
@@ -104,26 +80,25 @@ import { TraductionService } from '../../../services/traduction.service';
   `
 })
 export class AccueilComponent implements OnInit {
-  dashboard: TableauDeBord | null = null;
   categories: Categorie[] = [];
   recentProducts: Produit[] = [];
   loading = true;
 
   constructor(
-    private dashboardService: TableauDeBordService,
     private categorieService: CategorieService,
+    private produitService: ProduitService,
     public t: TraductionService
   ) {}
 
   ngOnInit(): void {
-    // Load ALL categories (not just the 5 from dashboard)
     this.categorieService.listerTout().subscribe({
       next: (cats) => this.categories = cats
     });
-    this.dashboardService.obtenirTableauDeBord().subscribe({
-      next: (data) => {
-        this.dashboard = data;
-        this.recentProducts = (data.derniersProduits || []).slice(0, 6);
+    this.produitService.listerTout().subscribe({
+      next: (prods) => {
+        this.recentProducts = prods
+          .sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''))
+          .slice(0, 6);
         this.loading = false;
       },
       error: () => {

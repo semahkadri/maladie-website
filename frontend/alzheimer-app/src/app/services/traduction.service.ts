@@ -76,11 +76,8 @@ const DICT: Record<string, TranslationEntry> = {
     en: 'Stock management platform for the Alzheimer Detection project.\nBrowse our product catalog and explore available categories.'
   },
   'accueil.btnCatalogue': { fr: 'Parcourir le Catalogue', en: 'Browse Catalog' },
-  'accueil.enChiffres': { fr: 'En chiffres', en: 'In Numbers' },
-  'accueil.statProduits': { fr: 'Produits', en: 'Products' },
-  'accueil.statCategories': { fr: 'Catégories', en: 'Categories' },
-  'accueil.statValeur': { fr: 'Valeur Stock (TND)', en: 'Stock Value (TND)' },
   'accueil.sectionCat': { fr: 'Catégories', en: 'Categories' },
+  'accueil.voirProduits': { fr: 'Voir les produits', en: 'Browse products' },
   'accueil.derniersProduits': { fr: 'Derniers Produits', en: 'Latest Products' },
 
   // ─── Catalogue ───────────────────────────────────────────
@@ -91,10 +88,8 @@ const DICT: Record<string, TranslationEntry> = {
   },
   'catalogue.rechercher': { fr: 'Rechercher un produit...', en: 'Search for a product...' },
   'catalogue.toutesCat': { fr: 'Toutes les catégories', en: 'All categories' },
-  'catalogue.toutStock': { fr: 'Tout le stock', en: 'All stock' },
-  'catalogue.enStockFiltre': { fr: 'En stock (> 10)', en: 'In stock (> 10)' },
-  'catalogue.faibleFiltre': { fr: 'Stock faible (1-10)', en: 'Low stock (1-10)' },
-  'catalogue.ruptureFiltre': { fr: 'Rupture de stock', en: 'Out of stock' },
+  'catalogue.toutStock': { fr: 'Tous', en: 'All' },
+  'catalogue.disponible': { fr: 'Disponible', en: 'Available' },
   'catalogue.trouves': { fr: 'trouvé', en: 'found' },
   'catalogue.filtres': { fr: 'filtré', en: 'filtered' },
   'catalogue.toutEffacer': { fr: 'Tout effacer', en: 'Clear all' },
@@ -105,8 +100,6 @@ const DICT: Record<string, TranslationEntry> = {
   'catalogue.prixDesc': { fr: 'Prix décroissant', en: 'Price descending' },
   'catalogue.dateDesc': { fr: 'Plus récents', en: 'Most recent' },
   'catalogue.dateAsc': { fr: 'Plus anciens', en: 'Oldest' },
-  'catalogue.stockDesc': { fr: 'Stock décroissant', en: 'Stock descending' },
-  'catalogue.stockAsc': { fr: 'Stock croissant', en: 'Stock ascending' },
   'catalogue.chipRecherche': { fr: 'Recherche', en: 'Search' },
   'catalogue.chipCategorie': { fr: 'Catégorie', en: 'Category' },
   'catalogue.chipStock': { fr: 'Stock', en: 'Stock' },
@@ -309,9 +302,8 @@ const DICT: Record<string, TranslationEntry> = {
   'panier.erreurVider': { fr: 'Erreur lors du vidage du panier.', en: 'Error emptying cart.' },
   'panier.ajouterSuccess': { fr: 'Produit ajouté au panier !', en: 'Product added to cart!' },
   'panier.ajouterErreur': { fr: 'Erreur lors de l\'ajout au panier.', en: 'Error adding to cart.' },
-  'panier.expireDans': { fr: 'Votre panier expire dans', en: 'Your cart expires in' },
-  'panier.expire': { fr: 'Votre panier a expiré', en: 'Your cart has expired' },
-  'panier.expireInfo': { fr: 'Finalisez votre commande avant l\'expiration pour ne pas perdre vos articles.', en: 'Complete your order before expiration to avoid losing your items.' },
+  'panier.reserveInfo': { fr: 'Votre panier est réservé pour une durée limitée', en: 'Your cart is reserved for a limited time' },
+  'panier.expireInfo': { fr: 'Finalisez votre commande pour ne pas perdre vos articles.', en: 'Complete your order to avoid losing your items.' },
 
   // ─── Catalogue (Add to Cart) ───────────────────────────
   'catalogue.ajouterPanier': { fr: 'Ajouter au panier', en: 'Add to cart' },
