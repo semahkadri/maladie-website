@@ -18,11 +18,11 @@ import { CreerCommande } from '../../../modeles/commande.model';
 
         <!-- Breadcrumb -->
         <div class="fo-breadcrumb">
-          <a routerLink="/">{{ t.tr('nav.accueil') }}</a>
-          <span>/</span>
+          <a routerLink="/"><i class="bi bi-house-door"></i></a>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
           <a routerLink="/panier">{{ t.tr('panier.titre') }}</a>
-          <span>/</span>
-          <span>{{ t.tr('checkout.titre') }}</span>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
+          <span class="fo-breadcrumb-current">{{ t.tr('checkout.titre') }}</span>
         </div>
 
         <h1 class="fo-page-title"><i class="bi bi-credit-card me-2"></i>{{ t.tr('checkout.titre') }}</h1>

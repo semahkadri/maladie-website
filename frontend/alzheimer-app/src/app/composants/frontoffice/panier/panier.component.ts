@@ -15,9 +15,9 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
 
         <!-- Breadcrumb -->
         <div class="fo-breadcrumb">
-          <a routerLink="/">{{ t.tr('nav.accueil') }}</a>
-          <span>/</span>
-          <span>{{ t.tr('panier.titre') }}</span>
+          <a routerLink="/"><i class="bi bi-house-door"></i></a>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
+          <span class="fo-breadcrumb-current">{{ t.tr('panier.titre') }}</span>
         </div>
 
         <h1 class="fo-page-title"><i class="bi bi-cart3 me-2"></i>{{ t.tr('panier.titre') }}</h1>
@@ -43,18 +43,13 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
         <div *ngIf="!chargement && panier && panier.lignes.length > 0">
 
           <!-- Reservation Info Banner -->
-          <div class="d-flex align-items-center mb-4"
-               style="background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 14px; padding: 16px 20px; gap: 16px;">
-            <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #eeeeee;">
-              <i class="bi bi-clock-history" style="font-size: 1.4rem; color: #616161;"></i>
+          <div class="fo-cart-reservation-banner">
+            <div class="fo-cart-reservation-icon">
+              <i class="bi bi-clock-history"></i>
             </div>
-            <div class="flex-grow-1">
-              <div style="font-weight: 600; font-size: 0.95rem; color: #424242;">
-                {{ t.tr('panier.reserveInfo') }}
-              </div>
-              <div style="font-size: 0.82rem; color: #78909c; margin-top: 3px;">
-                {{ t.tr('panier.expireInfo') }}
-              </div>
+            <div class="fo-cart-reservation-text">
+              <h4>{{ t.tr('panier.reserveInfo') }}</h4>
+              <p>{{ t.tr('panier.expireInfo') }}</p>
             </div>
           </div>
 
@@ -89,20 +84,20 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
                       </div>
                     </div>
                     <!-- Quantity Controls -->
-                    <div class="d-flex align-items-center gap-2 me-4">
-                      <button class="btn btn-sm btn-outline-secondary"
-                              (click)="modifierQuantite(ligne, ligne.quantite - 1)"
-                              [disabled]="enCours || ligne.quantite <= 1"
-                              style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-dash"></i>
-                      </button>
-                      <span class="fw-bold" style="min-width: 30px; text-align: center;">{{ ligne.quantite }}</span>
-                      <button class="btn btn-sm btn-outline-secondary"
-                              (click)="modifierQuantite(ligne, ligne.quantite + 1)"
-                              [disabled]="enCours || ligne.quantite >= 10"
-                              style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-plus"></i>
-                      </button>
+                    <div class="d-flex align-items-center me-4">
+                      <div class="fo-quantity-selector">
+                        <button class="fo-quantity-btn"
+                                (click)="modifierQuantite(ligne, ligne.quantite - 1)"
+                                [disabled]="enCours || ligne.quantite <= 1">
+                          <i class="bi bi-dash"></i>
+                        </button>
+                        <span class="fo-quantity-input" style="display: flex; align-items: center; justify-content: center;">{{ ligne.quantite }}</span>
+                        <button class="fo-quantity-btn"
+                                (click)="modifierQuantite(ligne, ligne.quantite + 1)"
+                                [disabled]="enCours || ligne.quantite >= 10">
+                          <i class="bi bi-plus"></i>
+                        </button>
+                      </div>
                     </div>
                     <!-- Subtotal -->
                     <div class="text-end me-3" style="min-width: 100px;">

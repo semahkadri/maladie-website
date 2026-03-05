@@ -18,9 +18,11 @@ import { TraductionService } from '../../../services/traduction.service';
       <div class="fo-section-container">
         <!-- Breadcrumb -->
         <div class="fo-breadcrumb">
-          <a routerLink="/">{{ t.tr('nav.accueil') }}</a>
-          <span>/</span>
-          <span>{{ categorie?.nom }}</span>
+          <a routerLink="/"><i class="bi bi-house-door"></i></a>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
+          <a routerLink="/catalogue">{{ t.tr('nav.catalogue') }}</a>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
+          <span class="fo-breadcrumb-current">{{ categorie?.nom }}</span>
         </div>
 
         <!-- Category Header -->
@@ -92,24 +94,33 @@ import { TraductionService } from '../../../services/traduction.service';
 
         <!-- Product Grid (paginated) -->
         <div class="fo-product-grid" *ngIf="pagedProducts.length > 0">
-          <a *ngFor="let prod of pagedProducts" [routerLink]="['/catalogue', prod.id]" class="fo-product-card">
-            <div class="fo-product-card-img">
-              <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
-              <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
-            </div>
-            <div class="fo-product-card-body">
-              <span class="fo-product-card-category">{{ prod.categorieNom }}</span>
-              <h4>{{ prod.nom }}</h4>
-              <p>{{ prod.description | slice:0:80 }}{{ prod.description && prod.description.length > 80 ? '...' : '' }}</p>
-              <div class="fo-product-card-footer">
-                <span class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
-                <span class="fo-product-stock"
-                      [class.in-stock]="prod.quantite > 0"
-                      [class.out-of-stock]="prod.quantite === 0">
-                  {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
-                </span>
+          <div *ngFor="let prod of pagedProducts" class="fo-product-card">
+            <a [routerLink]="['/catalogue', prod.id]" style="text-decoration: none; color: inherit;">
+              <div class="fo-product-card-img">
+                <button class="fo-product-wishlist" (click)="$event.preventDefault(); $event.stopPropagation()">
+                  <i class="bi bi-heart"></i>
+                </button>
+                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
+                <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
               </div>
-              <button *ngIf="prod.quantite > 0" class="fo-add-cart-btn mt-2"
+              <div class="fo-product-card-body">
+                <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                <h4>{{ prod.nom }}</h4>
+                <p>{{ prod.description | slice:0:80 }}{{ prod.description && prod.description.length > 80 ? '...' : '' }}</p>
+                <div class="fo-product-card-footer">
+                  <span class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  <span class="fo-product-stock"
+                        [class.in-stock]="prod.quantite > 0"
+                        [class.out-of-stock]="prod.quantite === 0">
+                    {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                  </span>
+                </div>
+              </div>
+            </a>
+            <div class="fo-product-card-body" style="padding-top: 0;">
+              <button *ngIf="prod.quantite > 0"
+                      class="fo-add-cart-btn"
+                      [class.success]="ajoutOk === prod.id"
                       (click)="ajouterAuPanier($event, prod)"
                       [disabled]="ajoutEnCours === prod.id">
                 <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
@@ -117,11 +128,11 @@ import { TraductionService } from '../../../services/traduction.service';
                 <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
                 {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
               </button>
-              <span *ngIf="prod.quantite === 0" class="fo-out-of-stock-label mt-2" style="color: var(--danger, #dc3545); font-weight: 600; font-size: 0.85rem;">
+              <span *ngIf="prod.quantite === 0" class="fo-product-stock out-of-stock mt-2" style="display: block; text-align: center;">
                 <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
               </span>
             </div>
-          </a>
+          </div>
         </div>
 
         <!-- Pagination -->

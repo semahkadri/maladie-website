@@ -38,14 +38,24 @@ const DICT: Record<string, TranslationEntry> = {
   'theme.light': { fr: 'Mode clair', en: 'Light mode' },
 
   // ─── Navbar (Frontoffice) ────────────────────────────────
-  'nav.brand': { fr: 'Gestion de Stock', en: 'Stock Management' },
+  'nav.brand': { fr: 'PharmaCare', en: 'PharmaCare' },
+  'nav.rechercher': { fr: 'Rechercher un produit...', en: 'Search for a product...' },
   'nav.accueil': { fr: 'Accueil', en: 'Home' },
   'nav.catalogue': { fr: 'Catalogue', en: 'Catalog' },
   'nav.admin': { fr: 'Administration', en: 'Administration' },
 
   // ─── Footer ──────────────────────────────────────────────
-  'footer.brand': { fr: 'Alzheimer - Gestion de Stock', en: 'Alzheimer - Stock Management' },
-  'footer.info': { fr: 'Microservices Spring Boot + Angular', en: 'Microservices Spring Boot + Angular' },
+  'footer.brand': { fr: 'PharmaCare', en: 'PharmaCare' },
+  'footer.info': { fr: 'Votre pharmacie en ligne de confiance', en: 'Your trusted online pharmacy' },
+  'footer.desc': { fr: 'Votre pharmacie en ligne de confiance. Produits certifiés, livraison rapide et service client disponible 7j/7.', en: 'Your trusted online pharmacy. Certified products, fast delivery and customer service available 7 days a week.' },
+  'footer.liens': { fr: 'Liens Rapides', en: 'Quick Links' },
+  'footer.service': { fr: 'Service Client', en: 'Customer Service' },
+  'footer.livraison': { fr: 'Livraison', en: 'Delivery' },
+  'footer.retours': { fr: 'Retours & Remboursements', en: 'Returns & Refunds' },
+  'footer.faq': { fr: 'FAQ', en: 'FAQ' },
+  'footer.contact': { fr: 'Contact', en: 'Contact' },
+  'footer.adresse': { fr: 'Tunis, Tunisie', en: 'Tunis, Tunisia' },
+  'footer.droits': { fr: 'Tous droits réservés.', en: 'All rights reserved.' },
   'footer.boInfo': { fr: 'Alzheimer - Gestion de Stock', en: 'Alzheimer - Stock Management' },
 
   // ─── Sidebar ─────────────────────────────────────────────
@@ -70,15 +80,54 @@ const DICT: Record<string, TranslationEntry> = {
   'breadcrumb.modifierProd': { fr: 'Modifier Produit', en: 'Edit Product' },
 
   // ─── Accueil (Homepage) ──────────────────────────────────
-  'accueil.titre': { fr: 'Gestion de Stock', en: 'Stock Management' },
+  'accueil.titre': { fr: 'Votre santé, notre priorité', en: 'Your health, our priority' },
   'accueil.sousTitre': {
-    fr: 'Plateforme de gestion de stock pour le projet Alzheimer Detection.\nConsultez notre catalogue de produits et explorez les catégories disponibles.',
-    en: 'Stock management platform for the Alzheimer Detection project.\nBrowse our product catalog and explore available categories.'
+    fr: 'Découvrez notre sélection de médicaments, soins et produits de parapharmacie livrés directement chez vous.',
+    en: 'Discover our selection of medicines, care products and parapharmacy delivered directly to your door.'
   },
-  'accueil.btnCatalogue': { fr: 'Parcourir le Catalogue', en: 'Browse Catalog' },
+  'accueil.btnCatalogue': { fr: 'Explorer nos produits', en: 'Explore our products' },
   'accueil.sectionCat': { fr: 'Catégories', en: 'Categories' },
   'accueil.voirProduits': { fr: 'Voir les produits', en: 'Browse products' },
-  'accueil.derniersProduits': { fr: 'Derniers Produits', en: 'Latest Products' },
+  'accueil.derniersProduits': { fr: 'Nouveautés', en: 'New Arrivals' },
+
+  // ─── Announcement Bar ─────────────────────────────────
+  'announce.livraison': { fr: 'Livraison gratuite dès 99 DT', en: 'Free delivery from 99 TND' },
+  'announce.pharmacie': { fr: 'Pharmacie certifiée', en: 'Certified pharmacy' },
+  'announce.support': { fr: 'Support 7j/7', en: 'Support 7 days a week' },
+
+  // ─── Hero ─────────────────────────────────────────────
+  'hero.badge': { fr: 'Pharmacie certifiée', en: 'Certified Pharmacy' },
+  'hero.nouveautes': { fr: 'Découvrir les nouveautés', en: 'Discover new arrivals' },
+  'hero.promoTitre': { fr: 'Les essentiels pharmacie', en: 'Pharmacy Essentials' },
+  'hero.promoDesc': { fr: 'Retrouvez tous vos produits de santé et bien-être au meilleur prix.', en: 'Find all your health and wellness products at the best price.' },
+
+  // ─── Trust Strip ──────────────────────────────────────
+  'trust.livraison': { fr: 'Livraison rapide', en: 'Fast delivery' },
+  'trust.livraisonDesc': { fr: '24-48h partout en Tunisie', en: '24-48h across Tunisia' },
+  'trust.paiement': { fr: 'Paiement sécurisé', en: 'Secure payment' },
+  'trust.paiementDesc': { fr: 'Transactions 100% sécurisées', en: '100% secure transactions' },
+  'trust.certifie': { fr: 'Pharmacie certifiée', en: 'Certified pharmacy' },
+  'trust.certifieDesc': { fr: 'Produits authentiques garantis', en: 'Guaranteed authentic products' },
+  'trust.retour': { fr: 'Retours faciles', en: 'Easy returns' },
+  'trust.retourDesc': { fr: 'Retour gratuit sous 14 jours', en: 'Free returns within 14 days' },
+  'trust.garantie': { fr: 'Produits authentiques garantis', en: 'Guaranteed authentic products' },
+  'trust.retourDetail': { fr: 'Retour gratuit sous 14 jours', en: 'Free returns within 14 days' },
+  'trust.livraisonDetail': { fr: 'Livraison 24-48h', en: 'Delivery 24-48h' },
+
+  // ─── Badges ───────────────────────────────────────────
+  'badge.nouveau': { fr: 'Nouveau', en: 'New' },
+  'badge.promo': { fr: 'Promo', en: 'Sale' },
+
+  // ─── Promo Banner ─────────────────────────────────────
+  'promo.titre': { fr: 'Les indispensables de votre pharmacie', en: 'Your pharmacy essentials' },
+  'promo.desc': { fr: 'Découvrez notre sélection de produits essentiels pour votre santé et bien-être au quotidien.', en: 'Discover our selection of essential products for your daily health and well-being.' },
+  'promo.cta': { fr: 'Je découvre', en: 'Discover now' },
+
+  // ─── Newsletter ───────────────────────────────────────
+  'newsletter.titre': { fr: 'Restez informé', en: 'Stay informed' },
+  'newsletter.desc': { fr: 'Recevez nos offres exclusives et nouveautés directement dans votre boîte mail.', en: 'Receive our exclusive offers and new arrivals directly in your inbox.' },
+  'newsletter.placeholder': { fr: 'Votre adresse email', en: 'Your email address' },
+  'newsletter.btn': { fr: "S'inscrire", en: 'Subscribe' },
 
   // ─── Catalogue ───────────────────────────────────────────
   'catalogue.titre': { fr: 'Catalogue des Produits', en: 'Product Catalog' },

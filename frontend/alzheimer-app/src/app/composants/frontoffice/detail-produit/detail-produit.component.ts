@@ -16,9 +16,13 @@ import { TraductionService } from '../../../services/traduction.service';
       <div class="fo-section-container">
         <!-- Breadcrumb -->
         <div class="fo-breadcrumb">
+          <a routerLink="/"><i class="bi bi-house-door"></i></a>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
           <a routerLink="/catalogue">{{ t.tr('detail.catalogue') }}</a>
-          <span>/</span>
-          <span>{{ produit.nom }}</span>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
+          <a *ngIf="produit.categorieId" [routerLink]="['/categories', produit.categorieId]">{{ produit.categorieNom }}</a>
+          <i *ngIf="produit.categorieId" class="bi bi-chevron-right fo-breadcrumb-sep"></i>
+          <span class="fo-breadcrumb-current">{{ produit.nom }}</span>
         </div>
 
         <!-- Product Detail -->
@@ -28,7 +32,7 @@ import { TraductionService } from '../../../services/traduction.service';
             <i *ngIf="!produit.imageUrl" class="bi bi-box-seam"></i>
           </div>
           <div class="fo-product-detail-info">
-            <span class="fo-product-card-category">{{ produit.categorieNom }}</span>
+            <span class="fo-product-brand" style="font-size: 0.82rem;">{{ produit.categorieNom }}</span>
             <h1>{{ produit.nom }}</h1>
             <p class="fo-product-detail-desc">{{ produit.description }}</p>
 
@@ -56,33 +60,49 @@ import { TraductionService } from '../../../services/traduction.service';
             </div>
 
             <!-- Add to Cart -->
-            <div *ngIf="produit.quantite > 0" class="fo-detail-cart-actions" style="margin-top: 24px;">
+            <div *ngIf="produit.quantite > 0" style="margin-top: 24px;">
               <div class="d-flex align-items-center gap-3 mb-3">
                 <label class="fw-semibold" style="font-size: 0.88rem; white-space: nowrap;">{{ t.tr('detail.quantiteLabel') }}</label>
-                <div class="d-flex align-items-center gap-2">
-                  <button class="btn btn-sm btn-outline-secondary"
-                          (click)="quantite = quantite - 1" [disabled]="quantite <= 1"
-                          style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <div class="fo-quantity-selector">
+                  <button class="fo-quantity-btn" (click)="quantite = quantite - 1" [disabled]="quantite <= 1">
                     <i class="bi bi-dash"></i>
                   </button>
-                  <input type="number" [(ngModel)]="quantite" min="1" [max]="10"
-                         style="width: 60px; text-align: center; border: 1.5px solid var(--border); border-radius: 8px; padding: 4px; font-weight: 600;"
+                  <input type="number" class="fo-quantity-input" [(ngModel)]="quantite" min="1" [max]="10"
                          (change)="quantite = Math.max(1, Math.min(quantite, 10))">
-                  <button class="btn btn-sm btn-outline-secondary"
-                          (click)="quantite = quantite + 1" [disabled]="quantite >= 10"
-                          style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                  <button class="fo-quantity-btn" (click)="quantite = quantite + 1" [disabled]="quantite >= 10">
                     <i class="bi bi-plus"></i>
                   </button>
                 </div>
               </div>
-              <button class="fo-btn fo-btn-primary" (click)="ajouterAuPanier()" [disabled]="ajoutEnCours">
-                <span *ngIf="ajoutEnCours" class="spinner-border spinner-border-sm me-2"></span>
-                <i *ngIf="!ajoutEnCours && !ajoutOk" class="bi bi-cart-plus me-2"></i>
-                <i *ngIf="ajoutOk" class="bi bi-check-lg me-2"></i>
-                {{ ajoutOk ? t.tr('panier.ajouterSuccess') : t.tr('detail.ajouterPanier') }}
-              </button>
+              <div class="fo-detail-actions">
+                <button class="fo-detail-add-btn" (click)="ajouterAuPanier()" [disabled]="ajoutEnCours">
+                  <span *ngIf="ajoutEnCours" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!ajoutEnCours && !ajoutOk" class="bi bi-cart-plus"></i>
+                  <i *ngIf="ajoutOk" class="bi bi-check-lg"></i>
+                  {{ ajoutOk ? t.tr('panier.ajouterSuccess') : t.tr('detail.ajouterPanier') }}
+                </button>
+                <button class="fo-detail-secondary-btn">
+                  <i class="bi bi-heart"></i>
+                </button>
+              </div>
               <div *ngIf="ajoutErreur" class="alert alert-danger mt-2 mb-0 py-2" style="font-size: 0.85rem;">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ ajoutErreur }}
+              </div>
+            </div>
+
+            <!-- Trust Guarantees -->
+            <div class="fo-detail-guarantees">
+              <div class="fo-detail-guarantee">
+                <i class="bi bi-truck"></i>
+                <span>{{ t.tr('trust.livraisonDetail') }}</span>
+              </div>
+              <div class="fo-detail-guarantee">
+                <i class="bi bi-patch-check"></i>
+                <span>{{ t.tr('trust.garantie') }}</span>
+              </div>
+              <div class="fo-detail-guarantee">
+                <i class="bi bi-arrow-return-left"></i>
+                <span>{{ t.tr('trust.retourDetail') }}</span>
               </div>
             </div>
 
@@ -102,7 +122,7 @@ import { TraductionService } from '../../../services/traduction.service';
                 <i *ngIf="!p.imageUrl" class="bi bi-box-seam"></i>
               </div>
               <div class="fo-product-card-body">
-                <span class="fo-product-card-category">{{ p.categorieNom }}</span>
+                <span class="fo-product-brand">{{ p.categorieNom }}</span>
                 <h4>{{ p.nom }}</h4>
                 <div class="fo-product-card-footer">
                   <span class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
