@@ -2,17 +2,32 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { ProduitService } from '../../../services/produit.service';
 import { CategorieService } from '../../../services/categorie.service';
 import { PanierService } from '../../../services/panier.service';
 import { Produit } from '../../../modeles/produit.model';
 import { Categorie } from '../../../modeles/categorie.model';
 import { TraductionService } from '../../../services/traduction.service';
+import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
+import { TiltDirective } from '../../../directives/tilt.directive';
+import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-catalogue',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ScrollAnimateDirective, TiltDirective, SkeletonLoaderComponent],
+  animations: [
+    trigger('quickViewAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.95) translateY(20px)' }),
+        animate('300ms cubic-bezier(0.22, 1, 0.36, 1)', style({ opacity: 1, transform: 'scale(1) translateY(0)' }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.95)' }))
+      ])
+    ])
+  ],
   template: `
     <div class="fo-section">
       <div class="fo-section-container">
@@ -87,13 +102,20 @@ import { TraductionService } from '../../../services/traduction.service';
           </span>
         </div>
 
+        <!-- Skeleton Loading -->
+        <app-skeleton-loader *ngIf="loading" type="product-grid" [count]="6"></app-skeleton-loader>
+
         <!-- Product Grid (paginated) -->
         <div class="fo-product-grid" *ngIf="!loading && pagedProducts.length > 0">
-          <div *ngFor="let prod of pagedProducts" class="fo-product-card">
+          <div *ngFor="let prod of pagedProducts; let i = index" class="fo-product-card"
+               appScrollAnimate="fade-up" [animateDelay]="i * 100" appTilt [tiltMax]="6">
             <a [routerLink]="['/catalogue', prod.id]" style="text-decoration: none; color: inherit;">
               <div class="fo-product-card-img">
                 <button class="fo-product-wishlist" (click)="$event.preventDefault(); $event.stopPropagation()">
                   <i class="bi bi-heart"></i>
+                </button>
+                <button class="fo-product-quickview" (click)="openQuickView($event, prod)">
+                  <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.quickView') }}
                 </button>
                 <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
                 <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
@@ -176,11 +198,41 @@ import { TraductionService } from '../../../services/traduction.service';
             <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.tr('catalogue.reinitialiser') }}
           </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Loading -->
-        <div *ngIf="loading" class="fo-loading">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">{{ t.tr('common.chargement') }}</span>
+    <!-- Quick View Modal -->
+    <div *ngIf="quickViewProduct" class="fo-quickview-overlay" (click)="closeQuickView()" [@quickViewAnim]>
+      <div class="fo-quickview-modal" (click)="$event.stopPropagation()">
+        <button class="fo-quickview-close" (click)="closeQuickView()"><i class="bi bi-x-lg"></i></button>
+        <div class="fo-quickview-img">
+          <img *ngIf="quickViewProduct.imageUrl" [src]="quickViewProduct.imageUrl" [alt]="quickViewProduct.nom">
+          <i *ngIf="!quickViewProduct.imageUrl" class="bi bi-box-seam"></i>
+        </div>
+        <div class="fo-quickview-body">
+          <span class="fo-product-brand">{{ quickViewProduct.categorieNom }}</span>
+          <h2>{{ quickViewProduct.nom }}</h2>
+          <p class="fo-quickview-desc">{{ quickViewProduct.description }}</p>
+          <span class="fo-product-price">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
+          <span class="fo-product-stock"
+                [class.in-stock]="quickViewProduct.quantite > 0"
+                [class.out-of-stock]="quickViewProduct.quantite === 0">
+            <i class="bi" [class.bi-check-circle-fill]="quickViewProduct.quantite > 0"
+               [class.bi-x-circle-fill]="quickViewProduct.quantite === 0"></i>
+            {{ quickViewProduct.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+          </span>
+          <div class="fo-quickview-actions">
+            <button *ngIf="quickViewProduct.quantite > 0"
+                    class="fo-add-cart-btn"
+                    (click)="quickViewAjouterPanier()"
+                    [disabled]="ajoutEnCours === quickViewProduct.id">
+              <span *ngIf="ajoutEnCours === quickViewProduct.id" class="spinner-border spinner-border-sm me-1"></span>
+              <i *ngIf="ajoutEnCours !== quickViewProduct.id" class="bi bi-cart-plus me-1"></i>
+              {{ t.tr('catalogue.ajouterPanier') }}
+            </button>
+            <a [routerLink]="['/catalogue', quickViewProduct.id]" class="fo-quickview-detail-link" (click)="closeQuickView()">
+              {{ t.tr('catalogue.voirDetail') }} <i class="bi bi-arrow-right ms-1"></i>
+            </a>
           </div>
         </div>
       </div>
@@ -214,6 +266,9 @@ export class CatalogueComponent implements OnInit {
   ajoutEnCours: number | null = null;
   ajoutOk: number | null = null;
   ajoutErreur = '';
+
+  // Quick View
+  quickViewProduct: Produit | null = null;
 
   constructor(
     private produitService: ProduitService,
@@ -341,6 +396,33 @@ export class CatalogueComponent implements OnInit {
         this.ajoutEnCours = null;
         this.ajoutOk = produit.id!;
         setTimeout(() => { if (this.ajoutOk === produit.id) this.ajoutOk = null; }, 2000);
+      },
+      error: (err) => {
+        this.ajoutEnCours = null;
+        this.ajoutErreur = err.error?.message || this.t.tr('panier.ajouterErreur');
+        setTimeout(() => this.ajoutErreur = '', 5000);
+      }
+    });
+  }
+
+  // Quick View
+  openQuickView(event: Event, prod: Produit): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.quickViewProduct = prod;
+  }
+
+  closeQuickView(): void {
+    this.quickViewProduct = null;
+  }
+
+  quickViewAjouterPanier(): void {
+    if (!this.quickViewProduct?.id || this.ajoutEnCours) return;
+    this.ajoutEnCours = this.quickViewProduct.id;
+    this.panierService.ajouterProduit(this.quickViewProduct.id, 1).subscribe({
+      next: () => {
+        this.ajoutEnCours = null;
+        this.closeQuickView();
       },
       error: (err) => {
         this.ajoutEnCours = null;

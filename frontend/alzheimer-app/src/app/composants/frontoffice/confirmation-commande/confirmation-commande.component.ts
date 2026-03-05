@@ -1,15 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommandeService } from '../../../services/commande.service';
 import { TraductionService } from '../../../services/traduction.service';
 import { Commande } from '../../../modeles/commande.model';
 
+interface ConfettiParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  size: number;
+  rotation: number;
+  rotationSpeed: number;
+  opacity: number;
+}
+
 @Component({
   selector: 'app-confirmation-commande',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
+    <!-- Confetti Canvas -->
+    <canvas #confettiCanvas class="fo-confetti-canvas"></canvas>
+
     <div class="fo-section">
       <div class="fo-section-container fade-in">
 
@@ -118,10 +133,13 @@ import { Commande } from '../../../modeles/commande.model';
     </div>
   `
 })
-export class ConfirmationCommandeComponent implements OnInit {
+export class ConfirmationCommandeComponent implements OnInit, OnDestroy {
+  @ViewChild('confettiCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
+
   commande: Commande | null = null;
   chargement = true;
   produitsEpuises: string[] = [];
+  private animationId: number = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -142,6 +160,8 @@ export class ConfirmationCommandeComponent implements OnInit {
         next: (data) => {
           this.commande = data;
           this.chargement = false;
+          // Launch confetti 300ms after data loads
+          setTimeout(() => this.launchConfetti(), 300);
         },
         error: () => {
           this.chargement = false;
@@ -149,6 +169,82 @@ export class ConfirmationCommandeComponent implements OnInit {
       });
     } else {
       this.chargement = false;
+    }
+  }
+
+  private launchConfetti(): void {
+    const canvas = this.canvasRef.nativeElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#1a73e8', '#1e8e3e', '#f9ab00', '#d93025', '#00897b', '#e65100', '#9c27b0'];
+    const particles: ConfettiParticle[] = [];
+    const particleCount = 200;
+
+    // Create particles
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        vx: (Math.random() - 0.5) * 8,
+        vy: Math.random() * 3 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: Math.random() * 8 + 4,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10,
+        opacity: 1
+      });
+    }
+
+    const startTime = performance.now();
+    const duration = 5000;
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = elapsed / duration;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let aliveCount = 0;
+      for (const p of particles) {
+        p.x += p.vx;
+        p.vy += 0.1; // gravity
+        p.y += p.vy;
+        p.rotation += p.rotationSpeed;
+
+        // Fade out in last 40% of duration
+        if (progress > 0.6) {
+          p.opacity = Math.max(0, 1 - ((progress - 0.6) / 0.4));
+        }
+
+        if (p.opacity <= 0 || p.y > canvas.height + 50) continue;
+        aliveCount++;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        ctx.restore();
+      }
+
+      if (aliveCount > 0 && progress < 1.2) {
+        this.animationId = requestAnimationFrame(animate);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    };
+
+    this.animationId = requestAnimationFrame(animate);
+  }
+
+  ngOnDestroy(): void {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
     }
   }
 }

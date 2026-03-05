@@ -502,6 +502,16 @@ const DICT: Record<string, TranslationEntry> = {
   'analyse.legendeReapproDesc': { fr: 'Seuil de stock minimum calculé : (demande moyenne × délai livraison) + stock de sécurité. Commander quand le stock atteint ce niveau.', en: 'Calculated minimum stock threshold: (avg demand × lead time) + safety stock. Reorder when stock reaches this level.' },
   'analyse.legendeScore': { fr: 'Score de Santé (0-100)', en: 'Health Score (0-100)' },
   'analyse.legendeScoreDesc': { fr: 'Indicateur composite : niveau de stock (30pts), rotation (25pts), classe ABC (20pts), tendance (15pts), couverture stock (10pts). ≥70 = sain, 40-69 = attention, <40 = critique.', en: 'Composite indicator: stock level (30pts), turnover (25pts), ABC class (20pts), trend (15pts), stock coverage (10pts). ≥70 = healthy, 40-69 = caution, <40 = critical.' },
+
+  // ─── Quick View / Mini-Cart / Dynamic UI ───────────────
+  'catalogue.quickView': { fr: 'Aperçu rapide', en: 'Quick View' },
+  'catalogue.voirDetail': { fr: 'Voir tous les détails', en: 'View full details' },
+  'minicart.titre': { fr: 'Panier', en: 'Cart' },
+  'minicart.voirPanier': { fr: 'Voir le panier', en: 'View cart' },
+  'minicart.vide': { fr: 'Votre panier est vide', en: 'Your cart is empty' },
+  'minicart.sousTotal': { fr: 'Sous-total', en: 'Subtotal' },
+  'marquee.marques': { fr: 'Nos marques partenaires', en: 'Our partner brands' },
+  'backToTop': { fr: 'Haut de page', en: 'Back to top' },
 };
 
 @Injectable({ providedIn: 'root' })

@@ -6,14 +6,25 @@ import { ProduitService } from '../../../services/produit.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
+import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
+import { CountUpDirective } from '../../../directives/count-up.directive';
 
 @Component({
   selector: 'app-accueil',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ScrollAnimateDirective, CountUpDirective],
   template: `
-    <!-- Premium Hero -->
-    <section class="fo-hero">
+    <!-- Premium Animated Hero -->
+    <section class="fo-hero fo-hero-animated">
+      <!-- Floating Particles -->
+      <div class="fo-hero-particles">
+        <div class="fo-hero-particle"></div>
+        <div class="fo-hero-particle"></div>
+        <div class="fo-hero-particle"></div>
+        <div class="fo-hero-particle"></div>
+        <div class="fo-hero-particle"></div>
+        <div class="fo-hero-particle"></div>
+      </div>
       <div class="fo-hero-inner">
         <div class="fo-hero-text">
           <div class="fo-hero-badge">
@@ -40,28 +51,28 @@ import { TraductionService } from '../../../services/traduction.service';
       </div>
     </section>
 
-    <!-- Trust Strip -->
-    <section class="fo-trust-strip">
+    <!-- Trust Strip with Scroll Animation & Count Up -->
+    <section class="fo-trust-strip" appScrollAnimate="fade-up">
       <div class="fo-trust-strip-inner">
-        <div class="fo-trust-badge">
+        <div class="fo-trust-badge" appScrollAnimate="fade-up" [animateDelay]="0">
           <div class="fo-trust-badge-icon">
             <i class="bi bi-truck"></i>
           </div>
           <div>
             <h4>{{ t.tr('trust.livraison') }}</h4>
-            <p>{{ t.tr('trust.livraisonDesc') }}</p>
+            <p><span [appCountUp]="24" countSuffix="h" [countDuration]="1800"></span> {{ t.isFr ? 'partout en Tunisie' : 'across Tunisia' }}</p>
           </div>
         </div>
-        <div class="fo-trust-badge">
+        <div class="fo-trust-badge" appScrollAnimate="fade-up" [animateDelay]="100">
           <div class="fo-trust-badge-icon">
             <i class="bi bi-shield-lock"></i>
           </div>
           <div>
             <h4>{{ t.tr('trust.paiement') }}</h4>
-            <p>{{ t.tr('trust.paiementDesc') }}</p>
+            <p><span [appCountUp]="100" countSuffix="%" [countDuration]="2000"></span> {{ t.isFr ? 'sécurisées' : 'secure' }}</p>
           </div>
         </div>
-        <div class="fo-trust-badge">
+        <div class="fo-trust-badge" appScrollAnimate="fade-up" [animateDelay]="200">
           <div class="fo-trust-badge-icon">
             <i class="bi bi-patch-check"></i>
           </div>
@@ -70,27 +81,28 @@ import { TraductionService } from '../../../services/traduction.service';
             <p>{{ t.tr('trust.certifieDesc') }}</p>
           </div>
         </div>
-        <div class="fo-trust-badge">
+        <div class="fo-trust-badge" appScrollAnimate="fade-up" [animateDelay]="300">
           <div class="fo-trust-badge-icon">
             <i class="bi bi-arrow-return-left"></i>
           </div>
           <div>
             <h4>{{ t.tr('trust.retour') }}</h4>
-            <p>{{ t.tr('trust.retourDesc') }}</p>
+            <p><span [appCountUp]="14" [countDuration]="1500"></span> {{ t.isFr ? ' jours de retour gratuit' : ' days free returns' }}</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Categories Section -->
-    <section class="fo-section" *ngIf="categories.length > 0">
+    <section class="fo-section" *ngIf="categories.length > 0" appScrollAnimate="fade-up">
       <div class="fo-section-container">
         <div class="fo-section-header">
           <h2 class="fo-section-title fo-section-title-bar">{{ t.tr('accueil.sectionCat') }}</h2>
           <a routerLink="/catalogue" class="fo-section-link">{{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="fo-category-grid">
-          <a *ngFor="let cat of categories" [routerLink]="['/categories', cat.id]" class="fo-category-card">
+          <a *ngFor="let cat of categories; let i = index" [routerLink]="['/categories', cat.id]" class="fo-category-card"
+             appScrollAnimate="scale-in" [animateDelay]="i * 100">
             <div class="fo-category-icon">
               <i class="bi" [ngClass]="getCategoryIcon(cat.nom)"></i>
             </div>
@@ -103,7 +115,7 @@ import { TraductionService } from '../../../services/traduction.service';
     </section>
 
     <!-- Promo Banner -->
-    <section class="fo-section" style="padding-bottom: 0;">
+    <section class="fo-section" style="padding-bottom: 0;" appScrollAnimate="fade-up">
       <div class="fo-section-container">
         <div class="fo-promo-banner">
           <h2>{{ t.tr('promo.titre') }}</h2>
@@ -115,15 +127,25 @@ import { TraductionService } from '../../../services/traduction.service';
       </div>
     </section>
 
+    <!-- Brand Marquee -->
+    <section class="fo-marquee-section" appScrollAnimate="fade-up">
+      <h3>{{ t.tr('marquee.marques') }}</h3>
+      <div class="fo-marquee-track">
+        <span class="fo-marquee-item" *ngFor="let brand of brands">{{ brand }}</span>
+        <span class="fo-marquee-item" *ngFor="let brand of brands">{{ brand }}</span>
+      </div>
+    </section>
+
     <!-- Recent Products Section -->
-    <section class="fo-section" *ngIf="recentProducts.length > 0">
+    <section class="fo-section" *ngIf="recentProducts.length > 0" appScrollAnimate="fade-up">
       <div class="fo-section-container">
         <div class="fo-section-header">
           <h2 class="fo-section-title fo-section-title-bar">{{ t.tr('accueil.derniersProduits') }}</h2>
           <a routerLink="/catalogue" class="fo-section-link">{{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="fo-product-grid">
-          <a *ngFor="let prod of recentProducts" [routerLink]="['/catalogue', prod.id]" class="fo-product-card">
+          <a *ngFor="let prod of recentProducts; let i = index" [routerLink]="['/catalogue', prod.id]" class="fo-product-card"
+             appScrollAnimate="fade-up" [animateDelay]="i * 100">
             <div class="fo-product-card-img">
               <span class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
               <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
@@ -148,7 +170,7 @@ import { TraductionService } from '../../../services/traduction.service';
     </section>
 
     <!-- Newsletter -->
-    <section class="fo-newsletter">
+    <section class="fo-newsletter" appScrollAnimate="fade-up">
       <div class="fo-newsletter-inner">
         <h2>{{ t.tr('newsletter.titre') }}</h2>
         <p>{{ t.tr('newsletter.desc') }}</p>
@@ -171,6 +193,8 @@ export class AccueilComponent implements OnInit {
   categories: Categorie[] = [];
   recentProducts: Produit[] = [];
   loading = true;
+
+  brands = ['Sanofi', 'Pfizer', 'Bayer', "L'Oréal Derma", 'Roche', 'Johnson & Johnson', 'Novartis', 'AstraZeneca'];
 
   constructor(
     private categorieService: CategorieService,

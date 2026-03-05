@@ -1,19 +1,50 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { TraductionService } from '../../../services/traduction.service';
 import { ThemeService } from '../../../services/theme.service';
 import { PanierService } from '../../../services/panier.service';
 import { CategorieService } from '../../../services/categorie.service';
 import { Categorie } from '../../../modeles/categorie.model';
+import { Panier } from '../../../modeles/panier.model';
 
 @Component({
   selector: 'app-layout-frontoffice',
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
+  animations: [
+    trigger('miniCartSlide', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)' }),
+        animate('300ms cubic-bezier(0.22, 1, 0.36, 1)', style({ transform: 'translateX(0)' }))
+      ]),
+      transition(':leave', [
+        animate('250ms cubic-bezier(0.4, 0, 1, 1)', style({ transform: 'translateX(100%)' }))
+      ])
+    ]),
+    trigger('miniCartOverlay', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('200ms ease', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease', style({ opacity: 0 }))
+      ])
+    ]),
+    trigger('fadeInUp', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(16px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ],
   template: `
+    <!-- Scroll Progress Bar -->
+    <div class="fo-scroll-progress" [style.width.%]="scrollProgress"></div>
+
     <!-- Announcement Bar -->
     <div class="fo-announcement-bar" *ngIf="!announcementClosed">
       <div class="fo-announcement-inner">
@@ -64,7 +95,7 @@ import { Categorie } from '../../../modeles/categorie.model';
           <!-- Cart -->
           <a routerLink="/panier" class="fo-navbar-action-btn fo-navbar-cart">
             <i class="bi bi-cart3"></i>
-            <span *ngIf="nombreArticles > 0" class="fo-cart-badge">{{ nombreArticles }}</span>
+            <span *ngIf="nombreArticles > 0" class="fo-cart-badge" [class.bounce]="cartBounce">{{ nombreArticles }}</span>
           </a>
           <!-- Mobile Toggle -->
           <button class="fo-navbar-toggle" (click)="menuOpen = !menuOpen">
@@ -188,6 +219,52 @@ import { Categorie } from '../../../modeles/categorie.model';
         </div>
       </div>
     </footer>
+
+    <!-- Mini-Cart Sidebar -->
+    <div *ngIf="miniCartOpen" class="fo-minicart-overlay" [@miniCartOverlay] (click)="miniCartOpen = false"></div>
+    <div *ngIf="miniCartOpen" class="fo-minicart-panel" [@miniCartSlide]>
+      <div class="fo-minicart-header">
+        <h3><i class="bi bi-cart3 me-2"></i>{{ t.tr('minicart.titre') }} ({{ nombreArticles }})</h3>
+        <button (click)="miniCartOpen = false"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="fo-minicart-body">
+        <div *ngIf="!panier || panier.lignes.length === 0" class="fo-minicart-empty">
+          <i class="bi bi-cart-x"></i>
+          {{ t.tr('minicart.vide') }}
+        </div>
+        <div *ngFor="let ligne of panier?.lignes || []" class="fo-minicart-item">
+          <div class="fo-minicart-item-img">
+            <img *ngIf="ligne.produitImageUrl" [src]="ligne.produitImageUrl" [alt]="ligne.produitNom">
+            <i *ngIf="!ligne.produitImageUrl" class="bi bi-box-seam"></i>
+          </div>
+          <div class="fo-minicart-item-info">
+            <h4>{{ ligne.produitNom }}</h4>
+            <span>x{{ ligne.quantite }}</span>
+          </div>
+          <div class="fo-minicart-item-price">{{ ligne.sousTotal | number:'1.2-2' }} TND</div>
+        </div>
+      </div>
+      <div class="fo-minicart-footer" *ngIf="panier && panier.lignes.length > 0">
+        <div class="fo-minicart-total">
+          <span>{{ t.tr('minicart.sousTotal') }}</span>
+          <span>{{ panier.montantTotal | number:'1.2-2' }} TND</span>
+        </div>
+        <a routerLink="/panier" class="fo-minicart-btn" (click)="miniCartOpen = false">
+          <i class="bi bi-cart-check me-2"></i>{{ t.tr('minicart.voirPanier') }}
+        </a>
+      </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="fo-back-to-top" [class.visible]="showBackToTop" (click)="scrollToTop()" [title]="t.tr('backToTop')">
+      <svg class="fo-btt-ring" viewBox="0 0 54 54">
+        <circle cx="27" cy="27" r="25"></circle>
+        <circle class="fo-btt-progress" cx="27" cy="27" r="25"
+                [attr.stroke-dasharray]="157"
+                [attr.stroke-dashoffset]="157 - (157 * scrollProgress / 100)"></circle>
+      </svg>
+      <i class="bi bi-chevron-up"></i>
+    </button>
   `
 })
 export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
@@ -196,7 +273,17 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   nombreArticles = 0;
   announcementClosed = false;
   topCategories: Categorie[] = [];
+
+  // Dynamic features
+  scrollProgress = 0;
+  showBackToTop = false;
+  miniCartOpen = false;
+  cartBounce = false;
+  panier: Panier | null = null;
+
   private panierSub!: Subscription;
+  private itemAddedSub!: Subscription;
+  private miniCartTimer: any;
 
   constructor(
     public t: TraductionService,
@@ -208,14 +295,41 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.panierService.chargerPanier().subscribe();
     this.panierSub = this.panierService.panier$.subscribe(panier => {
+      this.panier = panier;
       this.nombreArticles = panier?.nombreArticles || 0;
     });
     this.categorieService.listerTout().subscribe({
       next: (cats) => this.topCategories = cats.slice(0, 5)
     });
+
+    // Mini-cart auto-open + badge bounce on item added
+    this.itemAddedSub = this.panierService.itemAdded$.subscribe(() => {
+      // Open mini-cart
+      this.miniCartOpen = true;
+      clearTimeout(this.miniCartTimer);
+      this.miniCartTimer = setTimeout(() => this.miniCartOpen = false, 5000);
+
+      // Badge bounce
+      this.cartBounce = true;
+      setTimeout(() => this.cartBounce = false, 600);
+    });
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    this.scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    this.showBackToTop = scrollTop > 400;
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   ngOnDestroy(): void {
     this.panierSub?.unsubscribe();
+    this.itemAddedSub?.unsubscribe();
+    clearTimeout(this.miniCartTimer);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Subject, Observable, tap } from 'rxjs';
 import { Panier } from '../modeles/panier.model';
 import { environment } from '../../environments/environment';
 
@@ -12,6 +12,9 @@ export class PanierService {
   private apiUrl = `${environment.apiUrl}/panier`;
   private sessionId: string;
   private panierSubject = new BehaviorSubject<Panier | null>(null);
+  private itemAddedSubject = new Subject<void>();
+
+  itemAdded$ = this.itemAddedSubject.asObservable();
 
   panier$ = this.panierSubject.asObservable();
 
@@ -38,7 +41,10 @@ export class PanierService {
       `${this.apiUrl}/${this.sessionId}/produits/${produitId}?quantite=${quantite}`,
       {}
     ).pipe(
-      tap(panier => this.panierSubject.next(panier))
+      tap(panier => {
+        this.panierSubject.next(panier);
+        this.itemAddedSubject.next();
+      })
     );
   }
 

@@ -6,12 +6,20 @@ import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
+import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-detail-produit',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, SkeletonLoaderComponent],
   template: `
+    <!-- Skeleton Loading -->
+    <div class="fo-section" *ngIf="loading">
+      <div class="fo-section-container">
+        <app-skeleton-loader type="product-detail"></app-skeleton-loader>
+      </div>
+    </div>
+
     <div class="fo-section" *ngIf="!loading && produit">
       <div class="fo-section-container">
         <!-- Breadcrumb -->
@@ -27,9 +35,16 @@ import { TraductionService } from '../../../services/traduction.service';
 
         <!-- Product Detail -->
         <div class="fo-product-detail">
-          <div class="fo-product-detail-img">
-            <img *ngIf="produit.imageUrl" [src]="produit.imageUrl" [alt]="produit.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
+          <!-- Image with Zoom -->
+          <div class="fo-product-detail-img fo-zoom-container" [class.fo-zoom-active]="zoomActive"
+               (mousemove)="onImageMouseMove($event)" (mouseleave)="onImageMouseLeave()">
+            <img *ngIf="produit.imageUrl" [src]="produit.imageUrl" [alt]="produit.nom"
+                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;" #productImg>
             <i *ngIf="!produit.imageUrl" class="bi bi-box-seam"></i>
+            <!-- Zoom Lens -->
+            <div class="fo-zoom-lens" [ngStyle]="lensStyle" *ngIf="produit.imageUrl"></div>
+            <!-- Zoom Result -->
+            <div class="fo-zoom-result" [ngStyle]="zoomStyle" *ngIf="produit.imageUrl"></div>
           </div>
           <div class="fo-product-detail-info">
             <span class="fo-product-brand" style="font-size: 0.82rem;">{{ produit.categorieNom }}</span>
@@ -138,13 +153,6 @@ import { TraductionService } from '../../../services/traduction.service';
         </div>
       </div>
     </div>
-
-    <!-- Loading -->
-    <div *ngIf="loading" class="fo-loading">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">{{ t.tr('common.chargement') }}</span>
-      </div>
-    </div>
   `
 })
 export class DetailProduitComponent implements OnInit {
@@ -156,6 +164,11 @@ export class DetailProduitComponent implements OnInit {
   ajoutOk = false;
   ajoutErreur = '';
   Math = Math;
+
+  // Image Zoom
+  zoomActive = false;
+  zoomStyle: Record<string, string> = {};
+  lensStyle: Record<string, string> = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -198,6 +211,47 @@ export class DetailProduitComponent implements OnInit {
         setTimeout(() => this.ajoutErreur = '', 5000);
       }
     });
+  }
+
+  // Image Zoom
+  onImageMouseMove(event: MouseEvent): void {
+    if (!this.produit?.imageUrl) return;
+    const container = event.currentTarget as HTMLElement;
+    const img = container.querySelector('img');
+    if (!img) return;
+
+    const rect = container.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const lensSize = 150;
+    const zoomLevel = 2.5;
+
+    // Lens position
+    const lensX = Math.max(0, Math.min(x - lensSize / 2, rect.width - lensSize));
+    const lensY = Math.max(0, Math.min(y - lensSize / 2, rect.height - lensSize));
+
+    this.zoomActive = true;
+    this.lensStyle = {
+      left: lensX + 'px',
+      top: lensY + 'px',
+      'background-image': `url(${this.produit.imageUrl})`,
+      'background-size': `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`,
+      'background-position': `-${lensX * zoomLevel}px -${lensY * zoomLevel}px`
+    };
+
+    // Zoom result
+    const bgPosX = (x / rect.width) * 100;
+    const bgPosY = (y / rect.height) * 100;
+    this.zoomStyle = {
+      'background-image': `url(${this.produit.imageUrl})`,
+      'background-size': `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`,
+      'background-position': `${bgPosX}% ${bgPosY}%`
+    };
+  }
+
+  onImageMouseLeave(): void {
+    this.zoomActive = false;
   }
 
   private loadRelated(categorieId: number, currentId: number): void {
