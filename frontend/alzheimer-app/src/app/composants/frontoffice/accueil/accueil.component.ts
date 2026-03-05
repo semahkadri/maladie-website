@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CategorieService } from '../../../services/categorie.service';
@@ -93,23 +93,35 @@ import { CountUpDirective } from '../../../directives/count-up.directive';
       </div>
     </section>
 
-    <!-- Categories Section -->
+    <!-- Categories Section — Carousel -->
     <section class="fo-section" *ngIf="categories.length > 0" appScrollAnimate="fade-up">
       <div class="fo-section-container">
         <div class="fo-section-header">
           <h2 class="fo-section-title fo-section-title-bar">{{ t.tr('accueil.sectionCat') }}</h2>
-          <a routerLink="/catalogue" class="fo-section-link">{{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right"></i></a>
+          <div class="fo-carousel-nav-header">
+            <button class="fo-carousel-arrow fo-carousel-arrow-left" (click)="scrollCarousel(catTrack, -1)"
+                    [class.disabled]="!canScrollLeft(catTrack)">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="fo-carousel-arrow fo-carousel-arrow-right" (click)="scrollCarousel(catTrack, 1)"
+                    [class.disabled]="!canScrollRight(catTrack)">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <a routerLink="/catalogue" class="fo-section-link">{{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right"></i></a>
+          </div>
         </div>
-        <div class="fo-category-grid">
-          <a *ngFor="let cat of categories; let i = index" [routerLink]="['/categories', cat.id]" class="fo-category-card"
-             appScrollAnimate="scale-in" [animateDelay]="i * 100">
-            <div class="fo-category-icon">
-              <i class="bi" [ngClass]="getCategoryIcon(cat.nom)"></i>
-            </div>
-            <h3>{{ cat.nom }}</h3>
-            <p>{{ cat.description | slice:0:80 }}{{ cat.description && cat.description.length > 80 ? '...' : '' }}</p>
-            <span class="fo-category-count">{{ t.tr('accueil.voirProduits') }}</span>
-          </a>
+        <div class="fo-carousel-wrapper">
+          <div class="fo-carousel-track" #catTrack>
+            <a *ngFor="let cat of categories; let i = index" [routerLink]="['/categories', cat.id]" class="fo-category-card fo-carousel-item"
+               appScrollAnimate="scale-in" [animateDelay]="i * 80">
+              <div class="fo-category-icon">
+                <i class="bi" [ngClass]="getCategoryIcon(cat.nom)"></i>
+              </div>
+              <h3>{{ cat.nom }}</h3>
+              <p>{{ cat.description | slice:0:80 }}{{ cat.description && cat.description.length > 80 ? '...' : '' }}</p>
+              <span class="fo-category-count">{{ t.tr('accueil.voirProduits') }}</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -136,35 +148,52 @@ import { CountUpDirective } from '../../../directives/count-up.directive';
       </div>
     </section>
 
-    <!-- Recent Products Section -->
+    <!-- Recent Products Section — Carousel with Arrows -->
     <section class="fo-section" *ngIf="recentProducts.length > 0" appScrollAnimate="fade-up">
       <div class="fo-section-container">
         <div class="fo-section-header">
           <h2 class="fo-section-title fo-section-title-bar">{{ t.tr('accueil.derniersProduits') }}</h2>
-          <a routerLink="/catalogue" class="fo-section-link">{{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right"></i></a>
+          <div class="fo-carousel-nav-header">
+            <button class="fo-carousel-arrow fo-carousel-arrow-left" (click)="scrollCarousel(prodTrack, -1)"
+                    [class.disabled]="!canScrollLeft(prodTrack)">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="fo-carousel-arrow fo-carousel-arrow-right" (click)="scrollCarousel(prodTrack, 1)"
+                    [class.disabled]="!canScrollRight(prodTrack)">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <a routerLink="/catalogue" class="fo-section-link">{{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right"></i></a>
+          </div>
         </div>
-        <div class="fo-product-grid">
-          <a *ngFor="let prod of recentProducts; let i = index" [routerLink]="['/catalogue', prod.id]" class="fo-product-card"
-             appScrollAnimate="fade-up" [animateDelay]="i * 100">
-            <div class="fo-product-card-img">
-              <span class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
-              <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
-              <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
-            </div>
-            <div class="fo-product-card-body">
-              <span class="fo-product-brand">{{ prod.categorieNom }}</span>
-              <h4>{{ prod.nom }}</h4>
-              <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
-              <div class="fo-product-card-footer">
-                <span class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
-                <span class="fo-product-stock"
-                      [class.in-stock]="prod.quantite > 0"
-                      [class.out-of-stock]="prod.quantite === 0">
-                  {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
-                </span>
+        <div class="fo-carousel-wrapper">
+          <div class="fo-carousel-track fo-carousel-track-products" #prodTrack>
+            <a *ngFor="let prod of recentProducts; let i = index" [routerLink]="['/catalogue', prod.id]"
+               class="fo-product-card fo-carousel-item fo-carousel-product-item">
+              <div class="fo-product-card-img">
+                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
+                <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
               </div>
-            </div>
-          </a>
+              <div class="fo-product-card-body">
+                <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                <h4>{{ prod.nom }}</h4>
+                <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
+                <div class="fo-product-card-footer">
+                  <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                    <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                    <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  </div>
+                  <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  <span class="fo-product-stock"
+                        [class.in-stock]="prod.quantite > 0"
+                        [class.out-of-stock]="prod.quantite === 0">
+                    {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -210,13 +239,30 @@ export class AccueilComponent implements OnInit {
       next: (prods) => {
         this.recentProducts = prods
           .sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''))
-          .slice(0, 6);
+          .slice(0, 12);
         this.loading = false;
       },
       error: () => {
         this.loading = false;
       }
     });
+  }
+
+  // ─── Carousel scroll ────────────────────────────────────
+  scrollCarousel(track: HTMLElement, direction: number): void {
+    const cardWidth = track.querySelector('.fo-carousel-item')?.clientWidth || 300;
+    const gap = 20;
+    const scrollAmount = (cardWidth + gap) * 2;
+    track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+  }
+
+  canScrollLeft(track: HTMLElement): boolean {
+    return track?.scrollLeft > 0;
+  }
+
+  canScrollRight(track: HTMLElement): boolean {
+    if (!track) return false;
+    return track.scrollLeft < (track.scrollWidth - track.clientWidth - 2);
   }
 
   getCategoryIcon(name: string): string {

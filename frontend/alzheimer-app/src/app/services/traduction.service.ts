@@ -512,6 +512,16 @@ const DICT: Record<string, TranslationEntry> = {
   'minicart.sousTotal': { fr: 'Sous-total', en: 'Subtotal' },
   'marquee.marques': { fr: 'Nos marques partenaires', en: 'Our partner brands' },
   'backToTop': { fr: 'Haut de page', en: 'Back to top' },
+
+  // ─── Promo / Discount System ──────────────────────────────
+  'promo.badge': { fr: 'Promo', en: 'Sale' },
+  'promo.economie': { fr: 'Économie', en: 'You save' },
+  'promo.prixOriginal': { fr: 'Prix original', en: 'Original price' },
+  'promo.activer': { fr: 'Activer la promotion', en: 'Enable promotion' },
+  'promo.prixAvant': { fr: 'Prix avant remise', en: 'Price before discount' },
+  'promo.pourcentage': { fr: 'Réduction calculée', en: 'Calculated discount' },
+  'catalogue.filtrePromo': { fr: 'En promotion', en: 'On sale' },
+  'promo.reduction': { fr: 'de réduction', en: 'off' },
 };
 
 @Injectable({ providedIn: 'root' })

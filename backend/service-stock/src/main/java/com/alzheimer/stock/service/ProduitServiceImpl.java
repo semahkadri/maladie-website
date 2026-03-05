@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,6 +67,8 @@ public class ProduitServiceImpl implements ProduitService {
                 .prix(produitDTO.getPrix())
                 .quantite(produitDTO.getQuantite())
                 .imageUrl(produitDTO.getImageUrl())
+                .prixOriginal(produitDTO.getPrixOriginal())
+                .enPromo(produitDTO.getEnPromo() != null ? produitDTO.getEnPromo() : false)
                 .categorie(categorie)
                 .build();
 
@@ -85,6 +89,8 @@ public class ProduitServiceImpl implements ProduitService {
         produit.setPrix(produitDTO.getPrix());
         produit.setQuantite(produitDTO.getQuantite());
         produit.setImageUrl(produitDTO.getImageUrl());
+        produit.setPrixOriginal(produitDTO.getPrixOriginal());
+        produit.setEnPromo(produitDTO.getEnPromo() != null ? produitDTO.getEnPromo() : false);
         produit.setCategorie(categorie);
 
         Produit modifie = produitRepository.save(produit);
@@ -145,6 +151,16 @@ public class ProduitServiceImpl implements ProduitService {
     }
 
     private ProduitDTO convertirEnDTO(Produit produit) {
+        Integer remise = null;
+        if (Boolean.TRUE.equals(produit.getEnPromo()) && produit.getPrixOriginal() != null
+                && produit.getPrixOriginal().compareTo(BigDecimal.ZERO) > 0
+                && produit.getPrix().compareTo(produit.getPrixOriginal()) < 0) {
+            remise = produit.getPrixOriginal().subtract(produit.getPrix())
+                    .multiply(BigDecimal.valueOf(100))
+                    .divide(produit.getPrixOriginal(), 0, RoundingMode.HALF_UP)
+                    .intValue();
+        }
+
         return ProduitDTO.builder()
                 .id(produit.getId())
                 .nom(produit.getNom())
@@ -152,6 +168,9 @@ public class ProduitServiceImpl implements ProduitService {
                 .prix(produit.getPrix())
                 .quantite(produit.getQuantite())
                 .imageUrl(produit.getImageUrl())
+                .prixOriginal(produit.getPrixOriginal())
+                .enPromo(produit.getEnPromo())
+                .remise(remise)
                 .categorieId(produit.getCategorie().getId())
                 .categorieNom(produit.getCategorie().getNom())
                 .dateCreation(produit.getDateCreation())

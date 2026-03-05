@@ -5,6 +5,9 @@ export interface Produit {
   prix: number;
   quantite: number;
   imageUrl?: string;
+  prixOriginal?: number;
+  enPromo?: boolean;
+  remise?: number;
   categorieId: number;
   categorieNom?: string;
   dateCreation?: string;

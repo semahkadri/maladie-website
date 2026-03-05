@@ -48,13 +48,23 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
           </div>
           <div class="fo-product-detail-info">
             <span class="fo-product-brand" style="font-size: 0.82rem;">{{ produit.categorieNom }}</span>
-            <h1>{{ produit.nom }}</h1>
+            <h1>{{ produit.nom }}
+              <span *ngIf="produit.enPromo && produit.remise" class="fo-detail-promo-badge">-{{ produit.remise }}%</span>
+            </h1>
             <p class="fo-product-detail-desc">{{ produit.description }}</p>
 
             <div class="fo-product-detail-meta">
               <div class="fo-product-detail-price">
                 <span class="label">{{ t.tr('detail.prix') }}</span>
-                <span class="value">{{ produit.prix | number:'1.2-2' }} TND</span>
+                <div *ngIf="produit.enPromo && produit.prixOriginal">
+                  <span class="fo-price-original" style="font-size: 0.92rem;">{{ produit.prixOriginal | number:'1.2-2' }} TND</span>
+                  <span class="fo-price-promo" style="font-size: 1.35rem;">{{ produit.prix | number:'1.2-2' }} TND</span>
+                  <div class="fo-savings-line">
+                    <i class="bi bi-piggy-bank-fill"></i>
+                    {{ t.tr('promo.economie') }}: {{ produit.prixOriginal - produit.prix | number:'1.2-2' }} TND (-{{ produit.remise }}%)
+                  </div>
+                </div>
+                <span *ngIf="!produit.enPromo || !produit.prixOriginal" class="value">{{ produit.prix | number:'1.2-2' }} TND</span>
               </div>
               <div class="fo-product-detail-stock">
                 <span class="label">{{ t.tr('detail.disponibilite') }}</span>
@@ -133,6 +143,7 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
           <div class="fo-product-grid">
             <a *ngFor="let p of relatedProducts" [routerLink]="['/catalogue', p.id]" class="fo-product-card">
               <div class="fo-product-card-img">
+                <span *ngIf="p.enPromo && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
                 <img *ngIf="p.imageUrl" [src]="p.imageUrl" [alt]="p.nom" style="width: 100%; height: 100%; object-fit: cover;">
                 <i *ngIf="!p.imageUrl" class="bi bi-box-seam"></i>
               </div>
@@ -140,7 +151,11 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
                 <span class="fo-product-brand">{{ p.categorieNom }}</span>
                 <h4>{{ p.nom }}</h4>
                 <div class="fo-product-card-footer">
-                  <span class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
+                  <div *ngIf="p.enPromo && p.prixOriginal" class="fo-price-block">
+                    <span class="fo-price-original">{{ p.prixOriginal | number:'1.2-2' }} TND</span>
+                    <span class="fo-price-promo">{{ p.prix | number:'1.2-2' }} TND</span>
+                  </div>
+                  <span *ngIf="!p.enPromo || !p.prixOriginal" class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
                   <span class="fo-product-stock"
                         [class.in-stock]="p.quantite > 0"
                         [class.out-of-stock]="p.quantite === 0">

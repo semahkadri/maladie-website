@@ -325,9 +325,15 @@ html[data-theme="dark"] .pagination-controls button {
 
 /* FO pagination dark */
 html[data-theme="dark"] .fo-pagination-controls button {
-  background: var(--bg-card);
+  background: var(--bg);
   color: var(--text-primary);
   border-color: var(--border);
+}
+
+html[data-theme="dark"] .fo-pagination-controls button.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border-color: transparent;
 }
 
 html[data-theme="dark"] .fo-pagination-size select {
@@ -1971,11 +1977,14 @@ body {
 
 .fo-product-card {
   background: var(--bg-card);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
+  border-top: 3px solid transparent;
+  border-image: linear-gradient(90deg, var(--primary), var(--pharmacy-green)) 1;
+  border-image-slice: 1 0 0 0;
   box-shadow: var(--shadow);
   overflow: hidden;
-  transition: var(--transition);
+  transition: var(--transition-smooth);
   text-decoration: none;
   color: var(--text-primary);
   display: flex;
@@ -1983,15 +1992,17 @@ body {
 }
 
 .fo-product-card:hover {
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(26,115,232,0.18), 0 4px 16px rgba(0,0,0,0.08);
+  transform: translateY(-6px) scale(1.015);
   border-color: var(--primary);
+  border-image: linear-gradient(90deg, var(--primary), var(--pharmacy-green)) 1;
+  border-image-slice: 1 0 0 0;
   text-decoration: none;
   color: var(--text-primary);
 }
 
 .fo-product-card-img {
-  height: 220px;
+  height: 240px;
   background: linear-gradient(135deg, #f0f4f9 0%, #e8f0fe 100%);
   display: flex;
   align-items: center;
@@ -2001,6 +2012,18 @@ body {
   opacity: 0.4;
   position: relative;
   overflow: hidden;
+}
+
+.fo-product-card-img::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to top, rgba(0,0,0,0.06), transparent);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .fo-product-card-img img {
@@ -2069,13 +2092,17 @@ body {
 }
 
 .fo-product-brand {
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: var(--pharmacy-green);
-  margin-bottom: 4px;
-  display: block;
+  background: var(--pharmacy-green-light);
+  padding: 2px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 6px;
+  width: fit-content;
 }
 
 .fo-product-card-body {
@@ -2102,15 +2129,20 @@ body {
 .fo-product-card-body h4 {
   font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   letter-spacing: -0.2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.35;
 }
 
 .fo-product-card-body p {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 14px;
+  line-height: 1.45;
+  margin-bottom: 12px;
   flex: 1;
 }
 
@@ -2462,41 +2494,49 @@ body {
   color: var(--danger);
 }
 
-/* ==================== FO PAGINATION ==================== */
+/* ==================== FO PAGINATION — PREMIUM PILL STYLE ==================== */
 .fo-pagination {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 32px;
-  padding: 20px 0;
-  border-top: 1px solid var(--border);
+  justify-content: center;
+  margin-top: 36px;
+  padding: 20px 28px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 20px;
 }
 
 .fo-pagination-info {
   font-size: 0.84rem;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.fo-pagination-info strong,
+.fo-pagination-info b {
+  color: var(--primary);
 }
 
 .fo-pagination-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .fo-pagination-controls button {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
   background: var(--bg-card);
   color: var(--text-primary);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.88rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-smooth);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2506,17 +2546,21 @@ body {
   background: var(--primary-light);
   border-color: var(--primary);
   color: var(--primary);
+  transform: scale(1.1);
 }
 
 .fo-pagination-controls button.active {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--pharmacy-green));
   color: #fff;
-  border-color: var(--primary);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(26,115,232,0.35);
+  transform: scale(1.05);
 }
 
 .fo-pagination-controls button:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
+  transform: none;
 }
 
 .fo-pagination-size {
@@ -2528,25 +2572,27 @@ body {
 .fo-pagination-size label {
   font-size: 0.82rem;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 600;
   margin: 0;
   white-space: nowrap;
 }
 
 .fo-pagination-size select {
-  padding: 5px 10px;
+  padding: 6px 12px;
   border: 1.5px solid var(--border);
-  border-radius: 8px;
+  border-radius: 20px;
   font-size: 0.82rem;
   font-family: inherit;
+  font-weight: 500;
   background: var(--bg-card);
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-smooth);
 }
 
 .fo-pagination-size select:focus {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
 }
 
 .fo-filter-stock {
@@ -3291,24 +3337,31 @@ body {
   transform: scale(1.1);
 }
 
-/* ==================== FO ADD TO CART SUCCESS ==================== */
+/* ==================== FO ADD TO CART — PREMIUM GRADIENT ==================== */
 .fo-add-cart-btn {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--pharmacy-green));
   color: #fff;
-  border: 1.5px solid var(--primary);
+  border: none;
   border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 10px 20px;
+  letter-spacing: 0.2px;
+  box-shadow: 0 3px 12px rgba(26,115,232,0.25);
 }
 
 .fo-add-cart-btn:hover:not(:disabled) {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background: linear-gradient(135deg, var(--primary-dark), var(--pharmacy-green-dark));
   color: #fff;
+  box-shadow: 0 5px 18px rgba(26,115,232,0.35);
+  transform: translateY(-1px);
 }
 
 .fo-add-cart-btn.success {
-  background: var(--success);
-  border-color: var(--success);
+  background: var(--success) !important;
+  border-color: var(--success) !important;
   color: #fff;
+  box-shadow: 0 3px 12px rgba(30,142,62,0.3);
 }
 
 /* ==================== FO CART RESERVATION BANNER ==================== */
@@ -4479,4 +4532,457 @@ html[data-theme="dark"] .fo-zoom-result {
 
 html[data-theme="dark"] .fo-zoom-lens {
   border-color: var(--primary);
+}
+
+/* ==================== PROMO / DISCOUNT SYSTEM ==================== */
+
+/* Promo badge on card image — replaces "Nouveau" badge */
+.fo-badge-promo {
+  background: linear-gradient(135deg, #d93025, #e65100);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 10px rgba(217,48,37,0.35);
+}
+
+/* Price block — promo layout */
+.fo-price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fo-price-original {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.fo-price-promo {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--promo-red);
+  line-height: 1.2;
+}
+
+/* Savings line (detail page) */
+.fo-savings-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--success);
+  background: var(--success-light);
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-top: 6px;
+}
+
+.fo-savings-line i {
+  font-size: 0.9rem;
+}
+
+/* Promo badge next to title (detail page) */
+.fo-detail-promo-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #d93025, #e65100);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+
+/* Admin promo badge in product table */
+.fo-admin-promo-badge {
+  display: inline-block;
+  background: var(--promo-red);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Promo toggle in admin form */
+.fo-promo-section {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  background: var(--bg);
+  transition: var(--transition);
+}
+
+.fo-promo-section.active {
+  border-color: var(--promo-red);
+  background: var(--promo-red-light);
+}
+
+.fo-promo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fo-promo-toggle-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+
+.fo-promo-toggle-label i {
+  color: var(--promo-red);
+  margin-right: 6px;
+}
+
+/* Toggle switch */
+.fo-switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.fo-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.fo-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--border);
+  border-radius: 26px;
+  transition: var(--transition-smooth);
+}
+
+.fo-switch-slider::before {
+  content: '';
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: var(--transition-smooth);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.fo-switch input:checked + .fo-switch-slider {
+  background: var(--promo-red);
+}
+
+.fo-switch input:checked + .fo-switch-slider::before {
+  transform: translateX(22px);
+}
+
+/* Promo preview */
+.fo-promo-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-top: 16px;
+  font-size: 0.88rem;
+}
+
+.fo-promo-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.fo-promo-preview-item.discount {
+  color: var(--promo-red);
+}
+
+.fo-promo-preview-item.savings {
+  color: var(--success);
+}
+
+/* Quick view promo price */
+.fo-quickview-body .fo-price-block {
+  margin: 8px 0;
+}
+
+.fo-quickview-body .fo-price-promo {
+  font-size: 1.3rem;
+}
+
+/* Order confirmation promo original price */
+.fo-order-price-original {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+/* ==================== DARK MODE — PROMO OVERRIDES ==================== */
+
+html[data-theme="dark"] .fo-promo-section {
+  background: rgba(217,48,37,0.05);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .fo-promo-section.active {
+  border-color: var(--danger);
+  background: rgba(242,139,130,0.08);
+}
+
+html[data-theme="dark"] .fo-price-original {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .fo-price-promo {
+  color: var(--danger);
+}
+
+html[data-theme="dark"] .fo-badge-promo {
+  background: linear-gradient(135deg, #f28b82, #e65100);
+}
+
+html[data-theme="dark"] .fo-savings-line {
+  background: rgba(129,201,149,0.12);
+  color: var(--success);
+}
+
+html[data-theme="dark"] .fo-promo-preview {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .fo-product-brand {
+  background: rgba(77,182,172,0.12);
+  color: var(--accent);
+}
+
+html[data-theme="dark"] .fo-pagination {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .fo-pagination-controls button {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .fo-pagination-controls button:hover:not(:disabled):not(.active) {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+html[data-theme="dark"] .fo-pagination-controls button.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border-color: transparent;
+}
+
+html[data-theme="dark"] .fo-pagination-size select {
+  background: var(--bg);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .fo-product-card {
+  border-image: linear-gradient(90deg, var(--primary), var(--accent)) 1;
+  border-image-slice: 1 0 0 0;
+}
+
+html[data-theme="dark"] .fo-product-card:hover {
+  box-shadow: 0 8px 32px rgba(91,155,245,0.2), 0 4px 16px rgba(0,0,0,0.3);
+}
+
+html[data-theme="dark"] .fo-product-card-img::after {
+  background: linear-gradient(to top, rgba(0,0,0,0.15), transparent);
+}
+
+html[data-theme="dark"] .fo-add-cart-btn {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 3px 12px rgba(91,155,245,0.25);
+}
+
+html[data-theme="dark"] .fo-add-cart-btn:hover:not(:disabled) {
+  box-shadow: 0 5px 18px rgba(91,155,245,0.35);
+}
+
+/* ==================== CAROUSEL — DocMorris-Style Horizontal Scroll ==================== */
+
+.fo-carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.fo-carousel-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 2px 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.fo-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.fo-carousel-item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* Category carousel items */
+.fo-carousel-track .fo-category-card {
+  min-width: 260px;
+  max-width: 300px;
+}
+
+/* Product carousel items */
+.fo-carousel-product-item {
+  min-width: 280px;
+  max-width: 320px;
+}
+
+/* ─── Carousel Arrow Buttons ─────────────────────────────── */
+
+.fo-carousel-nav-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fo-carousel-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.fo-carousel-arrow:hover:not(.disabled) {
+  background: linear-gradient(135deg, var(--primary), var(--pharmacy-green));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(26,115,232,0.3);
+  transform: scale(1.08);
+}
+
+.fo-carousel-arrow:active:not(.disabled) {
+  transform: scale(0.95);
+}
+
+.fo-carousel-arrow.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Pagination prev/next arrows — bigger & fancier ──── */
+
+.fo-pagination-controls button:first-child,
+.fo-pagination-controls button:last-child,
+.fo-pagination-controls button:nth-child(2),
+.fo-pagination-controls button:nth-last-child(2) {
+  width: 42px;
+  height: 42px;
+  font-size: 1rem;
+  border-radius: 50%;
+}
+
+.fo-pagination-controls button:first-child:hover:not(:disabled),
+.fo-pagination-controls button:last-child:hover:not(:disabled),
+.fo-pagination-controls button:nth-child(2):hover:not(:disabled),
+.fo-pagination-controls button:nth-last-child(2):hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--primary), var(--pharmacy-green));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(26,115,232,0.3);
+}
+
+/* ─── Dark Mode — Carousel ─────────────────────────────── */
+
+html[data-theme="dark"] .fo-carousel-arrow {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+html[data-theme="dark"] .fo-carousel-arrow:hover:not(.disabled) {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(91,155,245,0.3);
+}
+
+/* ─── Responsive — Carousel ────────────────────────────── */
+
+@media (max-width: 768px) {
+  .fo-carousel-product-item {
+    min-width: 240px;
+    max-width: 260px;
+  }
+
+  .fo-carousel-track .fo-category-card {
+    min-width: 220px;
+    max-width: 250px;
+  }
+
+  .fo-carousel-arrow {
+    width: 38px;
+    height: 38px;
+    font-size: 0.95rem;
+  }
+
+  .fo-carousel-nav-header {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fo-carousel-product-item {
+    min-width: 200px;
+    max-width: 230px;
+  }
+
+  .fo-carousel-track .fo-category-card {
+    min-width: 190px;
+    max-width: 220px;
+  }
 }

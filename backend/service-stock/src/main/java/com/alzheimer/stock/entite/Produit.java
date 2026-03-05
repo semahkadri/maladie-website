@@ -36,6 +36,12 @@ public class Produit {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Column(name = "prix_original", precision = 10, scale = 2)
+    private BigDecimal prixOriginal;
+
+    @Column(name = "en_promo")
+    private Boolean enPromo = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categorie_id", nullable = false)
     private Categorie categorie;

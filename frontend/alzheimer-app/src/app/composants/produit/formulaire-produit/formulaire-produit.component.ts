@@ -126,6 +126,41 @@ import { TraductionService } from '../../../services/traduction.service';
                   </div>
                 </div>
 
+                <!-- Promo Section -->
+                <div class="fo-promo-section mb-4" [class.active]="produit.enPromo">
+                  <label class="fo-promo-toggle">
+                    <span class="fo-switch">
+                      <input type="checkbox" [(ngModel)]="produit.enPromo" name="enPromo"
+                             (ngModelChange)="onPromoToggle()">
+                      <span class="fo-switch-slider"></span>
+                    </span>
+                    <span class="fo-promo-toggle-label">
+                      <i class="bi bi-percent"></i>{{ t.tr('promo.activer') }}
+                    </span>
+                  </label>
+
+                  <div *ngIf="produit.enPromo" style="margin-top: 16px;">
+                    <label for="prixOriginal" class="form-label">{{ t.tr('promo.prixAvant') }} <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="prixOriginal" name="prixOriginal"
+                           [(ngModel)]="produit.prixOriginal" [required]="produit.enPromo"
+                           [min]="produit.prix || 0.01" step="0.01"
+                           #prixOriginal="ngModel" placeholder="0.00"
+                           [ngClass]="{'is-invalid': prixOriginal.invalid && prixOriginal.touched}">
+                    <div class="invalid-feedback">{{ t.tr('promo.prixAvant') }} > {{ t.tr('fp.prixLabel') }}</div>
+
+                    <div *ngIf="produit.prixOriginal && produit.prix && produit.prixOriginal > produit.prix" class="fo-promo-preview">
+                      <span class="fo-promo-preview-item discount">
+                        <i class="bi bi-arrow-down-circle-fill"></i>
+                        -{{ getRemise() }}% {{ t.tr('promo.reduction') }}
+                      </span>
+                      <span class="fo-promo-preview-item savings">
+                        <i class="bi bi-piggy-bank-fill"></i>
+                        {{ t.tr('promo.economie') }}: {{ (produit.prixOriginal - produit.prix).toFixed(2) }} TND
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="mb-4">
                   <label for="categorie" class="form-label">{{ t.tr('fp.categorieLabel') }} <span class="text-danger">*</span></label>
                   <select class="form-select" id="categorie" name="categorieId"
@@ -201,7 +236,9 @@ export class FormulaireProduitComponent implements OnInit {
     prix: 0,
     quantite: 0,
     imageUrl: '',
-    categorieId: 0
+    categorieId: 0,
+    enPromo: false,
+    prixOriginal: undefined
   };
   categories: Categorie[] = [];
   estModification = false;
@@ -251,6 +288,21 @@ export class FormulaireProduitComponent implements OnInit {
       next: (data) => this.categories = data,
       error: () => this.erreur = this.t.tr('fp.erreurCategories')
     });
+  }
+
+  // ─── Promo handling ─────────────────────────────────────
+
+  onPromoToggle(): void {
+    if (!this.produit.enPromo) {
+      this.produit.prixOriginal = undefined;
+    }
+  }
+
+  getRemise(): number {
+    if (this.produit.prixOriginal && this.produit.prix && this.produit.prixOriginal > this.produit.prix) {
+      return Math.round(((this.produit.prixOriginal - this.produit.prix) / this.produit.prixOriginal) * 100);
+    }
+    return 0;
   }
 
   // ─── Image handling ─────────────────────────────────────

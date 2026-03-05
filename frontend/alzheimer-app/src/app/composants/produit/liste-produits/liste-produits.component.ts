@@ -119,7 +119,10 @@ import { TraductionService } from '../../../services/traduction.service';
                     <td class="text-muted" style="max-width: 200px;">
                       {{ produit.description | slice:0:60 }}{{ (produit.description.length || 0) > 60 ? '...' : '' }}
                     </td>
-                    <td class="fw-semibold">{{ produit.prix | number:'1.2-2' }}</td>
+                    <td class="fw-semibold">
+                      {{ produit.prix | number:'1.2-2' }}
+                      <span *ngIf="produit.enPromo" class="fo-admin-promo-badge">Promo</span>
+                    </td>
                     <td>
                       <span class="badge badge-stock"
                             [ngClass]="produit.quantite > 10 ? 'bg-success' : produit.quantite > 0 ? 'bg-warning' : 'bg-danger'">

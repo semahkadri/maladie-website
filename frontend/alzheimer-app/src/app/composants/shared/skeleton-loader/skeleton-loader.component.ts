@@ -8,18 +8,21 @@ import { CommonModule } from '@angular/common';
   template: `
     <!-- Product Grid Skeleton -->
     <div *ngIf="type === 'product-grid'" class="fo-product-grid">
-      <div *ngFor="let item of items" class="skeleton-card">
-        <div class="skeleton-img skeleton-pulse"></div>
-        <div style="padding: 16px;">
-          <div class="skeleton-line skeleton-pulse" style="width: 40%; height: 10px; margin-bottom: 10px;"></div>
-          <div class="skeleton-line skeleton-pulse" style="width: 80%; height: 14px; margin-bottom: 8px;"></div>
-          <div class="skeleton-line skeleton-pulse" style="width: 95%; height: 10px; margin-bottom: 6px;"></div>
-          <div class="skeleton-line skeleton-pulse" style="width: 60%; height: 10px; margin-bottom: 16px;"></div>
+      <div *ngFor="let item of items" class="skeleton-card" style="border-top: 3px solid #e0e0e0; border-radius: 16px;">
+        <div class="skeleton-img skeleton-pulse" style="height: 240px;"></div>
+        <div style="padding: 18px;">
+          <div class="skeleton-line skeleton-pulse" style="width: 35%; height: 10px; margin-bottom: 8px; border-radius: 20px;"></div>
+          <div class="skeleton-line skeleton-pulse" style="width: 80%; height: 14px; margin-bottom: 6px;"></div>
+          <div class="skeleton-line skeleton-pulse" style="width: 60%; height: 14px; margin-bottom: 8px;"></div>
+          <div class="skeleton-line skeleton-pulse" style="width: 95%; height: 10px; margin-bottom: 12px;"></div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="skeleton-line skeleton-pulse" style="width: 30%; height: 16px;"></div>
-            <div class="skeleton-line skeleton-pulse" style="width: 25%; height: 12px;"></div>
+            <div>
+              <div class="skeleton-line skeleton-pulse" style="width: 60px; height: 10px; margin-bottom: 4px;"></div>
+              <div class="skeleton-line skeleton-pulse" style="width: 80px; height: 16px;"></div>
+            </div>
+            <div class="skeleton-line skeleton-pulse" style="width: 70px; height: 24px; border-radius: 20px;"></div>
           </div>
-          <div class="skeleton-line skeleton-pulse" style="width: 100%; height: 38px; margin-top: 12px; border-radius: 8px;"></div>
+          <div class="skeleton-line skeleton-pulse" style="width: 100%; height: 42px; margin-top: 12px; border-radius: 50px;"></div>
         </div>
       </div>
     </div>

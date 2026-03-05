@@ -36,6 +36,10 @@ public class ProduitDTO {
     @NotNull(message = "La catégorie est obligatoire")
     private Long categorieId;
 
+    private BigDecimal prixOriginal;
+    private Boolean enPromo;
+    private Integer remise;
+
     private String categorieNom;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;

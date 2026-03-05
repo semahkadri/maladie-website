@@ -55,6 +55,7 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
           <select class="fo-filter-select fo-filter-stock" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
             <option value="tous">{{ t.tr('catalogue.toutStock') }}</option>
             <option value="en-stock">{{ t.tr('catalogue.disponible') }}</option>
+            <option value="en-promo">{{ t.tr('catalogue.filtrePromo') }}</option>
           </select>
         </div>
 
@@ -111,6 +112,7 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
                appScrollAnimate="fade-up" [animateDelay]="i * 100" appTilt [tiltMax]="6">
             <a [routerLink]="['/catalogue', prod.id]" style="text-decoration: none; color: inherit;">
               <div class="fo-product-card-img">
+                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
                 <button class="fo-product-wishlist" (click)="$event.preventDefault(); $event.stopPropagation()">
                   <i class="bi bi-heart"></i>
                 </button>
@@ -125,7 +127,11 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
                 <h4>{{ prod.nom }}</h4>
                 <p>{{ prod.description | slice:0:80 }}{{ prod.description && prod.description.length > 80 ? '...' : '' }}</p>
                 <div class="fo-product-card-footer">
-                  <span class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                    <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                    <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  </div>
+                  <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
                   <span class="fo-product-stock"
                         [class.in-stock]="prod.quantite > 0"
                         [class.out-of-stock]="prod.quantite === 0">
@@ -211,9 +217,15 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
         </div>
         <div class="fo-quickview-body">
           <span class="fo-product-brand">{{ quickViewProduct.categorieNom }}</span>
-          <h2>{{ quickViewProduct.nom }}</h2>
+          <h2>{{ quickViewProduct.nom }}
+            <span *ngIf="quickViewProduct.enPromo && quickViewProduct.remise" class="fo-detail-promo-badge">-{{ quickViewProduct.remise }}%</span>
+          </h2>
           <p class="fo-quickview-desc">{{ quickViewProduct.description }}</p>
-          <span class="fo-product-price">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
+          <div *ngIf="quickViewProduct.enPromo && quickViewProduct.prixOriginal" class="fo-price-block">
+            <span class="fo-price-original">{{ quickViewProduct.prixOriginal | number:'1.2-2' }} TND</span>
+            <span class="fo-price-promo">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
+          </div>
+          <span *ngIf="!quickViewProduct.enPromo || !quickViewProduct.prixOriginal" class="fo-product-price">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
           <span class="fo-product-stock"
                 [class.in-stock]="quickViewProduct.quantite > 0"
                 [class.out-of-stock]="quickViewProduct.quantite === 0">
@@ -300,6 +312,7 @@ export class CatalogueComponent implements OnInit {
         p.categorieId === this.selectedCategory;
       let matchStock = true;
       if (this.selectedStock === 'en-stock') matchStock = p.quantite > 0;
+      else if (this.selectedStock === 'en-promo') matchStock = !!p.enPromo;
       return matchSearch && matchCategory && matchStock;
     });
     this.applySort();
@@ -379,7 +392,8 @@ export class CatalogueComponent implements OnInit {
 
   getStockLabel(value: string): string {
     const labels: Record<string, string> = {
-      'en-stock': this.t.tr('catalogue.disponible')
+      'en-stock': this.t.tr('catalogue.disponible'),
+      'en-promo': this.t.tr('catalogue.filtrePromo')
     };
     return labels[value] || value;
   }
