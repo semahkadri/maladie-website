@@ -53,6 +53,8 @@ management:
 app:
   upload:
     dir: uploads
+  mail:
+    admin-email: admin@pharmacare.tn
 
 eureka:
   client:

@@ -28,6 +28,7 @@ public class CommandeServiceImpl implements CommandeService {
     private final CommandeRepository commandeRepository;
     private final PanierRepository panierRepository;
     private final ProduitRepository produitRepository;
+    private final EmailService emailService;
 
     @Override
     public CommandeDTO creerCommande(CreerCommandeDTO dto) {
@@ -104,6 +105,10 @@ public class CommandeServiceImpl implements CommandeService {
         CommandeDTO commandeDTO = convertirEnDTO(sauvegardee);
         commandeDTO.setProduitsEpuises(nomsProduitsEpuises);
 
+        // Send emails (async — does not block the response)
+        emailService.envoyerConfirmationCommande(commandeDTO);
+        emailService.envoyerNotificationAdmin(commandeDTO);
+
         return commandeDTO;
     }
 
@@ -144,6 +149,8 @@ public class CommandeServiceImpl implements CommandeService {
         Commande commande = commandeRepository.findById(id)
                 .orElseThrow(() -> new ResourceIntrouvableException("Commande", "id", id));
 
+        StatutCommande ancienStatut = commande.getStatut();
+
         // Restore stock if cancelling (skip lines whose product was deleted)
         if (statut == StatutCommande.ANNULEE && commande.getStatut() != StatutCommande.ANNULEE) {
             for (LigneCommande ligne : commande.getLignes()) {
@@ -157,7 +164,14 @@ public class CommandeServiceImpl implements CommandeService {
 
         commande.setStatut(statut);
         Commande modifiee = commandeRepository.save(commande);
-        return convertirEnDTO(modifiee);
+        CommandeDTO dto = convertirEnDTO(modifiee);
+
+        // Send status change email to customer (async)
+        if (ancienStatut != statut) {
+            emailService.envoyerChangementStatut(dto, ancienStatut);
+        }
+
+        return dto;
     }
 
     @Override

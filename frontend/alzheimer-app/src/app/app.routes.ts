@@ -116,6 +116,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./composants/analyse-stock/analyse-stock.component')
             .then(m => m.AnalyseStockComponent)
+      },
+      {
+        path: 'emails',
+        loadComponent: () =>
+          import('./composants/email/liste-emails/liste-emails.component')
+            .then(m => m.ListeEmailsComponent)
       }
     ]
   },

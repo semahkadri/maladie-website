@@ -4,6 +4,7 @@ import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/ro
 import { Subscription, filter } from 'rxjs';
 import { TraductionService } from '../../../services/traduction.service';
 import { ThemeService } from '../../../services/theme.service';
+import { EmailLogService } from '../../../services/email-log.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -60,6 +61,13 @@ import { ThemeService } from '../../../services/theme.service';
            class="sidebar-nav-item" (click)="mobileOpen = false">
           <i class="bi bi-graph-up"></i>
           {{ t.tr('sidebar.analyseStock') }}
+        </a>
+
+        <a routerLink="/admin/emails" routerLinkActive="active"
+           class="sidebar-nav-item" (click)="mobileOpen = false">
+          <i class="bi bi-envelope-fill"></i>
+          {{ t.tr('sidebar.emails') }}
+          <span class="sidebar-badge" *ngIf="unreadEmailCount > 0">{{ unreadEmailCount }}</span>
         </a>
 
         <div class="sidebar-nav-label">{{ t.tr('sidebar.actionsRapides') }}</div>
@@ -123,10 +131,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   mobileOpen = false;
   currentPage = '';
   currentTime = '';
+  unreadEmailCount = 0;
   private routerSub!: Subscription;
   private timerInterval: any;
+  private emailInterval: any;
 
-  constructor(private router: Router, public t: TraductionService, public th: ThemeService) {}
+  constructor(private router: Router, public t: TraductionService, public th: ThemeService, private emailService: EmailLogService) {}
 
   ngOnInit(): void {
     this.updateBreadcrumb(this.router.url);
@@ -136,11 +146,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     this.updateTime();
     this.timerInterval = setInterval(() => this.updateTime(), 60000);
+
+    this.loadUnreadCount();
+    this.emailInterval = setInterval(() => this.loadUnreadCount(), 30000);
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
     if (this.timerInterval) clearInterval(this.timerInterval);
+    if (this.emailInterval) clearInterval(this.emailInterval);
+  }
+
+  private loadUnreadCount(): void {
+    this.emailService.compterNonLus().subscribe({
+      next: (res) => this.unreadEmailCount = res.count,
+      error: () => {}
+    });
   }
 
   private updateBreadcrumb(url: string): void {
@@ -151,7 +172,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       '/admin/produits': this.t.tr('breadcrumb.produits'),
       '/admin/produits/ajouter': this.t.tr('breadcrumb.nouveauProd'),
       '/admin/commandes': this.t.tr('breadcrumb.commandes'),
-      '/admin/analyse-stock': this.t.tr('breadcrumb.analyseStock')
+      '/admin/analyse-stock': this.t.tr('breadcrumb.analyseStock'),
+      '/admin/emails': this.t.tr('breadcrumb.emails')
     };
     if (map[url] !== undefined) {
       this.currentPage = map[url];

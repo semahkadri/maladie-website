@@ -550,6 +550,23 @@ const DICT: Record<string, TranslationEntry> = {
   'promo.pourcentage': { fr: 'Réduction calculée', en: 'Calculated discount' },
   'catalogue.filtrePromo': { fr: 'En promotion', en: 'On sale' },
   'promo.reduction': { fr: 'de réduction', en: 'off' },
+
+  // ─── Email Admin ──────────────────────────────────────────
+  'email.titre': { fr: 'Emails Envoyés', en: 'Sent Emails' },
+  'email.sousTitre': { fr: 'Consultez tous les emails générés par le système', en: 'View all system-generated emails' },
+  'email.nonLus': { fr: 'non lu(s)', en: 'unread' },
+  'email.toutMarquerLu': { fr: 'Tout marquer lu', en: 'Mark all read' },
+  'email.rechercher': { fr: 'Rechercher un email...', en: 'Search emails...' },
+  'email.tous': { fr: 'Tous', en: 'All' },
+  'email.confirmation': { fr: 'Confirmation', en: 'Confirmation' },
+  'email.statutChange': { fr: 'Changement statut', en: 'Status Change' },
+  'email.adminNotif': { fr: 'Notification admin', en: 'Admin Notification' },
+  'email.chargement': { fr: 'Chargement des emails...', en: 'Loading emails...' },
+  'email.aucun': { fr: 'Aucun email pour le moment', en: 'No emails yet' },
+  'email.selectionnez': { fr: 'Sélectionnez un email pour le prévisualiser', en: 'Select an email to preview' },
+  'email.retour': { fr: 'Retour', en: 'Back' },
+  'sidebar.emails': { fr: 'Emails', en: 'Emails' },
+  'breadcrumb.emails': { fr: 'Emails', en: 'Emails' },
 };
 
 @Injectable({ providedIn: 'root' })
