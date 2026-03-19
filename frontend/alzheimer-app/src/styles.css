@@ -782,6 +782,15 @@ body {
   font-size: 1rem;
 }
 
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
 /* ==================== TOPBAR ==================== */
 .topbar {
   position: fixed;
