@@ -101,7 +101,8 @@ import { TraductionService } from '../../../services/traduction.service';
                     </td>
                     <td class="fw-bold">{{ cmd.montantTotal | number:'1.2-2' }} TND</td>
                     <td>
-                      <span class="badge" [ngClass]="getStatutClass(cmd.statut)">
+                      <span class="cmd-badge" [ngClass]="getStatutClass(cmd.statut)">
+                        <i class="bi" [ngClass]="getStatutIcon(cmd.statut)"></i>
                         {{ t.tr('lcmd.' + getStatutKey(cmd.statut)) }}
                       </span>
                     </td>
@@ -205,14 +206,26 @@ export class ListeCommandesComponent implements OnInit {
 
   getStatutClass(statut: string): string {
     const map: Record<string, string> = {
-      'EN_ATTENTE': 'bg-warning text-dark',
-      'CONFIRMEE': 'bg-info text-white',
-      'EN_PREPARATION': 'bg-primary',
-      'EXPEDIEE': 'bg-primary',
-      'LIVREE': 'bg-success',
-      'ANNULEE': 'bg-danger'
+      'EN_ATTENTE': 'cmd-en-attente',
+      'CONFIRMEE': 'cmd-confirmee',
+      'EN_PREPARATION': 'cmd-en-preparation',
+      'EXPEDIEE': 'cmd-expediee',
+      'LIVREE': 'cmd-livree',
+      'ANNULEE': 'cmd-annulee'
     };
-    return map[statut] || 'bg-secondary';
+    return map[statut] || 'cmd-en-attente';
+  }
+
+  getStatutIcon(statut: string): string {
+    const map: Record<string, string> = {
+      'EN_ATTENTE': 'bi-hourglass-split',
+      'CONFIRMEE': 'bi-check-circle',
+      'EN_PREPARATION': 'bi-boxes',
+      'EXPEDIEE': 'bi-truck',
+      'LIVREE': 'bi-bag-check-fill',
+      'ANNULEE': 'bi-x-circle'
+    };
+    return map[statut] || 'bi-circle';
   }
 
   getStatutKey(statut: string): string {

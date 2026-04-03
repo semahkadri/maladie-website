@@ -36,7 +36,7 @@ import { TraductionService } from '../../../services/traduction.service';
       <div *ngIf="!chargement" class="row justify-content-center">
         <div class="col-lg-8">
           <div class="card">
-            <div class="card-header" style="background: linear-gradient(135deg, #1a73e8, #1557b0); color: white;">
+            <div class="card-header card-header-gradient">
               <h5 class="mb-0">
                 <i class="bi bi-info-circle me-2"></i>{{ t.tr('fc.infos') }}
               </h5>
@@ -64,7 +64,7 @@ import { TraductionService } from '../../../services/traduction.service';
                             rows="4" [(ngModel)]="categorie.description"
                             maxlength="500" #desc="ngModel"
                             [placeholder]="t.tr('fc.placeholderDesc')"></textarea>
-                  <small class="text-muted mt-1 d-block">{{ categorie.description.length || 0 }}/500 {{ t.tr('fc.caracteres') }}</small>
+                  <small class="text-muted mt-1 d-block">{{ categorie.description?.length || 0 }}/500 {{ t.tr('fc.caracteres') }}</small>
                 </div>
 
                 <div class="d-flex justify-content-between">

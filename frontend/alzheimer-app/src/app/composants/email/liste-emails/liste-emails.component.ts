@@ -60,14 +60,23 @@ import { TraductionService } from '../../../services/traduction.service';
       <span>{{ t.tr('email.chargement') }}</span>
     </div>
 
+    <!-- Error state -->
+    <div *ngIf="!loading && erreur" class="alert alert-danger d-flex align-items-center m-3">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <span>{{ t.isFr ? 'Impossible de charger les emails. Vérifiez la connexion au serveur.' : 'Failed to load emails. Check server connection.' }}</span>
+      <button class="btn btn-sm btn-outline-danger ms-auto" (click)="loading = true; erreur = false; charger()">
+        <i class="bi bi-arrow-clockwise me-1"></i>{{ t.isFr ? 'Réessayer' : 'Retry' }}
+      </button>
+    </div>
+
     <!-- Empty state -->
-    <div class="email-empty" *ngIf="!loading && emailsFiltres.length === 0">
+    <div class="email-empty" *ngIf="!loading && !erreur && emailsFiltres.length === 0">
       <i class="bi bi-inbox"></i>
       <p>{{ t.tr('email.aucun') }}</p>
     </div>
 
     <!-- Email list + preview -->
-    <div class="email-layout" *ngIf="!loading && emailsFiltres.length > 0">
+    <div class="email-layout" *ngIf="!loading && !erreur && emailsFiltres.length > 0">
       <!-- List panel -->
       <div class="email-list-panel" [class.hidden-on-mobile]="selectedEmail">
         <div *ngFor="let email of emailsFiltres"
@@ -143,6 +152,8 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
   emailsFiltres: EmailLog[] = [];
   selectedEmail: EmailLog | null = null;
   loading = true;
+  erreur = false;
+  private premierChargement = true;
   searchTerm = '';
   filtreType = 'TOUS';
   unreadCount = 0;
@@ -170,8 +181,16 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
         this.unreadCount = emails.filter(e => !e.lu).length;
         this.filtrer();
         this.loading = false;
+        this.erreur = false;
+        this.premierChargement = false;
       },
-      error: () => this.loading = false
+      error: () => {
+        if (this.premierChargement) {
+          this.loading = false;
+          this.erreur = true;
+        }
+        // On background refresh failure, keep showing existing data silently
+      }
     });
   }
 
@@ -231,8 +250,8 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  getSafeHtml(html: string): string {
-    return html;
+  getSafeHtml(html: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   getTypeIcon(type: string): string {
@@ -276,7 +295,7 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
   }
 
   formatDateFull(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString(this.t.locale, {
+    return new Date(dateStr).toLocaleString(this.t.locale, {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });

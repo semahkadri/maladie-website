@@ -38,7 +38,7 @@ import { TraductionService } from '../../../services/traduction.service';
       <div *ngIf="!chargement" class="row justify-content-center">
         <div class="col-lg-8">
           <div class="card">
-            <div class="card-header" style="background: linear-gradient(135deg, #1a73e8, #1557b0); color: white;">
+            <div class="card-header card-header-gradient">
               <h5 class="mb-0">
                 <i class="bi bi-info-circle me-2"></i>{{ t.tr('fp.infos') }}
               </h5>
@@ -170,10 +170,12 @@ import { TraductionService } from '../../../services/traduction.service';
                     <label for="prixOriginal" class="form-label">{{ t.tr('promo.prixAvant') }} <span class="text-danger">*</span></label>
                     <input type="number" class="form-control" id="prixOriginal" name="prixOriginal"
                            [(ngModel)]="produit.prixOriginal" [required]="produit.enPromo"
-                           [min]="produit.prix || 0.01" step="0.01"
+                           [min]="(produit.prix || 0) + 0.01" step="0.01"
                            #prixOriginal="ngModel" placeholder="0.00"
-                           [ngClass]="{'is-invalid': prixOriginal.invalid && prixOriginal.touched}">
-                    <div class="invalid-feedback">{{ t.tr('promo.prixAvant') }} > {{ t.tr('fp.prixLabel') }}</div>
+                           [ngClass]="{'is-invalid': (prixOriginal.invalid && prixOriginal.touched) || (produit.prixOriginal != null && produit.prix != null && produit.prixOriginal <= produit.prix)}">
+                    <div class="invalid-feedback">
+                      {{ t.isFr ? 'Le prix original doit être supérieur au prix de vente.' : 'Original price must be greater than the selling price.' }}
+                    </div>
 
                     <div *ngIf="produit.prixOriginal && produit.prix && produit.prixOriginal > produit.prix" class="fo-promo-preview">
                       <span class="fo-promo-preview-item discount">
@@ -217,12 +219,12 @@ import { TraductionService } from '../../../services/traduction.service';
 
                 <!-- Stock preview -->
                 <div *ngIf="produit.prix > 0 && produit.quantite >= 0" class="alert mb-4"
-                     [ngClass]="produit.quantite > 10 ? 'alert-success' : produit.quantite > 0 ? 'alert-danger' : 'alert-danger'"
+                     [ngClass]="produit.quantite > 10 ? 'alert-success' : produit.quantite > 0 ? 'alert-warning' : 'alert-danger'"
                      style="font-size: 0.85rem;">
                   <i class="bi bi-calculator me-1"></i>
                   <strong>{{ t.tr('fp.valeurStock') }}</strong> {{ produit.prix * produit.quantite | number:'1.2-2' }} TND
                   <span *ngIf="produit.quantite === 0" class="ms-2">
-                    <i class="bi bi-exclamation-triangle"></i> {{ t.tr('fp.enRupture') }}
+                    <i class="bi bi-exclamation-triangle-fill"></i> {{ t.tr('fp.enRupture') }}
                   </span>
                   <span *ngIf="produit.quantite > 0 && produit.quantite <= 10" class="ms-2">
                     <i class="bi bi-exclamation-triangle"></i> {{ t.tr('fp.stockFaible') }}
@@ -234,7 +236,7 @@ import { TraductionService } from '../../../services/traduction.service';
                     <i class="bi bi-arrow-left me-1"></i>{{ t.tr('common.retour') }}
                   </a>
                   <button type="submit" class="btn btn-primary"
-                          [disabled]="formulaire.invalid || enCours || produit.categorieId === 0">
+                          [disabled]="formulaire.invalid || enCours || produit.categorieId === 0 || (produit.enPromo && produit.prixOriginal != null && produit.prix != null && produit.prixOriginal <= produit.prix)">
                     <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
                     <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
                     {{ estModification ? t.tr('common.modifier') : t.tr('common.creer') }}

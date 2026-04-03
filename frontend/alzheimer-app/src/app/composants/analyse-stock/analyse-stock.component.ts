@@ -43,86 +43,100 @@ import { TraductionService } from '../../services/traduction.service';
         <div class="row g-3 mb-4">
           <div class="col-lg-3 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" style="background: var(--primary-light);">
-                <i class="bi bi-box-seam-fill" style="color: var(--primary);"></i>
-              </div>
-              <div>
-                <div class="stat-number">{{ data.indicateursGlobaux.totalProduits }}</div>
-                <div class="stat-label">{{ t.tr('analyse.totalProduits') }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <div class="stat-card">
-              <div class="stat-icon" style="background: var(--warning-light);">
-                <i class="bi bi-receipt" style="color: var(--warning);"></i>
-              </div>
-              <div>
-                <div class="stat-number">{{ data.indicateursGlobaux.totalCommandes90j }}</div>
-                <div class="stat-label">{{ t.tr('analyse.commandes90j') }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <div class="stat-card">
-              <div class="stat-icon" style="background: var(--success-light);">
-                <i class="bi bi-cash-stack" style="color: var(--success);"></i>
-              </div>
-              <div>
-                <div class="stat-number">{{ data.indicateursGlobaux.chiffreAffaires90j | number:'1.0-0' }}</div>
-                <div class="stat-label">{{ t.tr('analyse.ca90j') }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <div class="stat-card">
-              <div class="stat-icon" [style.background]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success-light)' : 'var(--danger-light)'">
-                <i class="bi" [class.bi-graph-up-arrow]="data.indicateursGlobaux.croissanceMensuelle >= 0"
-                   [class.bi-graph-down-arrow]="data.indicateursGlobaux.croissanceMensuelle < 0"
-                   [style.color]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success)' : 'var(--danger)'"></i>
-              </div>
-              <div>
-                <div class="stat-number" [style.color]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success)' : 'var(--danger)'">
-                  {{ data.indicateursGlobaux.croissanceMensuelle >= 0 ? '+' : '' }}{{ data.indicateursGlobaux.croissanceMensuelle }}%
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: var(--primary-light);">
+                  <i class="bi bi-box-seam-fill" style="color: var(--primary);"></i>
                 </div>
-                <div class="stat-label">{{ t.tr('analyse.croissance') }}</div>
+                <div>
+                  <div class="stat-number">{{ data.indicateursGlobaux.totalProduits }}</div>
+                  <div class="stat-label">{{ t.tr('analyse.totalProduits') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: var(--warning-light);">
+                  <i class="bi bi-receipt" style="color: var(--warning);"></i>
+                </div>
+                <div>
+                  <div class="stat-number">{{ data.indicateursGlobaux.totalCommandes90j }}</div>
+                  <div class="stat-label">{{ t.tr('analyse.commandes90j') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: var(--success-light);">
+                  <i class="bi bi-cash-stack" style="color: var(--success);"></i>
+                </div>
+                <div>
+                  <div class="stat-number" style="font-size: 1.4rem;">{{ data.indicateursGlobaux.chiffreAffaires90j | number:'1.0-0' }}</div>
+                  <div class="stat-label">{{ t.tr('analyse.ca90j') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" [style.background]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success-light)' : 'var(--danger-light)'">
+                  <i class="bi" [class.bi-graph-up-arrow]="data.indicateursGlobaux.croissanceMensuelle >= 0"
+                     [class.bi-graph-down-arrow]="data.indicateursGlobaux.croissanceMensuelle < 0"
+                     [style.color]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success)' : 'var(--danger)'"></i>
+                </div>
+                <div>
+                  <div class="stat-number" [style.color]="data.indicateursGlobaux.croissanceMensuelle >= 0 ? 'var(--success)' : 'var(--danger)'">
+                    {{ data.indicateursGlobaux.croissanceMensuelle >= 0 ? '+' : '' }}{{ data.indicateursGlobaux.croissanceMensuelle }}%
+                  </div>
+                  <div class="stat-label">{{ t.tr('analyse.croissance') }}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ═══ ROW 2: Alerts + Stock Value + Avg Turnover ═══ -->
+        <!-- ═══ ROW 2: Alerts + Rupture + Avg Turnover ═══ -->
         <div class="row g-3 mb-4">
           <div class="col-lg-4 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" style="background: var(--warning-light);">
-                <i class="bi bi-exclamation-triangle-fill" style="color: var(--warning);"></i>
-              </div>
-              <div>
-                <div class="stat-number" style="color: var(--warning);">{{ data.indicateursGlobaux.produitsEnAlerte }}</div>
-                <div class="stat-label">{{ t.tr('analyse.enAlerte') }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6">
-            <div class="stat-card">
-              <div class="stat-icon" style="background: var(--danger-light);">
-                <i class="bi bi-x-circle-fill" style="color: var(--danger);"></i>
-              </div>
-              <div>
-                <div class="stat-number" style="color: var(--danger);">{{ data.indicateursGlobaux.produitsEnRupture }}</div>
-                <div class="stat-label">{{ t.tr('analyse.enRupture') }}</div>
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: var(--warning-light);">
+                  <i class="bi bi-exclamation-triangle-fill" style="color: var(--warning);"></i>
+                </div>
+                <div>
+                  <div class="stat-number" style="color: var(--warning);">{{ data.indicateursGlobaux.produitsEnAlerte }}</div>
+                  <div class="stat-label">{{ t.tr('analyse.enAlerte') }}</div>
+                </div>
               </div>
             </div>
           </div>
           <div class="col-lg-4 col-md-6">
             <div class="stat-card">
-              <div class="stat-icon" style="background: var(--primary-light);">
-                <i class="bi bi-arrow-repeat" style="color: var(--primary);"></i>
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: var(--danger-light);">
+                  <i class="bi bi-x-circle-fill" style="color: var(--danger);"></i>
+                </div>
+                <div>
+                  <div class="stat-number" style="color: var(--danger);">{{ data.indicateursGlobaux.produitsEnRupture }}</div>
+                  <div class="stat-label">{{ t.tr('analyse.enRupture') }}</div>
+                </div>
               </div>
-              <div>
-                <div class="stat-number">{{ data.indicateursGlobaux.tauxRotationMoyen }}x</div>
-                <div class="stat-label">{{ t.tr('analyse.rotationMoyenne') }}</div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="stat-card">
+              <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: var(--primary-light);">
+                  <i class="bi bi-arrow-repeat" style="color: var(--primary);"></i>
+                </div>
+                <div>
+                  <div class="stat-number">{{ data.indicateursGlobaux.tauxRotationMoyen }}x</div>
+                  <div class="stat-label">{{ t.tr('analyse.rotationMoyenne') }}</div>
+                </div>
               </div>
             </div>
           </div>

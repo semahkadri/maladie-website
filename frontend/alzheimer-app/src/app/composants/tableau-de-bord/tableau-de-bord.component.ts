@@ -281,7 +281,7 @@ import { TraductionService } from '../../services/traduction.service';
                   <div *ngFor="let cat of categories" class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
                     <div>
                       <span class="fw-semibold">{{ cat.nom }}</span>
-                      <small class="d-block text-muted">{{ cat.description | slice:0:50 }}{{ (cat.description.length || 0) > 50 ? '...' : '' }}</small>
+                      <small class="d-block text-muted">{{ (cat.description || '') | slice:0:50 }}{{ (cat.description?.length || 0) > 50 ? '...' : '' }}</small>
                     </div>
                     <span class="badge badge-category">{{ cat.nombreProduits }} {{ cat.nombreProduits !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}</span>
                   </div>
@@ -351,14 +351,14 @@ import { TraductionService } from '../../services/traduction.service';
                     <div class="text-end">
                       <span class="fw-bold" style="font-size: 0.88rem;">{{ cmd.montantTotal | number:'1.2-2' }} TND</span>
                       <small class="d-block">
-                        <span class="badge" [ngClass]="{
-                          'bg-warning text-dark': cmd.statut === 'EN_ATTENTE',
-                          'bg-info': cmd.statut === 'CONFIRMEE',
-                          'bg-primary': cmd.statut === 'EN_PREPARATION',
-                          'bg-secondary': cmd.statut === 'EXPEDIEE',
-                          'bg-success': cmd.statut === 'LIVREE',
-                          'bg-danger': cmd.statut === 'ANNULEE'
-                        }">{{ cmd.statut }}</span>
+                        <span class="cmd-badge" [ngClass]="{
+                          'cmd-en-attente': cmd.statut === 'EN_ATTENTE',
+                          'cmd-confirmee': cmd.statut === 'CONFIRMEE',
+                          'cmd-en-preparation': cmd.statut === 'EN_PREPARATION',
+                          'cmd-expediee': cmd.statut === 'EXPEDIEE',
+                          'cmd-livree': cmd.statut === 'LIVREE',
+                          'cmd-annulee': cmd.statut === 'ANNULEE'
+                        }">{{ t.tr('lcmd.' + getStatutKey(cmd.statut)) }}</span>
                       </small>
                     </div>
                   </a>
@@ -397,6 +397,14 @@ export class TableauDeBordComponent implements OnInit {
 
   ngOnInit(): void {
     this.chargerDonnees();
+  }
+
+  getStatutKey(statut: string): string {
+    const map: Record<string, string> = {
+      'EN_ATTENTE': 'enAttente', 'CONFIRMEE': 'confirmee', 'EN_PREPARATION': 'enPreparation',
+      'EXPEDIEE': 'expediee', 'LIVREE': 'livree', 'ANNULEE': 'annulee'
+    };
+    return map[statut] || 'enAttente';
   }
 
   chargerDonnees(): void {

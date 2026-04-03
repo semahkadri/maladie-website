@@ -190,7 +190,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   private updateTime(): void {
     const now = new Date();
-    this.currentTime = now.toLocaleDateString(this.t.locale, {
+    this.currentTime = now.toLocaleString(this.t.locale, {
       weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
     });
   }

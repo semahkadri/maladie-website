@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Commande } from '../../../modeles/commande.model';
+import { Commande, LigneCommande } from '../../../modeles/commande.model';
 import { CommandeService } from '../../../services/commande.service';
 import { TraductionService } from '../../../services/traduction.service';
 
@@ -42,7 +42,8 @@ import { TraductionService } from '../../../services/traduction.service';
             <div class="card mb-4">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-bold"><i class="bi bi-info-circle me-2 text-primary"></i>{{ t.tr('dcmd.infos') }}</h6>
-                <span class="badge" [ngClass]="getStatutClass(commande.statut)" style="font-size: 0.85rem; padding: 6px 16px;">
+                <span class="cmd-badge" [ngClass]="getStatutClass(commande.statut)">
+                  <i class="bi" [ngClass]="getStatutIcon(commande.statut)"></i>
                   {{ t.tr('lcmd.' + getStatutKey(commande.statut)) }}
                 </span>
               </div>
@@ -90,8 +91,22 @@ import { TraductionService } from '../../../services/traduction.service';
                     </thead>
                     <tbody>
                       <tr *ngFor="let ligne of commande.lignes">
-                        <td class="fw-semibold">{{ ligne.nomProduit }}</td>
-                        <td>{{ ligne.prixUnitaire | number:'1.2-2' }} TND</td>
+                        <td>
+                          <span class="fw-semibold">{{ ligne.nomProduit }}</span>
+                          <span *ngIf="ligne.prixOriginalUnitaire && ligne.prixOriginalUnitaire > ligne.prixUnitaire"
+                                class="lc-promo-badge ms-2">
+                            -{{ getRemiseLigne(ligne) }}%
+                          </span>
+                        </td>
+                        <td>
+                          <div *ngIf="ligne.prixOriginalUnitaire && ligne.prixOriginalUnitaire > ligne.prixUnitaire">
+                            <span class="text-muted text-decoration-line-through" style="font-size:0.8rem;">{{ ligne.prixOriginalUnitaire | number:'1.2-2' }} TND</span>
+                            <span class="text-danger fw-bold ms-1">{{ ligne.prixUnitaire | number:'1.2-2' }} TND</span>
+                          </div>
+                          <span *ngIf="!ligne.prixOriginalUnitaire || ligne.prixOriginalUnitaire <= ligne.prixUnitaire">
+                            {{ ligne.prixUnitaire | number:'1.2-2' }} TND
+                          </span>
+                        </td>
                         <td><span class="badge badge-category">{{ ligne.quantite }}</span></td>
                         <td class="fw-bold">{{ ligne.sousTotal | number:'1.2-2' }} TND</td>
                       </tr>
@@ -111,7 +126,7 @@ import { TraductionService } from '../../../services/traduction.service';
           <!-- Status Management -->
           <div class="col-lg-4">
             <div class="card" style="position: sticky; top: 80px;">
-              <div class="card-header" style="background: linear-gradient(135deg, #1a73e8, #1557b0); color: white;">
+              <div class="card-header card-header-gradient">
                 <h6 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>{{ t.tr('dcmd.changerStatut') }}</h6>
               </div>
               <div class="card-body">
@@ -195,16 +210,33 @@ export class DetailCommandeComponent implements OnInit {
     });
   }
 
+  getRemiseLigne(ligne: LigneCommande): number {
+    if (!ligne.prixOriginalUnitaire || !ligne.prixUnitaire || ligne.prixOriginalUnitaire <= ligne.prixUnitaire) return 0;
+    return Math.round(((ligne.prixOriginalUnitaire - ligne.prixUnitaire) / ligne.prixOriginalUnitaire) * 100);
+  }
+
   getStatutClass(statut: string): string {
     const map: Record<string, string> = {
-      'EN_ATTENTE': 'bg-warning text-dark',
-      'CONFIRMEE': 'bg-info text-white',
-      'EN_PREPARATION': 'bg-primary',
-      'EXPEDIEE': 'bg-primary',
-      'LIVREE': 'bg-success',
-      'ANNULEE': 'bg-danger'
+      'EN_ATTENTE': 'cmd-en-attente',
+      'CONFIRMEE': 'cmd-confirmee',
+      'EN_PREPARATION': 'cmd-en-preparation',
+      'EXPEDIEE': 'cmd-expediee',
+      'LIVREE': 'cmd-livree',
+      'ANNULEE': 'cmd-annulee'
     };
-    return map[statut] || 'bg-secondary';
+    return map[statut] || 'cmd-en-attente';
+  }
+
+  getStatutIcon(statut: string): string {
+    const map: Record<string, string> = {
+      'EN_ATTENTE': 'bi-hourglass-split',
+      'CONFIRMEE': 'bi-check-circle',
+      'EN_PREPARATION': 'bi-boxes',
+      'EXPEDIEE': 'bi-truck',
+      'LIVREE': 'bi-bag-check-fill',
+      'ANNULEE': 'bi-x-circle'
+    };
+    return map[statut] || 'bi-circle';
   }
 
   getStatutKey(statut: string): string {
