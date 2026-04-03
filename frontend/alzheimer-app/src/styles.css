@@ -2918,9 +2918,62 @@ html[data-theme="dark"] .fo-nb-mobile { background: var(--bg-card); border-top-c
   text-decoration: underline;
 }
 
+/* kept for backward compat — new template uses fo-reco-section */
 .fo-related-section {
   border-top: 1px solid var(--border);
   padding-top: 40px;
+}
+
+/* ==================== RECOMMENDATION SECTIONS ==================== */
+.fo-reco-section {
+  margin-top: 56px;
+}
+
+.fo-reco-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.fo-reco-divider-line {
+  flex: 1;
+  height: 1.5px;
+  background: linear-gradient(to right, transparent, var(--border));
+}
+
+.fo-reco-divider:first-child .fo-reco-divider-line:first-child {
+  background: linear-gradient(to left, transparent, var(--border));
+}
+
+.fo-reco-divider-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border-radius: 50px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.fo-reco-divider-label i {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.fo-reco-desc {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 28px;
+}
+
+html[data-theme="dark"] .fo-reco-divider-label {
+  background: var(--bg-elevated);
 }
 
 /* ==================== FO BREADCRUMB ==================== */

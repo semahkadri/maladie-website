@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
+import { WishlistService } from '../../../services/wishlist.service';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
@@ -138,8 +139,11 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                   <i *ngIf="ajoutOk" class="bi bi-check-lg"></i>
                   {{ ajoutOk ? t.tr('panier.ajouterSuccess') : t.tr('detail.ajouterPanier') }}
                 </button>
-                <button class="fo-detail-secondary-btn">
-                  <i class="bi bi-heart"></i>
+                <button class="fo-detail-secondary-btn"
+                        [class.wl-active]="wishlistService.isInWishlist(produit.id!)"
+                        (click)="wishlistService.toggle(produit)"
+                        [title]="wishlistService.isInWishlist(produit.id!) ? (t.isFr ? 'Retirer de la liste' : 'Remove from wishlist') : (t.isFr ? 'Ajouter à la liste' : 'Add to wishlist')">
+                  <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(produit.id!)" [class.bi-heart]="!wishlistService.isInWishlist(produit.id!)"></i>
                 </button>
               </div>
               <div *ngIf="ajoutErreur" class="alert alert-danger mt-2 mb-0 py-2" style="font-size: 0.85rem;">
@@ -169,69 +173,127 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
           </div>
         </div>
 
-        <!-- Cross-sell: Frequently Bought Together -->
-        <div *ngIf="crossSellProducts.length > 0" class="fo-cross-sell-section">
-          <div class="fo-cross-sell-header">
-            <i class="bi bi-cart-check-fill"></i>
-            <div>
-              <h2>{{ t.tr('crossSell.titre') }}</h2>
-              <p>{{ t.tr('crossSell.desc') }}</p>
+        <!-- ══ Cross-sell: Frequently Bought Together ══ -->
+        <div *ngIf="crossSellProducts.length > 0" class="fo-reco-section">
+          <div class="fo-reco-divider">
+            <div class="fo-reco-divider-line"></div>
+            <div class="fo-reco-divider-label">
+              <i class="bi bi-cart-check-fill"></i>
+              <span>{{ t.tr('crossSell.titre') }}</span>
             </div>
+            <div class="fo-reco-divider-line"></div>
           </div>
+          <p class="fo-reco-desc">{{ t.tr('crossSell.desc') }}</p>
           <div class="fo-product-grid">
-            <a *ngFor="let p of crossSellProducts" [routerLink]="['/catalogue', p.id]" class="fo-product-card">
-              <div class="fo-product-card-img">
-                <span *ngIf="p.enPromo && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
-                <img *ngIf="p.imageUrl" [src]="p.imageUrl" [alt]="p.nom" style="width: 100%; height: 100%; object-fit: cover;">
-                <i *ngIf="!p.imageUrl" class="bi bi-box-seam"></i>
-              </div>
-              <div class="fo-product-card-body">
-                <span class="fo-product-brand">{{ p.categorieNom }}</span>
-                <h4>{{ p.nom }}</h4>
-                <div class="fo-product-card-footer">
+            <div *ngFor="let p of crossSellProducts" class="fo-product-card">
+              <a [routerLink]="['/catalogue', p.id]" class="fo-card-link">
+                <div class="fo-product-card-img">
+                  <span *ngIf="p.enPromo && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
+                  <span *ngIf="!p.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(p.id!)"
+                          (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(p)"
+                          [title]="wishlistService.isInWishlist(p.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
+                    <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(p.id!)" [class.bi-heart]="!wishlistService.isInWishlist(p.id!)"></i>
+                  </button>
+                  <img *ngIf="p.imageUrl" [src]="p.imageUrl" [alt]="p.nom" style="width:100%;height:100%;object-fit:cover;">
+                  <i *ngIf="!p.imageUrl" class="bi bi-box-seam"></i>
+                </div>
+                <div class="fo-product-card-body">
+                  <span class="fo-product-brand">{{ p.categorieNom }}</span>
+                  <h4>{{ p.nom }}</h4>
+                  <p>{{ p.description | slice:0:60 }}{{ p.description && p.description.length > 60 ? '...' : '' }}</p>
+                </div>
+              </a>
+              <div class="fo-card-bottom">
+                <div class="fo-card-price-row">
                   <div *ngIf="p.enPromo && p.prixOriginal" class="fo-price-block">
                     <span class="fo-price-original">{{ p.prixOriginal | number:'1.2-2' }} TND</span>
                     <span class="fo-price-promo">{{ p.prix | number:'1.2-2' }} TND</span>
                   </div>
                   <span *ngIf="!p.enPromo || !p.prixOriginal" class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
-                  <span class="fo-product-stock"
-                        [class.in-stock]="p.quantite > 0"
-                        [class.out-of-stock]="p.quantite === 0">
+                  <span class="fo-product-stock" [class.in-stock]="p.quantite > 0" [class.out-of-stock]="p.quantite === 0">
                     {{ p.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
+                <div class="fo-card-countdown-slot">
+                  <app-promo-countdown *ngIf="p.enPromo && p.dateFinPromo" [dateFinPromo]="p.dateFinPromo" size="card" [isFr]="t.isFr"></app-promo-countdown>
+                </div>
+                <button *ngIf="p.quantite > 0" class="fo-add-cart-btn"
+                        [class.success]="ajoutRecoOk === p.id"
+                        (click)="ajouterRecoAuPanier($event, p)"
+                        [disabled]="ajoutRecoEnCours === p.id">
+                  <span *ngIf="ajoutRecoEnCours === p.id" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="ajoutRecoEnCours !== p.id && ajoutRecoOk !== p.id" class="bi bi-cart-plus me-1"></i>
+                  <i *ngIf="ajoutRecoOk === p.id" class="bi bi-check-lg me-1"></i>
+                  {{ ajoutRecoOk === p.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+                </button>
+                <button *ngIf="p.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
+                  <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
+                </button>
               </div>
-            </a>
+            </div>
           </div>
         </div>
 
-        <!-- Related Products -->
-        <div *ngIf="relatedProducts.length > 0" class="fo-related-section">
-          <h2 class="fo-section-title">{{ t.tr('detail.similaires') }}</h2>
+        <!-- ══ Related: Same Category ══ -->
+        <div *ngIf="relatedProducts.length > 0" class="fo-reco-section">
+          <div class="fo-reco-divider">
+            <div class="fo-reco-divider-line"></div>
+            <div class="fo-reco-divider-label">
+              <i class="bi bi-grid-3x3-gap-fill"></i>
+              <span>{{ t.tr('detail.similaires') }}</span>
+            </div>
+            <div class="fo-reco-divider-line"></div>
+          </div>
+          <p class="fo-reco-desc">{{ t.isFr ? 'D\'autres produits de la même catégorie' : 'More products from the same category' }}</p>
           <div class="fo-product-grid">
-            <a *ngFor="let p of relatedProducts" [routerLink]="['/catalogue', p.id]" class="fo-product-card">
-              <div class="fo-product-card-img">
-                <span *ngIf="p.enPromo && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
-                <img *ngIf="p.imageUrl" [src]="p.imageUrl" [alt]="p.nom" style="width: 100%; height: 100%; object-fit: cover;">
-                <i *ngIf="!p.imageUrl" class="bi bi-box-seam"></i>
-              </div>
-              <div class="fo-product-card-body">
-                <span class="fo-product-brand">{{ p.categorieNom }}</span>
-                <h4>{{ p.nom }}</h4>
-                <div class="fo-product-card-footer">
+            <div *ngFor="let p of relatedProducts" class="fo-product-card">
+              <a [routerLink]="['/catalogue', p.id]" class="fo-card-link">
+                <div class="fo-product-card-img">
+                  <span *ngIf="p.enPromo && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
+                  <span *ngIf="!p.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(p.id!)"
+                          (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(p)"
+                          [title]="wishlistService.isInWishlist(p.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
+                    <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(p.id!)" [class.bi-heart]="!wishlistService.isInWishlist(p.id!)"></i>
+                  </button>
+                  <img *ngIf="p.imageUrl" [src]="p.imageUrl" [alt]="p.nom" style="width:100%;height:100%;object-fit:cover;">
+                  <i *ngIf="!p.imageUrl" class="bi bi-box-seam"></i>
+                </div>
+                <div class="fo-product-card-body">
+                  <span class="fo-product-brand">{{ p.categorieNom }}</span>
+                  <h4>{{ p.nom }}</h4>
+                  <p>{{ p.description | slice:0:60 }}{{ p.description && p.description.length > 60 ? '...' : '' }}</p>
+                </div>
+              </a>
+              <div class="fo-card-bottom">
+                <div class="fo-card-price-row">
                   <div *ngIf="p.enPromo && p.prixOriginal" class="fo-price-block">
                     <span class="fo-price-original">{{ p.prixOriginal | number:'1.2-2' }} TND</span>
                     <span class="fo-price-promo">{{ p.prix | number:'1.2-2' }} TND</span>
                   </div>
                   <span *ngIf="!p.enPromo || !p.prixOriginal" class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
-                  <span class="fo-product-stock"
-                        [class.in-stock]="p.quantite > 0"
-                        [class.out-of-stock]="p.quantite === 0">
+                  <span class="fo-product-stock" [class.in-stock]="p.quantite > 0" [class.out-of-stock]="p.quantite === 0">
                     {{ p.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
+                <div class="fo-card-countdown-slot">
+                  <app-promo-countdown *ngIf="p.enPromo && p.dateFinPromo" [dateFinPromo]="p.dateFinPromo" size="card" [isFr]="t.isFr"></app-promo-countdown>
+                </div>
+                <button *ngIf="p.quantite > 0" class="fo-add-cart-btn"
+                        [class.success]="ajoutRecoOk === p.id"
+                        (click)="ajouterRecoAuPanier($event, p)"
+                        [disabled]="ajoutRecoEnCours === p.id">
+                  <span *ngIf="ajoutRecoEnCours === p.id" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="ajoutRecoEnCours !== p.id && ajoutRecoOk !== p.id" class="bi bi-cart-plus me-1"></i>
+                  <i *ngIf="ajoutRecoOk === p.id" class="bi bi-check-lg me-1"></i>
+                  {{ ajoutRecoOk === p.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+                </button>
+                <button *ngIf="p.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
+                  <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
+                </button>
               </div>
-            </a>
+            </div>
           </div>
         </div>
       </div>
@@ -247,6 +309,8 @@ export class DetailProduitComponent implements OnInit {
   ajoutEnCours = false;
   ajoutOk = false;
   ajoutErreur = '';
+  ajoutRecoEnCours: number | null = null;
+  ajoutRecoOk: number | null = null;
   Math = Math;
 
   // Image Zoom
@@ -258,6 +322,7 @@ export class DetailProduitComponent implements OnInit {
     private route: ActivatedRoute,
     private produitService: ProduitService,
     private panierService: PanierService,
+    public wishlistService: WishlistService,
     public t: TraductionService
   ) {}
 
@@ -338,6 +403,22 @@ export class DetailProduitComponent implements OnInit {
 
   onImageMouseLeave(): void {
     this.zoomActive = false;
+  }
+
+  ajouterRecoAuPanier(event: Event, produit: Produit): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!produit.id || this.ajoutRecoEnCours) return;
+    this.ajoutRecoEnCours = produit.id;
+    this.ajoutRecoOk = null;
+    this.panierService.ajouterProduit(produit.id, 1).subscribe({
+      next: () => {
+        this.ajoutRecoEnCours = null;
+        this.ajoutRecoOk = produit.id!;
+        setTimeout(() => { if (this.ajoutRecoOk === produit.id) this.ajoutRecoOk = null; }, 2000);
+      },
+      error: () => { this.ajoutRecoEnCours = null; }
+    });
   }
 
   private loadCrossSell(produitId: number): void {
