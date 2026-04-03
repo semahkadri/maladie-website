@@ -9,13 +9,15 @@ import { ThemeService } from '../../../services/theme.service';
 import { PanierService } from '../../../services/panier.service';
 import { CategorieService } from '../../../services/categorie.service';
 import { WishlistService } from '../../../services/wishlist.service';
+import { CompareService } from '../../../services/compare.service';
+import { CompareBarComponent } from '../../shared/compare-bar/compare-bar.component';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Panier } from '../../../modeles/panier.model';
 
 @Component({
   selector: 'app-layout-frontoffice',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FormsModule, CompareBarComponent],
   animations: [
     trigger('miniCartSlide', [
       transition(':enter', [
@@ -113,6 +115,13 @@ import { Panier } from '../../../modeles/panier.model';
             <i class="bi" [class.bi-moon-stars-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
           </button>
 
+          <!-- Compare -->
+          <a routerLink="/comparer" class="fo-nb-icon-btn fo-nb-compare-btn"
+             [title]="t.isFr ? 'Comparateur de produits' : 'Product comparison'">
+            <i class="bi bi-bar-chart-steps"></i>
+            <span class="fo-nb-badge fo-nb-badge-compare" *ngIf="compareCount > 0">{{ compareCount }}</span>
+          </a>
+
           <!-- Wishlist -->
           <a routerLink="/wishlist" class="fo-nb-icon-btn fo-nb-wishlist-btn"
              [title]="t.isFr ? 'Ma liste de souhaits' : 'My wishlist'">
@@ -184,6 +193,12 @@ import { Panier } from '../../../modeles/panier.model';
           <i class="bi bi-heart-fill"></i>
           {{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}
           <span class="fo-nb-badge fo-nb-badge-red fo-nb-badge-inline" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
+        </a>
+        <a routerLink="/comparer" routerLinkActive="active"
+           class="fo-nb-mlink fo-nb-mlink-compare" (click)="menuOpen=false">
+          <i class="bi bi-bar-chart-steps"></i>
+          {{ t.isFr ? 'Comparateur' : 'Compare' }}
+          <span class="fo-nb-badge fo-nb-badge-compare fo-nb-badge-inline" *ngIf="compareCount > 0">{{ compareCount }}</span>
         </a>
         <a routerLink="/panier" routerLinkActive="active"
            class="fo-nb-mlink" (click)="menuOpen=false">
@@ -315,6 +330,9 @@ import { Panier } from '../../../modeles/panier.model';
       </div>
     </div>
 
+    <!-- Compare Bar (floating bottom) -->
+    <app-compare-bar></app-compare-bar>
+
     <!-- Back to Top Button -->
     <button class="fo-back-to-top" [class.visible]="showBackToTop" (click)="scrollToTop()" [title]="t.tr('backToTop')">
       <svg class="fo-btt-ring" viewBox="0 0 54 54">
@@ -335,6 +353,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   announcementClosed = false;
   topCategories: Categorie[] = [];
   wishlistCount = 0;
+  compareCount = 0;
 
   // Dynamic features
   scrollProgress = 0;
@@ -346,6 +365,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   private panierSub!: Subscription;
   private itemAddedSub!: Subscription;
   private wishlistSub!: Subscription;
+  private compareSub!: Subscription;
   private miniCartTimer: any;
 
   constructor(
@@ -354,6 +374,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
     private panierService: PanierService,
     private categorieService: CategorieService,
     public wishlistService: WishlistService,
+    public compareService: CompareService,
     private router: Router
   ) {}
 
@@ -375,6 +396,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
       next: (cats) => this.topCategories = cats.slice(0, 5)
     });
     this.wishlistSub = this.wishlistService.wishlist$.subscribe(items => this.wishlistCount = items.length);
+    this.compareSub = this.compareService.items$.subscribe(items => this.compareCount = items.length);
 
     // Mini-cart auto-open + badge bounce on item added
     this.itemAddedSub = this.panierService.itemAdded$.subscribe(() => {
@@ -405,6 +427,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
     this.panierSub?.unsubscribe();
     this.itemAddedSub?.unsubscribe();
     this.wishlistSub?.unsubscribe();
+    this.compareSub?.unsubscribe();
     clearTimeout(this.miniCartTimer);
   }
 }

@@ -10,6 +10,7 @@ import { Produit } from '../../../modeles/produit.model';
 import { Categorie } from '../../../modeles/categorie.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { WishlistService } from '../../../services/wishlist.service';
+import { CompareService } from '../../../services/compare.service';
 import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
 import { TiltDirective } from '../../../directives/tilt.directive';
 import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
@@ -286,6 +287,12 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                     <button class="fo-product-quickview" (click)="openQuickView($event, prod)">
                       <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.quickView') }}
                     </button>
+                    <button class="fo-product-compare"
+                            [class.fo-compare-active]="compareService.isInCompare(prod.id!)"
+                            (click)="$event.preventDefault();$event.stopPropagation();toggleCompare(prod)"
+                            [title]="compareService.isInCompare(prod.id!) ? (t.isFr ? 'Retirer de la comparaison' : 'Remove from comparison') : (t.isFr ? 'Ajouter à la comparaison' : 'Add to comparison')">
+                      <i class="bi" [class.bi-bar-chart-steps]="!compareService.isInCompare(prod.id!)" [class.bi-bar-chart-fill]="compareService.isInCompare(prod.id!)"></i>
+                    </button>
                     <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
                     <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
                   </div>
@@ -411,6 +418,11 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               </div>
             </div>
 
+            <!-- Compare Toast -->
+            <div *ngIf="compareToast" class="fo-toast fo-toast-compare fade-in">
+              <i class="bi bi-bar-chart-steps me-2"></i>{{ compareToast }}
+            </div>
+
             <!-- Toast -->
             <div *ngIf="ajoutErreur" class="fo-toast fo-toast-error fade-in">
               <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ ajoutErreur }}
@@ -516,14 +528,30 @@ export class CatalogueComponent implements OnInit {
   // Quick View
   quickViewProduct: Produit | null = null;
 
+  compareToast = '';
+  private compareToastTimer: any;
+
   constructor(
     private produitService: ProduitService,
     private categorieService: CategorieService,
     private panierService: PanierService,
     private route: ActivatedRoute,
     public t: TraductionService,
-    public wishlistService: WishlistService
+    public wishlistService: WishlistService,
+    public compareService: CompareService
   ) {}
+
+  toggleCompare(prod: Produit): void {
+    const result = this.compareService.toggle(prod);
+    clearTimeout(this.compareToastTimer);
+    if (result === 'full') {
+      this.compareToast = this.t.isFr ? 'Maximum 4 produits en comparaison' : 'Maximum 4 products in comparison';
+      this.compareToastTimer = setTimeout(() => this.compareToast = '', 3000);
+    } else if (result === 'added') {
+      this.compareToast = this.t.isFr ? `"${prod.nom}" ajouté à la comparaison` : `"${prod.nom}" added to comparison`;
+      this.compareToastTimer = setTimeout(() => this.compareToast = '', 2500);
+    }
+  }
 
   ngOnInit(): void {
     const saved = localStorage.getItem('catalogue-view-mode');

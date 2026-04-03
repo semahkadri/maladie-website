@@ -517,6 +517,25 @@ const DICT: Record<string, TranslationEntry> = {
   'marquee.marques': { fr: 'Nos marques partenaires', en: 'Our partner brands' },
   'backToTop': { fr: 'Haut de page', en: 'Back to top' },
 
+  // ─── Comparateur ─────────────────────────────────────────────
+  'compare.titre': { fr: 'Comparateur de produits', en: 'Product Comparison' },
+  'compare.sousTitre': { fr: 'Comparez jusqu\'à 4 produits côte à côte', en: 'Compare up to 4 products side by side' },
+  'compare.ajouter': { fr: 'Ajouter à la comparaison', en: 'Add to comparison' },
+  'compare.retirer': { fr: 'Retirer de la comparaison', en: 'Remove from comparison' },
+  'compare.comparer': { fr: 'Comparer', en: 'Compare' },
+  'compare.vider': { fr: 'Vider', en: 'Clear' },
+  'compare.max': { fr: 'Maximum 4 produits en comparaison', en: 'Maximum 4 products in comparison' },
+  'compare.ajouteMsg': { fr: 'ajouté à la comparaison', en: 'added to comparison' },
+  'compare.meilleurPrix': { fr: 'Meilleur prix', en: 'Best price' },
+  'compare.aucun': { fr: 'Aucun produit à comparer', en: 'No products to compare' },
+  'compare.aucunDesc': { fr: 'Ajoutez des produits depuis le catalogue en cliquant sur l\'icône de comparaison.', en: 'Add products from the catalog by clicking the compare icon.' },
+  'compare.explorer': { fr: 'Explorer le catalogue', en: 'Explore catalog' },
+  'compare.retourCatalogue': { fr: 'Retour au catalogue', en: 'Back to catalog' },
+  'compare.viderComparaison': { fr: 'Vider la comparaison', en: 'Clear comparison' },
+  'compare.ajouterProduits': { fr: 'Ajouter des produits', en: 'Add more products' },
+  'compare.voir': { fr: 'Voir le produit', en: 'View product' },
+  'compare.navLabel': { fr: 'Comparateur de produits', en: 'Product comparison' },
+
   // ─── Expiry & Lot Tracking ──────────────────────────────────
   'expiry.dateExpiration': { fr: 'Date d\'expiration', en: 'Expiry date' },
   'expiry.numeroLot': { fr: 'Numéro de lot', en: 'Batch number' },

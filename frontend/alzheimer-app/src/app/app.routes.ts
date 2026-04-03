@@ -54,6 +54,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./composants/frontoffice/confirmation-commande/confirmation-commande.component')
             .then(m => m.ConfirmationCommandeComponent)
+      },
+      {
+        path: 'comparer',
+        loadComponent: () =>
+          import('./composants/frontoffice/comparer/comparer.component')
+            .then(m => m.ComparerComponent)
       }
     ]
   },

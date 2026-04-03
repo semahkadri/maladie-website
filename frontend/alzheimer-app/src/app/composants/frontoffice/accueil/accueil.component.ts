@@ -6,6 +6,7 @@ import { PanierService } from '../../../services/panier.service';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { WishlistService } from '../../../services/wishlist.service';
+import { CompareService } from '../../../services/compare.service';
 import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
 import { CountUpDirective } from '../../../directives/count-up.directive';
 import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
@@ -168,6 +169,11 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
                     <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
                   </button>
+                  <button class="fo-product-compare"
+                          [class.fo-compare-active]="compareService.isInCompare(prod.id!)"
+                          (click)="$event.preventDefault();$event.stopPropagation();compareService.toggle(prod)">
+                    <i class="bi" [class.bi-bar-chart-steps]="!compareService.isInCompare(prod.id!)" [class.bi-bar-chart-fill]="compareService.isInCompare(prod.id!)"></i>
+                  </button>
                   <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
                   <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
                 </div>
@@ -255,6 +261,11 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
                     <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
+                  </button>
+                  <button class="fo-product-compare"
+                          [class.fo-compare-active]="compareService.isInCompare(prod.id!)"
+                          (click)="$event.preventDefault();$event.stopPropagation();compareService.toggle(prod)">
+                    <i class="bi" [class.bi-bar-chart-steps]="!compareService.isInCompare(prod.id!)" [class.bi-bar-chart-fill]="compareService.isInCompare(prod.id!)"></i>
                   </button>
                   <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
                   <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
@@ -374,7 +385,8 @@ export class AccueilComponent implements OnInit, OnDestroy {
     private produitService: ProduitService,
     private panierService: PanierService,
     public t: TraductionService,
-    public wishlistService: WishlistService
+    public wishlistService: WishlistService,
+    public compareService: CompareService
   ) {}
 
   ngOnInit(): void {
