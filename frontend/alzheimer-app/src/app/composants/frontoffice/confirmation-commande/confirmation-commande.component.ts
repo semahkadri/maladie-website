@@ -100,13 +100,23 @@ interface ConfettiParticle {
 
               <!-- Order Lines -->
               <div *ngFor="let ligne of commande.lignes; let last = last"
-                   class="d-flex justify-content-between align-items-center py-2"
+                   class="fo-confirm-ligne py-2"
                    [style.border-bottom]="!last ? '1px solid var(--border)' : 'none'">
-                <div>
+                <div class="fo-confirm-ligne-left">
                   <span class="fw-semibold">{{ ligne.nomProduit }}</span>
                   <small class="text-muted ms-2">x{{ ligne.quantite }}</small>
+                  <span *ngIf="ligne.prixOriginalUnitaire" class="fo-confirm-promo-label ms-2">
+                    <i class="bi bi-tag-fill"></i> Promo
+                  </span>
                 </div>
-                <span class="fw-bold">{{ ligne.sousTotal | number:'1.2-2' }} TND</span>
+                <div class="fo-confirm-ligne-price">
+                  <span *ngIf="ligne.prixOriginalUnitaire" class="fo-confirm-original">
+                    {{ (ligne.prixOriginalUnitaire * ligne.quantite) | number:'1.2-2' }} TND
+                  </span>
+                  <span class="fw-bold" [class.fo-confirm-promo-price]="ligne.prixOriginalUnitaire">
+                    {{ ligne.sousTotal | number:'1.2-2' }} TND
+                  </span>
+                </div>
               </div>
 
               <hr>

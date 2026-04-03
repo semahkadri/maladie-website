@@ -75,6 +75,7 @@ public class CommandeServiceImpl implements CommandeService {
                     .produit(produit)
                     .nomProduit(produit.getNom())
                     .prixUnitaire(produit.getPrix())
+                    .prixOriginalUnitaire(Boolean.TRUE.equals(produit.getEnPromo()) ? produit.getPrixOriginal() : null)
                     .quantite(lignePanier.getQuantite())
                     .sousTotal(produit.getPrix().multiply(BigDecimal.valueOf(lignePanier.getQuantite())))
                     .build();
@@ -217,6 +218,7 @@ public class CommandeServiceImpl implements CommandeService {
                 .produitId(ligne.getProduit() != null ? ligne.getProduit().getId() : null)
                 .nomProduit(ligne.getNomProduit())
                 .prixUnitaire(ligne.getPrixUnitaire())
+                .prixOriginalUnitaire(ligne.getPrixOriginalUnitaire())
                 .quantite(ligne.getQuantite())
                 .sousTotal(ligne.getSousTotal())
                 .build();

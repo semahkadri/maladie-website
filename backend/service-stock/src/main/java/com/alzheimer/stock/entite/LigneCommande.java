@@ -32,6 +32,9 @@ public class LigneCommande {
     @Column(name = "prix_unitaire", nullable = false, precision = 10, scale = 2)
     private BigDecimal prixUnitaire;
 
+    @Column(name = "prix_original_unitaire", precision = 10, scale = 2)
+    private BigDecimal prixOriginalUnitaire;
+
     @Column(nullable = false)
     private Integer quantite;
 

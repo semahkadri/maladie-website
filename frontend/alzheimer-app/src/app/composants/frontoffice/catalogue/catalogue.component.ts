@@ -74,6 +74,18 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             </span>
           </div>
           <div class="fo-toolbar-right">
+            <!-- View toggle: Grid / List -->
+            <div class="fo-view-toggle-group">
+              <span class="fo-vt-label-prefix">{{ t.isFr ? 'Affichage' : 'View' }}</span>
+              <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'grid'" (click)="setView('grid')">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+                <span>{{ t.isFr ? 'Grille' : 'Grid' }}</span>
+              </button>
+              <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'list'" (click)="setView('list')">
+                <i class="bi bi-list-ul"></i>
+                <span>{{ t.isFr ? 'Liste' : 'List' }}</span>
+              </button>
+            </div>
             <div class="fo-sort-control">
               <label><i class="bi bi-sort-down me-1"></i>{{ t.tr('catalogue.trierPar') }}</label>
               <select [(ngModel)]="sortBy" (ngModelChange)="applySort()">
@@ -107,10 +119,10 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
         <!-- Skeleton Loading -->
         <app-skeleton-loader *ngIf="loading" type="product-grid" [count]="6"></app-skeleton-loader>
 
-        <!-- Product Grid (paginated) -->
-        <div class="fo-product-grid" *ngIf="!loading && pagedProducts.length > 0">
+        <!-- ═══ GRID VIEW ═══════════════════════════════════════════ -->
+        <div class="fo-product-grid" *ngIf="!loading && pagedProducts.length > 0 && viewMode === 'grid'">
           <div *ngFor="let prod of pagedProducts; let i = index" class="fo-product-card"
-               appScrollAnimate="fade-up" [animateDelay]="i * 100" appTilt [tiltMax]="6">
+               appScrollAnimate="fade-up" [animateDelay]="i * 80" appTilt [tiltMax]="6">
             <a [routerLink]="['/catalogue', prod.id]" style="text-decoration: none; color: inherit;">
               <div class="fo-product-card-img">
                 <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
@@ -161,6 +173,90 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <span *ngIf="prod.quantite === 0" class="fo-product-stock out-of-stock mt-2" style="display: block; text-align: center;">
                 <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
               </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ LIST VIEW ════════════════════════════════════════════ -->
+        <div class="fo-product-list" *ngIf="!loading && pagedProducts.length > 0 && viewMode === 'list'">
+          <div *ngFor="let prod of pagedProducts; let i = index"
+               class="fo-list-card"
+               [style.animation-delay]="i * 55 + 'ms'">
+
+            <!-- Left: Image -->
+            <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-img-wrap">
+              <div class="fo-list-card-img">
+                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom">
+                <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
+              </div>
+            </a>
+
+            <!-- Right: Content -->
+            <div class="fo-list-card-body">
+
+              <!-- Top row: brand + stock -->
+              <div class="fo-list-card-top">
+                <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                <span class="fo-product-stock"
+                      [class.in-stock]="prod.quantite > 0"
+                      [class.out-of-stock]="prod.quantite === 0">
+                  <i class="bi" [class.bi-check-circle-fill]="prod.quantite > 0"
+                               [class.bi-x-circle-fill]="prod.quantite === 0"></i>
+                  {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                </span>
+              </div>
+
+              <!-- Title -->
+              <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-title-link">
+                <h3>{{ prod.nom }}</h3>
+              </a>
+
+              <!-- Full description -->
+              <p class="fo-list-card-desc">{{ prod.description }}</p>
+
+              <!-- Price block -->
+              <div class="fo-list-card-price">
+                <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                  <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                  <span class="fo-price-promo" style="font-size: 1.25rem;">{{ prod.prix | number:'1.2-2' }} TND</span>
+                </div>
+                <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-list-card-price-value">
+                  {{ prod.prix | number:'1.2-2' }} TND
+                </span>
+                <span *ngIf="prod.enPromo && prod.remise && prod.prixOriginal" class="fo-list-savings-badge">
+                  <i class="bi bi-piggy-bank-fill"></i>
+                  {{ t.tr('promo.economie') }} {{ (prod.prixOriginal - prod.prix) | number:'1.2-2' }} TND
+                </span>
+              </div>
+
+              <!-- Countdown -->
+              <app-promo-countdown
+                *ngIf="prod.enPromo && prod.dateFinPromo"
+                [dateFinPromo]="prod.dateFinPromo"
+                size="card"
+                [isFr]="t.isFr">
+              </app-promo-countdown>
+
+              <!-- Action buttons -->
+              <div class="fo-list-card-actions">
+                <button *ngIf="prod.quantite > 0"
+                        class="fo-add-cart-btn"
+                        [class.success]="ajoutOk === prod.id"
+                        (click)="ajouterAuPanier($event, prod)"
+                        [disabled]="ajoutEnCours === prod.id">
+                  <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
+                  <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
+                  {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+                </button>
+                <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-detail-btn">
+                  <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.voirDetail') }}
+                </a>
+                <button class="fo-list-card-qv-btn" (click)="openQuickView($event, prod)">
+                  <i class="bi bi-zoom-in me-1"></i>{{ t.tr('catalogue.quickView') }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -292,6 +388,9 @@ export class CatalogueComponent implements OnInit {
   ajoutOk: number | null = null;
   ajoutErreur = '';
 
+  // View mode: grid | list
+  viewMode: 'grid' | 'list' = 'grid';
+
   // Quick View
   quickViewProduct: Produit | null = null;
 
@@ -303,6 +402,9 @@ export class CatalogueComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const saved = localStorage.getItem('catalogue-view-mode');
+    if (saved === 'list' || saved === 'grid') this.viewMode = saved;
+
     this.categorieService.listerTout().subscribe({
       next: (cats) => this.categories = cats
     });
@@ -314,6 +416,11 @@ export class CatalogueComponent implements OnInit {
       },
       error: () => this.loading = false
     });
+  }
+
+  setView(mode: 'grid' | 'list'): void {
+    this.viewMode = mode;
+    localStorage.setItem('catalogue-view-mode', mode);
   }
 
   applyFilters(): void {

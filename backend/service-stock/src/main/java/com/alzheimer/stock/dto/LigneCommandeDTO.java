@@ -15,6 +15,7 @@ public class LigneCommandeDTO {
     private Long produitId;
     private String nomProduit;
     private BigDecimal prixUnitaire;
+    private BigDecimal prixOriginalUnitaire;
     private Integer quantite;
     private BigDecimal sousTotal;
 }

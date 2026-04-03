@@ -3,6 +3,7 @@ export interface LigneCommande {
   produitId?: number | null;
   nomProduit: string;
   prixUnitaire: number;
+  prixOriginalUnitaire?: number;
   quantite: number;
   sousTotal: number;
 }
