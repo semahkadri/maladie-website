@@ -2259,10 +2259,12 @@ body {
 }
 
 .fo-product-card-body {
-  padding: 16px 16px 0;
-  flex: 1;
+  padding: 14px 16px 14px;
+  flex: 1;              /* fills remaining space inside fo-card-link */
   display: flex;
   flex-direction: column;
+  gap: 5px;
+  overflow: hidden;     /* clips any overflow so it never pushes card taller */
 }
 
 .fo-product-card-category {
@@ -2282,13 +2284,15 @@ body {
 .fo-product-card-body h4 {
   font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   letter-spacing: -0.2px;
+  line-height: 1.35;
+  height: calc(2 * 1rem * 1.35); /* exactly 2 lines — never more, never less */
+  flex-shrink: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.35;
 }
 
 .fo-product-card-body p {
@@ -2296,7 +2300,8 @@ body {
   color: var(--text-secondary);
   line-height: 1.45;
   margin-bottom: 0;
-  flex: 1;
+  height: calc(2 * 0.8rem * 1.45); /* exactly 2 lines — cards with/without desc identical */
+  flex-shrink: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
