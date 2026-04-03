@@ -44,6 +44,7 @@ public class ProduitDTO {
     private LocalDate dateExpiration;
     private String numeroLot;
     private Integer joursAvantExpiration;
+    private LocalDateTime dateFinPromo;
 
     private String categorieNom;
     private LocalDateTime dateCreation;

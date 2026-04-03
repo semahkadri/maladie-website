@@ -7,11 +7,12 @@ import { PanierService } from '../../../services/panier.service';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
+import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
 
 @Component({
   selector: 'app-detail-produit',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, SkeletonLoaderComponent],
+  imports: [CommonModule, RouterLink, FormsModule, SkeletonLoaderComponent, PromoCountdownComponent],
   template: `
     <!-- Skeleton Loading -->
     <div class="fo-section" *ngIf="loading">
@@ -63,6 +64,12 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
                     <i class="bi bi-piggy-bank-fill"></i>
                     {{ t.tr('promo.economie') }}: {{ produit.prixOriginal - produit.prix | number:'1.2-2' }} TND (-{{ produit.remise }}%)
                   </div>
+                  <app-promo-countdown
+                    *ngIf="produit.dateFinPromo"
+                    [dateFinPromo]="produit.dateFinPromo"
+                    size="detail"
+                    [isFr]="t.isFr">
+                  </app-promo-countdown>
                 </div>
                 <span *ngIf="!produit.enPromo || !produit.prixOriginal" class="value">{{ produit.prix | number:'1.2-2' }} TND</span>
               </div>

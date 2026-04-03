@@ -73,6 +73,7 @@ public class ProduitServiceImpl implements ProduitService {
                 .enPromo(produitDTO.getEnPromo() != null ? produitDTO.getEnPromo() : false)
                 .dateExpiration(produitDTO.getDateExpiration())
                 .numeroLot(produitDTO.getNumeroLot())
+                .dateFinPromo(produitDTO.getDateFinPromo())
                 .categorie(categorie)
                 .build();
 
@@ -97,6 +98,7 @@ public class ProduitServiceImpl implements ProduitService {
         produit.setEnPromo(produitDTO.getEnPromo() != null ? produitDTO.getEnPromo() : false);
         produit.setDateExpiration(produitDTO.getDateExpiration());
         produit.setNumeroLot(produitDTO.getNumeroLot());
+        produit.setDateFinPromo(produitDTO.getDateFinPromo());
         produit.setCategorie(categorie);
 
         Produit modifie = produitRepository.save(produit);
@@ -209,6 +211,7 @@ public class ProduitServiceImpl implements ProduitService {
                 .dateExpiration(produit.getDateExpiration())
                 .numeroLot(produit.getNumeroLot())
                 .joursAvantExpiration(joursAvantExpiration)
+                .dateFinPromo(produit.getDateFinPromo())
                 .categorieId(produit.getCategorie().getId())
                 .categorieNom(produit.getCategorie().getNom())
                 .dateCreation(produit.getDateCreation())

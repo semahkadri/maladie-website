@@ -550,6 +550,8 @@ const DICT: Record<string, TranslationEntry> = {
   'promo.pourcentage': { fr: 'Réduction calculée', en: 'Calculated discount' },
   'catalogue.filtrePromo': { fr: 'En promotion', en: 'On sale' },
   'promo.reduction': { fr: 'de réduction', en: 'off' },
+  'promo.dateFinLabel': { fr: 'Date de fin de promotion', en: 'Promo end date' },
+  'promo.dateFinHint':  { fr: 'Un compte à rebours sera affiché sur le site client', en: 'A countdown will be shown on the storefront' },
 
   // ─── Email Admin ──────────────────────────────────────────
   'email.titre': { fr: 'Emails Envoyés', en: 'Sent Emails' },

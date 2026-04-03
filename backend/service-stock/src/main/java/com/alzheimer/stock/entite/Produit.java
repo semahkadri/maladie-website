@@ -49,6 +49,9 @@ public class Produit {
     @Column(name = "numero_lot", length = 100)
     private String numeroLot;
 
+    @Column(name = "date_fin_promo")
+    private LocalDateTime dateFinPromo;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categorie_id", nullable = false)
     private Categorie categorie;

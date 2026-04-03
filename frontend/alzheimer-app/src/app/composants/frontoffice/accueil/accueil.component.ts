@@ -8,11 +8,12 @@ import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
 import { CountUpDirective } from '../../../directives/count-up.directive';
+import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
 
 @Component({
   selector: 'app-accueil',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScrollAnimateDirective, CountUpDirective],
+  imports: [CommonModule, RouterLink, ScrollAnimateDirective, CountUpDirective, PromoCountdownComponent],
   template: `
     <!-- Premium Animated Hero -->
     <section class="fo-hero fo-hero-animated">
@@ -191,6 +192,12 @@ import { CountUpDirective } from '../../../directives/count-up.directive';
                     {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
+                <app-promo-countdown
+                  *ngIf="prod.enPromo && prod.dateFinPromo"
+                  [dateFinPromo]="prod.dateFinPromo"
+                  size="card"
+                  [isFr]="t.isFr">
+                </app-promo-countdown>
               </div>
             </a>
           </div>

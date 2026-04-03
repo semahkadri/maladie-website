@@ -12,11 +12,12 @@ import { TraductionService } from '../../../services/traduction.service';
 import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
 import { TiltDirective } from '../../../directives/tilt.directive';
 import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
+import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
 
 @Component({
   selector: 'app-categorie-produits',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ScrollAnimateDirective, TiltDirective, SkeletonLoaderComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ScrollAnimateDirective, TiltDirective, SkeletonLoaderComponent, PromoCountdownComponent],
   animations: [
     trigger('quickViewAnim', [
       transition(':enter', [
@@ -147,6 +148,12 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
                     {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
+                <app-promo-countdown
+                  *ngIf="prod.enPromo && prod.dateFinPromo"
+                  [dateFinPromo]="prod.dateFinPromo"
+                  size="card"
+                  [isFr]="t.isFr">
+                </app-promo-countdown>
               </div>
             </a>
             <div class="fo-product-card-body" style="padding-top: 0;">
@@ -237,6 +244,12 @@ import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-l
             <span class="fo-price-promo">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
           </div>
           <span *ngIf="!quickViewProduct.enPromo || !quickViewProduct.prixOriginal" class="fo-product-price">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
+          <app-promo-countdown
+            *ngIf="quickViewProduct.enPromo && quickViewProduct.dateFinPromo"
+            [dateFinPromo]="quickViewProduct.dateFinPromo"
+            size="card"
+            [isFr]="t.isFr">
+          </app-promo-countdown>
           <span class="fo-product-stock"
                 [class.in-stock]="quickViewProduct.quantite > 0"
                 [class.out-of-stock]="quickViewProduct.quantite === 0">

@@ -185,6 +185,21 @@ import { TraductionService } from '../../../services/traduction.service';
                         {{ t.tr('promo.economie') }}: {{ (produit.prixOriginal - produit.prix).toFixed(2) }} TND
                       </span>
                     </div>
+
+                    <!-- Date de fin de promotion -->
+                    <div class="fo-promo-date-fin">
+                      <label for="dateFinPromo">
+                        <i class="bi bi-hourglass-split"></i>
+                        {{ t.tr('promo.dateFinLabel') }}
+                      </label>
+                      <input type="datetime-local" class="form-control" id="dateFinPromo" name="dateFinPromo"
+                             [(ngModel)]="produit.dateFinPromo"
+                             [min]="minDateFinPromo">
+                      <p class="fo-promo-date-hint" *ngIf="produit.dateFinPromo">
+                        <i class="bi bi-info-circle"></i>
+                        {{ t.tr('promo.dateFinHint') }}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -330,9 +345,16 @@ export class FormulaireProduitComponent implements OnInit {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }
 
+  get minDateFinPromo(): string {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 5);
+    return now.toISOString().slice(0, 16);
+  }
+
   onPromoToggle(): void {
     if (!this.produit.enPromo) {
       this.produit.prixOriginal = undefined;
+      this.produit.dateFinPromo = undefined;
     }
   }
 

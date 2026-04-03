@@ -5776,3 +5776,220 @@ html[data-theme="dark"] .fo-carousel-arrow:hover:not(.disabled) {
     display: none;
   }
 }
+
+
+/* ════════════════════════════════════════════════════════
+   PROMO COUNTDOWN TIMER — app-promo-countdown
+   ════════════════════════════════════════════════════════ */
+
+/* ── Card mode ───────────────────────────────────────── */
+.pcd-card {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #d93025 0%, #e65100 100%);
+  border-radius: 8px;
+  padding: 5px 10px;
+  margin-top: 8px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.pcd-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(255,200,0,0.7));
+}
+
+.pcd-blocks-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.pcd-unit-block {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+
+.pcd-num {
+  font-weight: 800;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.pcd-lbl {
+  font-size: 0.58rem;
+  font-weight: 600;
+  opacity: 0.8;
+  margin-left: 1px;
+}
+
+.pcd-colon {
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 1px;
+  padding-bottom: 1px;
+}
+
+/* Urgent pulse — < 24 h */
+.pcd-card.pcd-urgent {
+  animation: pcd-pulse-card 1.2s ease-in-out infinite alternate;
+  box-shadow: 0 0 10px rgba(217, 48, 37, 0.55);
+}
+
+@keyframes pcd-pulse-card {
+  from { opacity: 1;   transform: scale(1); }
+  to   { opacity: 0.85; transform: scale(1.01); }
+}
+
+/* Expired state */
+.pcd-card.pcd-expired {
+  background: var(--secondary, #5f6368);
+  font-size: 0.7rem;
+  justify-content: center;
+}
+
+/* ── Detail mode ─────────────────────────────────────── */
+.pcd-detail {
+  margin-top: 18px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #c62828 0%, #d84315 60%, #e65100 100%);
+  box-shadow: 0 6px 24px rgba(198, 40, 40, 0.35);
+}
+
+.pcd-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pcd-detail-header i {
+  font-size: 1rem;
+  filter: drop-shadow(0 0 5px rgba(255,220,0,0.8));
+}
+
+.pcd-detail-blocks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 20px;
+}
+
+.pcd-detail-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 12px;
+  padding: 12px 20px;
+  min-width: 66px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pcd-detail-num {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.pcd-detail-lbl {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 5px;
+}
+
+.pcd-detail-sep {
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.4);
+  padding-bottom: 22px;
+  margin: 0 2px;
+  line-height: 1;
+}
+
+/* Urgent pulse */
+.pcd-detail.pcd-urgent {
+  animation: pcd-pulse-detail 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pcd-pulse-detail {
+  from { box-shadow: 0 6px 24px rgba(198, 40, 40, 0.35); }
+  to   { box-shadow: 0 6px 32px rgba(198, 40, 40, 0.65); }
+}
+
+/* Expired state */
+.pcd-detail.pcd-expired {
+  background: var(--secondary, #5f6368);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 14px;
+}
+
+/* ── Dark mode overrides ─────────────────────────────── */
+html[data-theme="dark"] .pcd-detail {
+  box-shadow: 0 6px 24px rgba(198, 40, 40, 0.2);
+}
+html[data-theme="dark"] .pcd-card {
+  box-shadow: 0 2px 10px rgba(217, 48, 37, 0.25);
+}
+
+/* ── Formulaire admin — date fin promo field ─────────── */
+.fo-promo-date-fin {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border, #dadce0);
+}
+
+.fo-promo-date-fin label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  color: var(--promo-red, #d93025);
+}
+
+.fo-promo-date-fin label i {
+  font-size: 0.9rem;
+}
+
+.fo-promo-date-hint {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #5f6368);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

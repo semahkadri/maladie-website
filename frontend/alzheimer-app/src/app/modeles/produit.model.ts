@@ -13,6 +13,7 @@ export interface Produit {
   joursAvantExpiration?: number;
   categorieId: number;
   categorieNom?: string;
+  dateFinPromo?: string;
   dateCreation?: string;
   dateModification?: string;
 }
