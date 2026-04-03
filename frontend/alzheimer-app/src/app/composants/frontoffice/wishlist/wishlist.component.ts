@@ -13,90 +13,110 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
   standalone: true,
   imports: [CommonModule, RouterLink, PromoCountdownComponent],
   template: `
-    <div class="wl-page">
-      <!-- Header -->
-      <div class="wl-header">
-        <div class="wl-header-inner">
-          <div class="wl-header-title">
-            <i class="bi bi-heart-fill wl-header-icon"></i>
-            <h1>{{ t.isFr ? 'Ma Liste de Souhaits' : 'My Wishlist' }}</h1>
-            <span class="wl-count-badge" *ngIf="items.length > 0">{{ items.length }}</span>
-          </div>
-          <div class="wl-header-actions" *ngIf="items.length > 0">
-            <button class="wl-clear-btn" (click)="clearAll()">
-              <i class="bi bi-trash3 me-1"></i>{{ t.isFr ? 'Tout vider' : 'Clear all' }}
-            </button>
-          </div>
+    <div class="fo-section">
+      <div class="fo-section-container fade-in">
+
+        <!-- Breadcrumb — same as panier/commander -->
+        <div class="fo-breadcrumb">
+          <a routerLink="/"><i class="bi bi-house-door"></i></a>
+          <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
+          <span class="fo-breadcrumb-current">
+            {{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}
+          </span>
         </div>
-      </div>
 
-      <!-- Empty state -->
-      <div *ngIf="items.length === 0" class="wl-empty">
-        <div class="wl-empty-icon">
-          <i class="bi bi-heart"></i>
+        <!-- Page title — same pattern as panier -->
+        <div class="fo-wl-titlebar">
+          <div>
+            <h1 class="fo-page-title">
+              <i class="bi bi-heart-fill me-2" style="color:#d32f2f;"></i>
+              {{ t.isFr ? 'Ma Liste de Souhaits' : 'My Wishlist' }}
+            </h1>
+            <p class="fo-page-subtitle">
+              {{ items.length > 0
+                ? (t.isFr ? items.length + ' produit(s) sauvegardé(s)' : items.length + ' saved product(s)')
+                : (t.isFr ? 'Sauvegardez vos produits favoris pour les retrouver facilement.' : 'Save your favourite products to find them easily.') }}
+            </p>
+          </div>
+          <button *ngIf="items.length > 0" class="fo-wl-clear-btn" (click)="clearAll()">
+            <i class="bi bi-trash3 me-1"></i>{{ t.isFr ? 'Tout vider' : 'Clear all' }}
+          </button>
         </div>
-        <h2>{{ t.isFr ? 'Votre liste est vide' : 'Your wishlist is empty' }}</h2>
-        <p>{{ t.isFr ? 'Ajoutez des produits à votre liste pour les retrouver facilement.' : 'Add products to your wishlist to find them easily.' }}</p>
-        <a routerLink="/catalogue" class="wl-browse-btn">
-          <i class="bi bi-grid-3x3-gap me-2"></i>{{ t.isFr ? 'Parcourir le catalogue' : 'Browse catalogue' }}
-        </a>
-      </div>
 
-      <!-- Products grid -->
-      <div *ngIf="items.length > 0" class="wl-grid">
-        <div *ngFor="let prod of items" class="fo-product-card wl-card">
-
-          <!-- ① Clickable zone -->
-          <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
-            <div class="fo-product-card-img">
-              <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-              <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
-              <button class="fo-product-wishlist wl-active" (click)="removeItem($event, prod.id!)">
-                <i class="bi bi-heart-fill"></i>
-              </button>
-              <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
-              <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
-            </div>
-            <div class="fo-product-card-body">
-              <span class="fo-product-brand">{{ prod.categorieNom }}</span>
-              <h4>{{ prod.nom }}</h4>
-              <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
-            </div>
+        <!-- Empty state — same style as panier -->
+        <div *ngIf="items.length === 0" class="fo-empty-state">
+          <i class="bi bi-heart" style="color:#d32f2f;opacity:0.35;"></i>
+          <p>{{ t.isFr ? 'Votre liste de souhaits est vide.' : 'Your wishlist is empty.' }}</p>
+          <a routerLink="/catalogue" class="fo-btn fo-btn-outline">
+            <i class="bi bi-grid-3x3-gap me-2"></i>{{ t.isFr ? 'Parcourir le catalogue' : 'Browse catalogue' }}
           </a>
-
-          <!-- ② Static footer -->
-          <div class="fo-card-bottom">
-            <div class="fo-card-price-row">
-              <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
-                <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
-                <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
-              </div>
-              <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
-              <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
-                {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
-              </span>
-            </div>
-            <div class="fo-card-countdown-slot">
-              <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
-                [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
-              </app-promo-countdown>
-            </div>
-            <button *ngIf="prod.quantite > 0"
-                    class="fo-add-cart-btn"
-                    [class.success]="ajoutOk === prod.id"
-                    (click)="ajouterAuPanier($event, prod)"
-                    [disabled]="ajoutEnCours === prod.id">
-              <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
-              <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
-              <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
-              {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
-            </button>
-            <button *ngIf="prod.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
-              <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
-            </button>
-          </div>
-
         </div>
+
+        <!-- Product grid — same card design as catalogue -->
+        <div *ngIf="items.length > 0" class="fo-wl-grid">
+          <div *ngFor="let prod of items" class="fo-product-card">
+
+            <!-- ① Clickable zone -->
+            <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
+              <div class="fo-product-card-img">
+                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                <!-- Heart button: filled red, click = remove from wishlist -->
+                <button class="fo-product-wishlist wl-active"
+                        (click)="removeItem($event, prod.id!)"
+                        [title]="t.isFr ? 'Retirer de la liste' : 'Remove from wishlist'">
+                  <i class="bi bi-heart-fill"></i>
+                </button>
+                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom"
+                     style="width:100%;height:100%;object-fit:cover;">
+                <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
+              </div>
+              <div class="fo-product-card-body">
+                <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                <h4>{{ prod.nom }}</h4>
+                <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
+              </div>
+            </a>
+
+            <!-- ② Static footer — identical to catalogue cards -->
+            <div class="fo-card-bottom">
+              <div class="fo-card-price-row">
+                <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                  <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                  <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
+                </div>
+                <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">
+                  {{ prod.prix | number:'1.2-2' }} TND
+                </span>
+                <span class="fo-product-stock"
+                      [class.in-stock]="prod.quantite > 0"
+                      [class.out-of-stock]="prod.quantite === 0">
+                  {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                </span>
+              </div>
+              <div class="fo-card-countdown-slot">
+                <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                  [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
+                </app-promo-countdown>
+              </div>
+              <button *ngIf="prod.quantite > 0"
+                      class="fo-add-cart-btn"
+                      [class.success]="ajoutOk === prod.id"
+                      (click)="ajouterAuPanier($event, prod)"
+                      [disabled]="ajoutEnCours === prod.id">
+                <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
+                <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
+                {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+              </button>
+              <button *ngIf="prod.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
+                <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
+              </button>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   `

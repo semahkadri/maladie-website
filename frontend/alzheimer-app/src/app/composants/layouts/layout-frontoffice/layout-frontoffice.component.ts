@@ -66,95 +66,128 @@ import { Panier } from '../../../modeles/panier.model';
       </button>
     </div>
 
-    <!-- Navbar -->
-    <nav class="fo-navbar">
-      <!-- Top Row: Brand + Search + Actions -->
-      <div class="fo-navbar-top">
-        <a routerLink="/" class="fo-navbar-brand">
-          <div class="fo-navbar-brand-icon">
+    <!-- ════════════════════════════════════════════
+         SINGLE UNIFIED NAVBAR
+         ════════════════════════════════════════════ -->
+    <nav class="fo-nb" [class.fo-nb-elevated]="showBackToTop">
+
+      <!-- ── Row 1: Brand · Search · Actions ── -->
+      <div class="fo-nb-row1">
+
+        <!-- Brand -->
+        <a routerLink="/" class="fo-nb-brand">
+          <div class="fo-nb-brand-orb">
             <i class="bi bi-heart-pulse"></i>
           </div>
-          <span>{{ t.tr('nav.brand') }}</span>
+          <div class="fo-nb-brand-text">
+            <span class="fo-nb-brand-name">{{ t.tr('nav.brand') }}</span>
+            <span class="fo-nb-brand-sub">{{ t.isFr ? 'Votre pharmacie en ligne' : 'Your online pharmacy' }}</span>
+          </div>
         </a>
 
-        <div class="fo-navbar-search d-none d-md-block">
-          <i class="bi bi-search"></i>
-          <input type="text" [placeholder]="t.tr('nav.rechercher')">
+        <!-- Search bar -->
+        <div class="fo-nb-search">
+          <i class="bi bi-search fo-nb-search-ico"></i>
+          <input type="text" class="fo-nb-search-input" [placeholder]="t.tr('nav.rechercher')">
+          <button class="fo-nb-search-btn">
+            <i class="bi bi-search"></i>
+            <span class="d-none d-xl-inline ms-1">{{ t.isFr ? 'Rechercher' : 'Search' }}</span>
+          </button>
         </div>
 
-        <div class="fo-navbar-actions">
-          <!-- Language Toggle -->
-          <div class="lang-toggle">
-            <i class="bi bi-globe2 lang-toggle-icon"></i>
-            <button [class.active]="t.isFr" (click)="t.setLang('fr')">FR</button>
-            <button [class.active]="t.isEn" (click)="t.setLang('en')">EN</button>
+        <!-- Actions -->
+        <div class="fo-nb-actions">
+
+          <!-- Language -->
+          <div class="fo-nb-lang">
+            <button [class.fo-nb-lang-active]="t.isFr" (click)="t.setLang('fr')">FR</button>
+            <button [class.fo-nb-lang-active]="t.isEn" (click)="t.setLang('en')">EN</button>
           </div>
-          <!-- Theme Toggle -->
-          <button class="theme-toggle" (click)="th.toggle()" [attr.title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
-            <i class="bi" [class.bi-moon-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
+
+          <!-- Dark / Light mode -->
+          <button class="fo-nb-icon-btn" (click)="th.toggle()"
+                  [title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
+            <i class="bi" [class.bi-moon-stars-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
           </button>
+
           <!-- Wishlist -->
-          <a routerLink="/wishlist" class="fo-navbar-action-btn fo-navbar-wishlist">
+          <a routerLink="/wishlist" class="fo-nb-icon-btn fo-nb-wishlist-btn"
+             [title]="t.isFr ? 'Ma liste de souhaits' : 'My wishlist'">
             <i class="bi bi-heart"></i>
-            <span *ngIf="wishlistCount > 0" class="fo-wishlist-badge">{{ wishlistCount }}</span>
+            <span class="fo-nb-badge fo-nb-badge-red" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
           </a>
+
           <!-- Cart -->
-          <a routerLink="/panier" class="fo-navbar-action-btn fo-navbar-cart">
+          <a routerLink="/panier" class="fo-nb-icon-btn fo-nb-cart-btn" [title]="t.tr('nav.panier')">
             <i class="bi bi-cart3"></i>
-            <span *ngIf="nombreArticles > 0" class="fo-cart-badge" [class.bounce]="cartBounce">{{ nombreArticles }}</span>
+            <span class="fo-nb-badge fo-nb-badge-primary" *ngIf="nombreArticles > 0" [class.bounce]="cartBounce">
+              {{ nombreArticles }}
+            </span>
           </a>
-          <!-- Mobile Toggle -->
-          <button class="fo-navbar-toggle" (click)="menuOpen = !menuOpen">
-            <i class="bi" [class.bi-list]="!menuOpen" [class.bi-x-lg]="menuOpen"></i>
+
+          <!-- Hamburger (mobile only) -->
+          <button class="fo-nb-hamburger" (click)="menuOpen = !menuOpen" [class.fo-nb-hamburger-open]="menuOpen">
+            <span></span><span></span><span></span>
           </button>
+
         </div>
       </div>
 
-      <!-- Bottom Row: Category Links -->
-      <div class="fo-navbar-bottom" *ngIf="topCategories.length > 0">
-        <div class="fo-navbar-bottom-inner">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-             class="fo-navbar-cat-link">
-            <i class="bi bi-house-door"></i> {{ t.tr('nav.accueil') }}
+      <!-- ── Row 2: Category strip (desktop) ── -->
+      <div class="fo-nb-row2">
+        <div class="fo-nb-cats">
+          <a routerLink="/" routerLinkActive="fo-nb-cat-active"
+             [routerLinkActiveOptions]="{exact: true}" class="fo-nb-cat">
+            <i class="bi bi-house-door-fill"></i>
+            <span>{{ t.tr('nav.accueil') }}</span>
           </a>
-          <a routerLink="/catalogue" routerLinkActive="active"
-             class="fo-navbar-cat-link">
-            <i class="bi bi-grid-3x3-gap"></i> {{ t.tr('nav.catalogue') }}
+          <a routerLink="/catalogue" routerLinkActive="fo-nb-cat-active" class="fo-nb-cat">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+            <span>{{ t.tr('nav.catalogue') }}</span>
           </a>
+          <span class="fo-nb-cats-divider"></span>
           <a *ngFor="let cat of topCategories" [routerLink]="['/categories', cat.id]"
-             class="fo-navbar-cat-link">
+             routerLinkActive="fo-nb-cat-active" class="fo-nb-cat">
             {{ cat.nom }}
           </a>
-          <a routerLink="/admin" class="fo-navbar-cat-link">
-            <i class="bi bi-gear"></i> {{ t.tr('nav.admin') }}
+          <span class="fo-nb-cats-divider"></span>
+          <a [routerLink]="['/catalogue']" [queryParams]="{filtre:'promo'}" class="fo-nb-cat fo-nb-cat-promo"
+             routerLinkActive="fo-nb-cat-active">
+            <i class="bi bi-fire"></i>
+            <span>{{ t.isFr ? 'Promos' : 'Deals' }}</span>
           </a>
+          <span class="fo-nb-cats-spacer"></span>
         </div>
       </div>
 
-      <!-- Mobile Menu -->
-      <div class="fo-navbar-menu" [class.open]="menuOpen">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-           class="fo-navbar-link" (click)="menuOpen = false">
-          <i class="bi bi-house-door"></i> {{ t.tr('nav.accueil') }}
+      <!-- ── Mobile slide-down menu ── -->
+      <div class="fo-nb-mobile" [class.fo-nb-mobile-open]="menuOpen">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
+           class="fo-nb-mlink" (click)="menuOpen=false">
+          <i class="bi bi-house-door-fill"></i> {{ t.tr('nav.accueil') }}
         </a>
         <a routerLink="/catalogue" routerLinkActive="active"
-           class="fo-navbar-link" (click)="menuOpen = false">
-          <i class="bi bi-grid-3x3-gap"></i> {{ t.tr('nav.catalogue') }}
-        </a>
-        <a routerLink="/panier" routerLinkActive="active"
-           class="fo-navbar-link" (click)="menuOpen = false">
-          <i class="bi bi-cart3"></i> {{ t.tr('nav.panier') }}
-          <span *ngIf="nombreArticles > 0" class="fo-cart-badge">{{ nombreArticles }}</span>
+           class="fo-nb-mlink" (click)="menuOpen=false">
+          <i class="bi bi-grid-3x3-gap-fill"></i> {{ t.tr('nav.catalogue') }}
         </a>
         <a routerLink="/wishlist" routerLinkActive="active"
-           class="fo-navbar-link" (click)="menuOpen = false">
-          <i class="bi bi-heart"></i> {{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}
-          <span *ngIf="wishlistCount > 0" class="fo-cart-badge">{{ wishlistCount }}</span>
+           class="fo-nb-mlink fo-nb-mlink-wishlist" (click)="menuOpen=false">
+          <i class="bi bi-heart-fill"></i>
+          {{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}
+          <span class="fo-nb-badge fo-nb-badge-red fo-nb-badge-inline" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
         </a>
-        <a routerLink="/admin" class="fo-navbar-link fo-navbar-admin" (click)="menuOpen = false">
-          <i class="bi bi-gear"></i> {{ t.tr('nav.admin') }}
+        <a routerLink="/panier" routerLinkActive="active"
+           class="fo-nb-mlink" (click)="menuOpen=false">
+          <i class="bi bi-cart3-fill"></i>
+          {{ t.tr('nav.panier') }}
+          <span class="fo-nb-badge fo-nb-badge-primary fo-nb-badge-inline" *ngIf="nombreArticles > 0">{{ nombreArticles }}</span>
+        </a>
+        <a [routerLink]="['/catalogue']" [queryParams]="{filtre:'promo'}"
+           class="fo-nb-mlink fo-nb-mlink-promo" (click)="menuOpen=false">
+          <i class="bi bi-fire"></i> {{ t.isFr ? 'Promotions' : 'Deals' }}
         </a>
       </div>
+
     </nav>
 
     <!-- Page Content -->
@@ -231,6 +264,12 @@ import { Panier } from '../../../modeles/panier.model';
         </div>
       </div>
     </footer>
+
+    <!-- Admin Floating Button (temp — replace with guard after auth integration) -->
+    <a routerLink="/admin" class="fo-admin-fab" title="Administration">
+      <i class="bi bi-shield-lock-fill"></i>
+      <span>Admin</span>
+    </a>
 
     <!-- Mini-Cart Sidebar -->
     <div *ngIf="miniCartOpen" class="fo-minicart-overlay" [@miniCartOverlay] (click)="miniCartOpen = false"></div>
