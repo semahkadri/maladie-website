@@ -1,10 +1,8 @@
 import { Component, OnInit, ElementRef, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CategorieService } from '../../../services/categorie.service';
 import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
-import { Categorie } from '../../../modeles/categorie.model';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { WishlistService } from '../../../services/wishlist.service';
@@ -91,39 +89,6 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
           <div>
             <h4>{{ t.tr('trust.retour') }}</h4>
             <p><span [appCountUp]="14" [countDuration]="1500"></span> {{ t.isFr ? ' jours de retour gratuit' : ' days free returns' }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Categories Section — Carousel -->
-    <section class="fo-section" *ngIf="categories.length > 0" appScrollAnimate="fade-up">
-      <div class="fo-section-container">
-        <div class="fo-section-header">
-          <h2 class="fo-section-title fo-section-title-bar">{{ t.tr('accueil.sectionCat') }}</h2>
-          <div class="fo-carousel-nav-header">
-            <button class="fo-carousel-arrow fo-carousel-arrow-left" (click)="scrollCarousel(catTrack, -1)"
-                    [class.disabled]="!canScrollLeft(catTrack)">
-              <i class="bi bi-chevron-left"></i>
-            </button>
-            <button class="fo-carousel-arrow fo-carousel-arrow-right" (click)="scrollCarousel(catTrack, 1)"
-                    [class.disabled]="!canScrollRight(catTrack)">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-            <a routerLink="/catalogue" class="fo-section-link">{{ t.tr('common.voirTout') }} <i class="bi bi-arrow-right"></i></a>
-          </div>
-        </div>
-        <div class="fo-carousel-wrapper">
-          <div class="fo-carousel-track" #catTrack>
-            <a *ngFor="let cat of categories; let i = index" [routerLink]="['/categories', cat.id]" class="fo-category-card fo-carousel-item"
-               appScrollAnimate="scale-in" [animateDelay]="i * 80">
-              <div class="fo-category-icon">
-                <i class="bi" [ngClass]="getCategoryIcon(cat.nom)"></i>
-              </div>
-              <h3>{{ cat.nom }}</h3>
-              <p>{{ cat.description | slice:0:80 }}{{ cat.description && cat.description.length > 80 ? '...' : '' }}</p>
-              <span class="fo-category-count">{{ t.tr('accueil.voirProduits') }}</span>
-            </a>
           </div>
         </div>
       </div>
@@ -338,7 +303,6 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
   `
 })
 export class AccueilComponent implements OnInit {
-  categories: Categorie[] = [];
   recentProducts: Produit[] = [];
   promoProducts: Produit[] = [];
   loading = true;
@@ -349,7 +313,6 @@ export class AccueilComponent implements OnInit {
   brands = ['Sanofi', 'Pfizer', 'Bayer', "L'Oréal Derma", 'Roche', 'Johnson & Johnson', 'Novartis', 'AstraZeneca'];
 
   constructor(
-    private categorieService: CategorieService,
     private produitService: ProduitService,
     private panierService: PanierService,
     public t: TraductionService,
@@ -357,9 +320,6 @@ export class AccueilComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.categorieService.listerTout().subscribe({
-      next: (cats) => this.categories = cats
-    });
     this.produitService.listerTout().subscribe({
       next: (prods) => {
         const sorted = prods.sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''));
