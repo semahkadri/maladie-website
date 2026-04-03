@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Categorie } from '../../../modeles/categorie.model';
+import { Produit } from '../../../modeles/produit.model';
 import { CategorieService } from '../../../services/categorie.service';
+import { ProduitService } from '../../../services/produit.service';
 import { TraductionService } from '../../../services/traduction.service';
 
 @Component({
@@ -85,27 +87,118 @@ import { TraductionService } from '../../../services/traduction.service';
                       </div>
                     </td>
                   </tr>
-                  <tr *ngFor="let categorie of categoriesPage">
-                    <td><span class="text-muted">#{{ categorie.id }}</span></td>
-                    <td class="fw-semibold">{{ categorie.nom }}</td>
-                    <td class="text-muted" style="max-width: 250px;">
-                      {{ categorie.description | slice:0:80 }}{{ (categorie.description.length || 0) > 80 ? '...' : '' }}
-                    </td>
-                    <td>
-                      <span class="badge badge-category badge-stock">{{ categorie.nombreProduits }}</span>
-                    </td>
-                    <td>{{ categorie.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td class="text-center">
-                      <div class="btn-action-group">
-                        <a [routerLink]="['/admin/categories/modifier', categorie.id]" class="btn btn-sm btn-warning">
-                          <i class="bi bi-pencil"></i> {{ t.tr('common.modifier') }}
-                        </a>
-                        <button class="btn btn-sm btn-danger" (click)="confirmerSuppression(categorie)">
-                          <i class="bi bi-trash"></i> {{ t.tr('common.supprimer') }}
+
+                  <ng-container *ngFor="let categorie of categoriesPage">
+                    <!-- Category row -->
+                    <tr [class.lc-row-expanded]="expandedId === categorie.id">
+                      <td><span class="text-muted">#{{ categorie.id }}</span></td>
+                      <td class="fw-semibold">{{ categorie.nom }}</td>
+                      <td class="text-muted" style="max-width: 250px;">
+                        {{ categorie.description | slice:0:80 }}{{ (categorie.description?.length || 0) > 80 ? '...' : '' }}
+                      </td>
+                      <td>
+                        <button class="lc-products-toggle"
+                                [class.active]="expandedId === categorie.id"
+                                (click)="toggleProducts(categorie)"
+                                [disabled]="loadingFor === categorie.id">
+                          <span *ngIf="loadingFor === categorie.id" class="spinner-border spinner-border-sm me-1"></span>
+                          <i *ngIf="loadingFor !== categorie.id" class="bi me-1"
+                             [class.bi-chevron-down]="expandedId !== categorie.id"
+                             [class.bi-chevron-up]="expandedId === categorie.id"></i>
+                          <strong>{{ categorie.nombreProduits }}</strong>
+                          <span class="ms-1" style="font-size:0.75rem;opacity:0.7;">{{ t.isFr ? 'produit(s)' : 'product(s)' }}</span>
                         </button>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td>{{ categorie.dateCreation | date:'dd/MM/yyyy' }}</td>
+                      <td class="text-center">
+                        <div class="btn-action-group">
+                          <a [routerLink]="['/admin/categories/modifier', categorie.id]" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i> {{ t.tr('common.modifier') }}
+                          </a>
+                          <button class="btn btn-sm btn-danger" (click)="confirmerSuppression(categorie)">
+                            <i class="bi bi-trash"></i> {{ t.tr('common.supprimer') }}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- ── Products drawer ── -->
+                    <tr *ngIf="expandedId === categorie.id" class="lc-drawer-row">
+                      <td colspan="6" class="lc-drawer-cell">
+                        <div class="lc-drawer">
+
+                          <div class="lc-drawer-header">
+                            <i class="bi bi-box-seam me-2"></i>
+                            {{ t.isFr ? 'Produits de la catégorie' : 'Products in category' }}
+                            <strong class="ms-1">{{ categorie.nom }}</strong>
+                            <span class="lc-drawer-count ms-2">{{ (categoryProducts[categorie.id!] || []).length }}</span>
+                          </div>
+
+                          <!-- No products -->
+                          <div *ngIf="(categoryProducts[categorie.id!] || []).length === 0" class="lc-drawer-empty">
+                            <i class="bi bi-inbox"></i>
+                            <p>{{ t.isFr ? 'Aucun produit dans cette catégorie.' : 'No products in this category.' }}</p>
+                            <a [routerLink]="['/admin/produits/ajouter']" class="btn btn-sm btn-primary">
+                              <i class="bi bi-plus me-1"></i>{{ t.isFr ? 'Ajouter un produit' : 'Add product' }}
+                            </a>
+                          </div>
+
+                          <!-- Products mini-table -->
+                          <table *ngIf="(categoryProducts[categorie.id!] || []).length > 0" class="lc-prod-table">
+                            <thead>
+                              <tr>
+                                <th>{{ t.isFr ? 'Image' : 'Image' }}</th>
+                                <th>{{ t.tr('common.nom') }}</th>
+                                <th>{{ t.isFr ? 'Prix' : 'Price' }}</th>
+                                <th>{{ t.isFr ? 'Stock' : 'Stock' }}</th>
+                                <th>{{ t.isFr ? 'Statut' : 'Status' }}</th>
+                                <th class="text-center">{{ t.tr('common.actions') }}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let prod of categoryProducts[categorie.id!]">
+                                <td>
+                                  <div class="lc-prod-img">
+                                    <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom">
+                                    <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span class="fw-semibold">{{ prod.nom }}</span>
+                                  <span *ngIf="prod.enPromo" class="lc-promo-badge ms-2">
+                                    -{{ prod.remise }}%
+                                  </span>
+                                </td>
+                                <td>
+                                  <div *ngIf="prod.enPromo && prod.prixOriginal">
+                                    <span class="text-muted text-decoration-line-through" style="font-size:0.78rem;">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                                    <span class="text-danger fw-bold ms-1">{{ prod.prix | number:'1.2-2' }} TND</span>
+                                  </div>
+                                  <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fw-semibold">{{ prod.prix | number:'1.2-2' }} TND</span>
+                                </td>
+                                <td>
+                                  <span class="lc-stock-badge" [class.in]="prod.quantite > 0" [class.out]="prod.quantite === 0">
+                                    {{ prod.quantite }}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="badge" [class.bg-success]="prod.quantite > 0" [class.bg-danger]="prod.quantite === 0">
+                                    {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                                  </span>
+                                </td>
+                                <td class="text-center">
+                                  <a [routerLink]="['/admin/produits/modifier', prod.id]" class="btn btn-xs btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                  </a>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
                 </tbody>
               </table>
             </div>
@@ -169,6 +262,11 @@ export class ListeCategoriesComponent implements OnInit {
   chargement = true;
   recherche = '';
 
+  // Expandable products drawer
+  expandedId: number | null = null;
+  loadingFor: number | null = null;
+  categoryProducts: Record<number, Produit[]> = {};
+
   // Pagination
   page = 1;
   parPage = 8;
@@ -179,6 +277,7 @@ export class ListeCategoriesComponent implements OnInit {
 
   constructor(
     private categorieService: CategorieService,
+    private produitService: ProduitService,
     public t: TraductionService
   ) {}
 
@@ -219,6 +318,27 @@ export class ListeCategoriesComponent implements OnInit {
     this.fin = Math.min(this.debut + this.parPage, this.categoriesFiltrees.length);
     this.categoriesPage = this.categoriesFiltrees.slice(this.debut, this.fin);
     this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  toggleProducts(categorie: Categorie): void {
+    const id = categorie.id!;
+    if (this.expandedId === id) { this.expandedId = null; return; }
+    // Already cached
+    if (this.categoryProducts[id]) { this.expandedId = id; return; }
+    // Load from API
+    this.loadingFor = id;
+    this.produitService.listerParCategorie(id).subscribe({
+      next: (prods) => {
+        this.categoryProducts[id] = prods;
+        this.expandedId = id;
+        this.loadingFor = null;
+      },
+      error: () => {
+        this.categoryProducts[id] = [];
+        this.expandedId = id;
+        this.loadingFor = null;
+      }
+    });
   }
 
   confirmerSuppression(categorie: Categorie): void {
