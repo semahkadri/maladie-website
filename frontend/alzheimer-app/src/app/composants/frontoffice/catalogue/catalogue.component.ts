@@ -30,285 +30,392 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
     ])
   ],
   template: `
-    <div class="fo-section">
-      <div class="fo-section-container">
+    <div class="cat-page-wrap">
+
         <!-- Breadcrumb -->
-        <div class="fo-breadcrumb">
+        <div class="fo-breadcrumb" style="margin-bottom:12px;">
           <a routerLink="/"><i class="bi bi-house-door"></i></a>
           <i class="bi bi-chevron-right fo-breadcrumb-sep"></i>
           <span class="fo-breadcrumb-current">{{ t.tr('catalogue.titre') }}</span>
         </div>
 
-        <h1 class="fo-page-title">{{ t.tr('catalogue.titre') }}</h1>
-        <p class="fo-page-subtitle">{{ t.tr('catalogue.sousTitre') }}</p>
+        <!-- ═══ SIDEBAR + CONTENT LAYOUT ═══ -->
+        <div class="cat-layout">
 
-        <!-- Filters Row -->
-        <div class="fo-filter-bar">
-          <div class="fo-search-box">
-            <i class="bi bi-search"></i>
-            <input type="text" [placeholder]="t.tr('catalogue.rechercher')"
-                   [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()">
-          </div>
-          <select class="fo-filter-select" [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()">
-            <option [ngValue]="0">{{ t.tr('catalogue.toutesCat') }}</option>
-            <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.nom }}</option>
-          </select>
-          <select class="fo-filter-select fo-filter-stock" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
-            <option value="tous">{{ t.tr('catalogue.toutStock') }}</option>
-            <option value="en-stock">{{ t.tr('catalogue.disponible') }}</option>
-            <option value="en-promo">{{ t.tr('catalogue.filtrePromo') }}</option>
-          </select>
-        </div>
+          <!-- ─── LEFT SIDEBAR ─────────────────────────────────── -->
+          <aside class="cat-sidebar">
 
-        <!-- Toolbar: Sort + Results Count -->
-        <div class="fo-toolbar" *ngIf="!loading">
-          <div class="fo-toolbar-left">
-            <span class="fo-results-count">
-              <strong>{{ filteredProducts.length }}</strong> {{ filteredProducts.length !== 1 ? t.tr('common.produits') : t.tr('common.produit') }} {{ t.tr('catalogue.trouves') }}{{ filteredProducts.length !== 1 ? 's' : '' }}
-              <span *ngIf="hasActiveFilters()" class="fo-results-filtered">
-                ({{ t.tr('catalogue.filtres') }}{{ filteredProducts.length !== 1 ? 's' : '' }})
-                <button class="fo-clear-filters" (click)="resetFilters()">
-                  <i class="bi bi-x-circle"></i> {{ t.tr('catalogue.toutEffacer') }}
-                </button>
+            <!-- Sidebar header -->
+            <div class="cat-sidebar-head">
+              <span class="cat-sidebar-title">
+                <i class="bi bi-funnel-fill"></i>
+                {{ t.isFr ? 'Filtres' : 'Filters' }}
               </span>
-            </span>
-          </div>
-          <div class="fo-toolbar-right">
-            <!-- View toggle: Grid / List -->
-            <div class="fo-view-toggle-group">
-              <span class="fo-vt-label-prefix">{{ t.isFr ? 'Affichage' : 'View' }}</span>
-              <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'grid'" (click)="setView('grid')">
-                <i class="bi bi-grid-3x3-gap-fill"></i>
-                <span>{{ t.isFr ? 'Grille' : 'Grid' }}</span>
-              </button>
-              <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'list'" (click)="setView('list')">
-                <i class="bi bi-list-ul"></i>
-                <span>{{ t.isFr ? 'Liste' : 'List' }}</span>
+              <button *ngIf="hasActiveFilters()" class="cat-sidebar-reset" (click)="resetFilters()">
+                {{ t.isFr ? 'Tout effacer' : 'Clear all' }}
               </button>
             </div>
-            <div class="fo-sort-control">
-              <label><i class="bi bi-sort-down me-1"></i>{{ t.tr('catalogue.trierPar') }}</label>
-              <select [(ngModel)]="sortBy" (ngModelChange)="applySort()">
-                <option value="nom-asc">{{ t.tr('catalogue.nomAZ') }}</option>
-                <option value="nom-desc">{{ t.tr('catalogue.nomZA') }}</option>
-                <option value="prix-asc">{{ t.tr('catalogue.prixAsc') }}</option>
-                <option value="prix-desc">{{ t.tr('catalogue.prixDesc') }}</option>
-                <option value="date-desc">{{ t.tr('catalogue.dateDesc') }}</option>
-                <option value="date-asc">{{ t.tr('catalogue.dateAsc') }}</option>
-              </select>
-            </div>
-          </div>
-        </div>
 
-        <!-- Active Filters Chips -->
-        <div class="fo-filter-chips" *ngIf="hasActiveFilters()">
-          <span class="fo-chip" *ngIf="searchTerm">
-            {{ t.tr('catalogue.chipRecherche') }} : &laquo; {{ searchTerm }} &raquo;
-            <button (click)="searchTerm = ''; applyFilters()"><i class="bi bi-x"></i></button>
-          </span>
-          <span class="fo-chip" *ngIf="selectedCategory">
-            {{ t.tr('catalogue.chipCategorie') }} : {{ getCategoryName(selectedCategory) }}
-            <button (click)="selectedCategory = 0; applyFilters()"><i class="bi bi-x"></i></button>
-          </span>
-          <span class="fo-chip" *ngIf="selectedStock !== 'tous'">
-            {{ t.tr('catalogue.chipStock') }} : {{ getStockLabel(selectedStock) }}
-            <button (click)="selectedStock = 'tous'; applyFilters()"><i class="bi bi-x"></i></button>
-          </span>
-        </div>
-
-        <!-- Skeleton Loading -->
-        <app-skeleton-loader *ngIf="loading" type="product-grid" [count]="6"></app-skeleton-loader>
-
-        <!-- ═══ GRID VIEW ═══════════════════════════════════════════ -->
-        <div class="fo-product-grid" *ngIf="!loading && pagedProducts.length > 0 && viewMode === 'grid'">
-          <div *ngFor="let prod of pagedProducts; let i = index" class="fo-product-card"
-               appScrollAnimate="fade-up" [animateDelay]="i * 80" appTilt [tiltMax]="6">
-            <a [routerLink]="['/catalogue', prod.id]" style="text-decoration: none; color: inherit;">
-              <div class="fo-product-card-img">
-                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                <button class="fo-product-wishlist" (click)="$event.preventDefault(); $event.stopPropagation()">
-                  <i class="bi bi-heart"></i>
-                </button>
-                <button class="fo-product-quickview" (click)="openQuickView($event, prod)">
-                  <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.quickView') }}
-                </button>
-                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
-                <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
-              </div>
-              <div class="fo-product-card-body">
-                <span class="fo-product-brand">{{ prod.categorieNom }}</span>
-                <h4>{{ prod.nom }}</h4>
-                <p>{{ prod.description | slice:0:80 }}{{ prod.description && prod.description.length > 80 ? '...' : '' }}</p>
-                <div class="fo-product-card-footer">
-                  <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
-                    <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
-                    <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
+            <!-- Search -->
+            <div class="cat-filter-block">
+              <button class="cat-filter-toggle" (click)="toggleSection('search')">
+                <span><i class="bi bi-search"></i>{{ t.isFr ? 'Recherche' : 'Search' }}</span>
+                <i class="bi cat-chevron" [class.bi-chevron-up]="sectionOpen['search']" [class.bi-chevron-down]="!sectionOpen['search']"></i>
+              </button>
+              <div class="cat-filter-body" [class.cat-filter-body-open]="sectionOpen['search']">
+                <div class="cat-filter-body-inner">
+                  <div class="cat-search-wrap">
+                    <input type="text" [placeholder]="t.tr('catalogue.rechercher')"
+                           [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" class="cat-search-input">
+                    <button *ngIf="searchTerm" class="cat-search-clear" (click)="searchTerm=''; applyFilters()">
+                      <i class="bi bi-x"></i>
+                    </button>
                   </div>
-                  <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
-                  <span class="fo-product-stock"
-                        [class.in-stock]="prod.quantite > 0"
-                        [class.out-of-stock]="prod.quantite === 0">
-                    {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
-                  </span>
                 </div>
-                <app-promo-countdown
-                  *ngIf="prod.enPromo && prod.dateFinPromo"
-                  [dateFinPromo]="prod.dateFinPromo"
-                  size="card"
-                  [isFr]="t.isFr">
-                </app-promo-countdown>
               </div>
-            </a>
-            <div class="fo-product-card-body" style="padding-top: 0;">
-              <button *ngIf="prod.quantite > 0"
-                      class="fo-add-cart-btn"
-                      [class.success]="ajoutOk === prod.id"
-                      (click)="ajouterAuPanier($event, prod)"
-                      [disabled]="ajoutEnCours === prod.id">
-                <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
-                <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
-                <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
-                {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+            </div>
+
+            <!-- Categories -->
+            <div class="cat-filter-block">
+              <button class="cat-filter-toggle" (click)="toggleSection('categories')">
+                <span>
+                  <i class="bi bi-grid-1x2"></i>{{ t.isFr ? 'Catégories' : 'Categories' }}
+                  <span *ngIf="selectedCategory" class="cat-filter-active-dot"></span>
+                </span>
+                <i class="bi cat-chevron" [class.bi-chevron-up]="sectionOpen['categories']" [class.bi-chevron-down]="!sectionOpen['categories']"></i>
               </button>
-              <span *ngIf="prod.quantite === 0" class="fo-product-stock out-of-stock mt-2" style="display: block; text-align: center;">
-                <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
+              <div class="cat-filter-body" [class.cat-filter-body-open]="sectionOpen['categories']">
+                <div class="cat-filter-body-inner">
+                  <div class="cat-cat-list">
+                    <button class="cat-cat-item" [class.active]="selectedCategory === 0"
+                            (click)="selectedCategory = 0; applyFilters()">
+                      <i class="bi bi-collection"></i>
+                      {{ t.tr('catalogue.toutesCat') }}
+                      <span class="cat-cat-count">{{ products.length }}</span>
+                    </button>
+                    <button *ngFor="let cat of categories" class="cat-cat-item"
+                            [class.active]="selectedCategory === cat.id"
+                            (click)="selectedCategory = cat.id!; applyFilters()">
+                      <i class="bi bi-tag"></i>
+                      {{ cat.nom }}
+                      <span class="cat-cat-count">{{ getCatCount(cat.id!) }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="cat-filter-block" *ngIf="!loading && products.length > 0">
+              <button class="cat-filter-toggle" (click)="toggleSection('price')">
+                <span>
+                  <i class="bi bi-cash-stack"></i>{{ t.isFr ? 'Prix' : 'Price' }}
+                  <span *ngIf="isPriceFiltered" class="cat-filter-active-dot"></span>
+                </span>
+                <i class="bi cat-chevron" [class.bi-chevron-up]="sectionOpen['price']" [class.bi-chevron-down]="!sectionOpen['price']"></i>
+              </button>
+              <div class="cat-filter-body" [class.cat-filter-body-open]="sectionOpen['price']">
+                <div class="cat-filter-body-inner">
+                  <div class="cat-prs-live">
+                    <span>{{ priceRangeMin | number:'1.0-0' }} TND</span>
+                    <span class="cat-prs-live-sep">—</span>
+                    <span>{{ priceRangeMax | number:'1.0-0' }} TND</span>
+                    <button *ngIf="isPriceFiltered" class="cat-prs-clear"
+                            (click)="priceRangeMin = absoluteMin; priceRangeMax = absoluteMax; applyFilters()">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                  <div class="cat-prs-wrap">
+                    <div class="cat-prs-track-bg"></div>
+                    <div class="cat-prs-track-fill" [style.left.%]="fillLeft" [style.right.%]="fillRight"></div>
+                    <input type="range" class="cat-prs-thumb" [min]="absoluteMin" [max]="absoluteMax"
+                           [(ngModel)]="priceRangeMin" (input)="onMinChange()">
+                    <input type="range" class="cat-prs-thumb" [min]="absoluteMin" [max]="absoluteMax"
+                           [(ngModel)]="priceRangeMax" (input)="onMaxChange()">
+                  </div>
+                  <div class="cat-prs-inputs">
+                    <div class="cat-prs-input-wrap">
+                      <span class="cat-prs-input-label">Min</span>
+                      <input type="number" class="cat-prs-input" [min]="absoluteMin" [max]="priceRangeMax - 1"
+                             [(ngModel)]="priceRangeMin" (change)="onMinChange()">
+                      <span class="cat-prs-cur">TND</span>
+                    </div>
+                    <span class="cat-prs-between">—</span>
+                    <div class="cat-prs-input-wrap">
+                      <span class="cat-prs-input-label">Max</span>
+                      <input type="number" class="cat-prs-input" [min]="priceRangeMin + 1" [max]="absoluteMax"
+                             [(ngModel)]="priceRangeMax" (change)="onMaxChange()">
+                      <span class="cat-prs-cur">TND</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Availability -->
+            <div class="cat-filter-block">
+              <button class="cat-filter-toggle" (click)="toggleSection('availability')">
+                <span>
+                  <i class="bi bi-box-seam"></i>{{ t.isFr ? 'Disponibilité' : 'Availability' }}
+                  <span *ngIf="selectedStock !== 'tous'" class="cat-filter-active-dot"></span>
+                </span>
+                <i class="bi cat-chevron" [class.bi-chevron-up]="sectionOpen['availability']" [class.bi-chevron-down]="!sectionOpen['availability']"></i>
+              </button>
+              <div class="cat-filter-body" [class.cat-filter-body-open]="sectionOpen['availability']">
+                <div class="cat-filter-body-inner">
+                  <div class="cat-radio-list">
+                    <label class="cat-radio-item" [class.active]="selectedStock === 'tous'">
+                      <input type="radio" name="stock" value="tous" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
+                      <span class="cat-radio-dot"></span>{{ t.tr('catalogue.toutStock') }}
+                    </label>
+                    <label class="cat-radio-item" [class.active]="selectedStock === 'en-stock'">
+                      <input type="radio" name="stock" value="en-stock" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
+                      <span class="cat-radio-dot"></span>
+                      <i class="bi bi-check-circle-fill" style="color:#1e8e3e;font-size:.75rem;"></i>
+                      {{ t.tr('catalogue.disponible') }}
+                    </label>
+                    <label class="cat-radio-item" [class.active]="selectedStock === 'en-promo'">
+                      <input type="radio" name="stock" value="en-promo" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
+                      <span class="cat-radio-dot"></span>
+                      <i class="bi bi-tag-fill" style="color:#d32f2f;font-size:.75rem;"></i>
+                      {{ t.tr('catalogue.filtrePromo') }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </aside>
+
+          <!-- ─── RIGHT CONTENT ─────────────────────────────────── -->
+          <div class="cat-content">
+
+            <!-- Page header -->
+            <div class="cat-page-header">
+              <div>
+                <h1 class="cat-page-title">{{ t.tr('catalogue.titre') }}</h1>
+                <p class="cat-page-sub">{{ t.tr('catalogue.sousTitre') }}</p>
+              </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="cat-toolbar" *ngIf="!loading">
+              <span class="cat-results-count">
+                <strong>{{ filteredProducts.length }}</strong>
+                {{ filteredProducts.length !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}
+                {{ t.tr('catalogue.trouves') }}{{ filteredProducts.length !== 1 ? 's' : '' }}
+              </span>
+              <div class="cat-toolbar-right">
+                <!-- View toggle -->
+                <div class="fo-view-toggle-group">
+                  <span class="fo-vt-label-prefix">{{ t.isFr ? 'Affichage' : 'View' }}</span>
+                  <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'grid'" (click)="setView('grid')">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                    <span>{{ t.isFr ? 'Grille' : 'Grid' }}</span>
+                  </button>
+                  <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'list'" (click)="setView('list')">
+                    <i class="bi bi-list-ul"></i>
+                    <span>{{ t.isFr ? 'Liste' : 'List' }}</span>
+                  </button>
+                </div>
+                <!-- Sort -->
+                <div class="fo-sort-control">
+                  <label><i class="bi bi-sort-down me-1"></i>{{ t.tr('catalogue.trierPar') }}</label>
+                  <select [(ngModel)]="sortBy" (ngModelChange)="applySort()">
+                    <option value="nom-asc">{{ t.tr('catalogue.nomAZ') }}</option>
+                    <option value="nom-desc">{{ t.tr('catalogue.nomZA') }}</option>
+                    <option value="prix-asc">{{ t.tr('catalogue.prixAsc') }}</option>
+                    <option value="prix-desc">{{ t.tr('catalogue.prixDesc') }}</option>
+                    <option value="date-desc">{{ t.tr('catalogue.dateDesc') }}</option>
+                    <option value="date-asc">{{ t.tr('catalogue.dateAsc') }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active filter chips -->
+            <div class="fo-filter-chips" *ngIf="hasActiveFilters()">
+              <span class="fo-chip" *ngIf="searchTerm">
+                {{ t.tr('catalogue.chipRecherche') }} : &laquo;{{ searchTerm }}&raquo;
+                <button (click)="searchTerm = ''; applyFilters()"><i class="bi bi-x"></i></button>
+              </span>
+              <span class="fo-chip" *ngIf="selectedCategory">
+                {{ getCategoryName(selectedCategory) }}
+                <button (click)="selectedCategory = 0; applyFilters()"><i class="bi bi-x"></i></button>
+              </span>
+              <span class="fo-chip" *ngIf="selectedStock !== 'tous'">
+                {{ getStockLabel(selectedStock) }}
+                <button (click)="selectedStock = 'tous'; applyFilters()"><i class="bi bi-x"></i></button>
+              </span>
+              <span class="fo-chip fo-chip-price" *ngIf="isPriceFiltered">
+                {{ priceRangeMin | number:'1.0-0' }} — {{ priceRangeMax | number:'1.0-0' }} TND
+                <button (click)="priceRangeMin = absoluteMin; priceRangeMax = absoluteMax; applyFilters()"><i class="bi bi-x"></i></button>
               </span>
             </div>
-          </div>
-        </div>
 
-        <!-- ═══ LIST VIEW ════════════════════════════════════════════ -->
-        <div class="fo-product-list" *ngIf="!loading && pagedProducts.length > 0 && viewMode === 'list'">
-          <div *ngFor="let prod of pagedProducts; let i = index"
-               class="fo-list-card"
-               [style.animation-delay]="i * 55 + 'ms'">
+            <!-- Skeleton -->
+            <app-skeleton-loader *ngIf="loading" type="product-grid" [count]="6"></app-skeleton-loader>
 
-            <!-- Left: Image -->
-            <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-img-wrap">
-              <div class="fo-list-card-img">
-                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom">
-                <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
-              </div>
-            </a>
+            <!-- Empty state -->
+            <div *ngIf="!loading && filteredProducts.length === 0" class="cat-empty">
+              <i class="bi bi-search"></i>
+              <p>{{ t.isFr ? 'Aucun produit ne correspond à vos filtres.' : 'No products match your filters.' }}</p>
+              <button class="cat-empty-reset" (click)="resetFilters()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.isFr ? 'Réinitialiser les filtres' : 'Reset filters' }}
+              </button>
+            </div>
 
-            <!-- Right: Content -->
-            <div class="fo-list-card-body">
+            <!-- GRID VIEW -->
+            <div class="fo-product-grid" *ngIf="!loading && pagedProducts.length > 0 && viewMode === 'grid'">
+              <div *ngFor="let prod of pagedProducts; let i = index" class="fo-product-card"
+                   appScrollAnimate="fade-up" [animateDelay]="i * 60" appTilt [tiltMax]="6">
 
-              <!-- Top row: brand + stock -->
-              <div class="fo-list-card-top">
-                <span class="fo-product-brand">{{ prod.categorieNom }}</span>
-                <span class="fo-product-stock"
-                      [class.in-stock]="prod.quantite > 0"
-                      [class.out-of-stock]="prod.quantite === 0">
-                  <i class="bi" [class.bi-check-circle-fill]="prod.quantite > 0"
-                               [class.bi-x-circle-fill]="prod.quantite === 0"></i>
-                  {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
-                </span>
-              </div>
-
-              <!-- Title -->
-              <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-title-link">
-                <h3>{{ prod.nom }}</h3>
-              </a>
-
-              <!-- Full description -->
-              <p class="fo-list-card-desc">{{ prod.description }}</p>
-
-              <!-- Price block -->
-              <div class="fo-list-card-price">
-                <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
-                  <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
-                  <span class="fo-price-promo" style="font-size: 1.25rem;">{{ prod.prix | number:'1.2-2' }} TND</span>
-                </div>
-                <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-list-card-price-value">
-                  {{ prod.prix | number:'1.2-2' }} TND
-                </span>
-                <span *ngIf="prod.enPromo && prod.remise && prod.prixOriginal" class="fo-list-savings-badge">
-                  <i class="bi bi-piggy-bank-fill"></i>
-                  {{ t.tr('promo.economie') }} {{ (prod.prixOriginal - prod.prix) | number:'1.2-2' }} TND
-                </span>
-              </div>
-
-              <!-- Countdown -->
-              <app-promo-countdown
-                *ngIf="prod.enPromo && prod.dateFinPromo"
-                [dateFinPromo]="prod.dateFinPromo"
-                size="card"
-                [isFr]="t.isFr">
-              </app-promo-countdown>
-
-              <!-- Action buttons -->
-              <div class="fo-list-card-actions">
-                <button *ngIf="prod.quantite > 0"
-                        class="fo-add-cart-btn"
-                        [class.success]="ajoutOk === prod.id"
-                        (click)="ajouterAuPanier($event, prod)"
-                        [disabled]="ajoutEnCours === prod.id">
-                  <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
-                  <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
-                  <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
-                  {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
-                </button>
-                <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-detail-btn">
-                  <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.voirDetail') }}
+                <!-- ① Clickable zone (image + info) -->
+                <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
+                  <div class="fo-product-card-img">
+                    <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                    <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                    <button class="fo-product-wishlist" (click)="$event.preventDefault();$event.stopPropagation()">
+                      <i class="bi bi-heart"></i>
+                    </button>
+                    <button class="fo-product-quickview" (click)="openQuickView($event, prod)">
+                      <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.quickView') }}
+                    </button>
+                    <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
+                    <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
+                  </div>
+                  <div class="fo-product-card-body">
+                    <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                    <h4>{{ prod.nom }}</h4>
+                    <p>{{ prod.description | slice:0:75 }}{{ prod.description && prod.description.length > 75 ? '...' : '' }}</p>
+                  </div>
                 </a>
-                <button class="fo-list-card-qv-btn" (click)="openQuickView($event, prod)">
-                  <i class="bi bi-zoom-in me-1"></i>{{ t.tr('catalogue.quickView') }}
-                </button>
+
+                <!-- ② Static footer — identical height on every card -->
+                <div class="fo-card-bottom">
+                  <!-- Price row -->
+                  <div class="fo-card-price-row">
+                    <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                      <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                      <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
+                    </div>
+                    <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                    <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
+                      {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                    </span>
+                  </div>
+
+                  <!-- Countdown slot — fixed height so promo/non-promo cards match -->
+                  <div class="fo-card-countdown-slot">
+                    <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                      [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
+                    </app-promo-countdown>
+                  </div>
+
+                  <!-- Action button — always same height -->
+                  <button *ngIf="prod.quantite > 0"
+                          class="fo-add-cart-btn"
+                          [class.success]="ajoutOk === prod.id"
+                          (click)="ajouterAuPanier($event, prod)"
+                          [disabled]="ajoutEnCours === prod.id">
+                    <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
+                    <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
+                    <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
+                    {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+                  </button>
+                  <button *ngIf="prod.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
+                    <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
+                  </button>
+                </div>
+
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Pagination -->
-        <div class="fo-pagination" *ngIf="!loading && totalPages > 1">
-          <div class="fo-pagination-info">
-            {{ t.tr('catalogue.affichage') }} {{ startIndex + 1 }}–{{ endIndex }} {{ t.tr('catalogue.sur') }} {{ filteredProducts.length }}
-          </div>
-          <div class="fo-pagination-controls">
-            <button (click)="goToPage(1)" [disabled]="page === 1" [title]="t.tr('catalogue.premierePage')">
-              <i class="bi bi-chevron-double-left"></i>
-            </button>
-            <button (click)="goToPage(page - 1)" [disabled]="page === 1" [title]="t.tr('catalogue.precedente')">
-              <i class="bi bi-chevron-left"></i>
-            </button>
-            <button *ngFor="let p of visiblePages" (click)="goToPage(p)"
-                    [class.active]="p === page">{{ p }}</button>
-            <button (click)="goToPage(page + 1)" [disabled]="page === totalPages" [title]="t.tr('catalogue.suivante')">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-            <button (click)="goToPage(totalPages)" [disabled]="page === totalPages" [title]="t.tr('catalogue.dernierePage')">
-              <i class="bi bi-chevron-double-right"></i>
-            </button>
-          </div>
-          <div class="fo-pagination-size">
-            <label>{{ t.tr('catalogue.parPage') }}</label>
-            <select [(ngModel)]="perPage" (ngModelChange)="onPerPageChange()">
-              <option [ngValue]="6">6</option>
-              <option [ngValue]="12">12</option>
-              <option [ngValue]="24">24</option>
-              <option [ngValue]="48">48</option>
-            </select>
-          </div>
-        </div>
+            <!-- LIST VIEW -->
+            <div class="fo-product-list" *ngIf="!loading && pagedProducts.length > 0 && viewMode === 'list'">
+              <div *ngFor="let prod of pagedProducts; let i = index" class="fo-list-card"
+                   [style.animation-delay]="i * 55 + 'ms'">
+                <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-img-wrap">
+                  <div class="fo-list-card-img">
+                    <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                    <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom">
+                    <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
+                  </div>
+                </a>
+                <div class="fo-list-card-body">
+                  <div class="fo-list-card-top">
+                    <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                    <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
+                      <i class="bi" [class.bi-check-circle-fill]="prod.quantite > 0" [class.bi-x-circle-fill]="prod.quantite === 0"></i>
+                      {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                    </span>
+                  </div>
+                  <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-title-link"><h3>{{ prod.nom }}</h3></a>
+                  <p class="fo-list-card-desc">{{ prod.description }}</p>
+                  <div class="fo-list-card-price">
+                    <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                      <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                      <span class="fo-price-promo" style="font-size:1.25rem;">{{ prod.prix | number:'1.2-2' }} TND</span>
+                    </div>
+                    <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-list-card-price-value">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  </div>
+                  <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                    [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
+                  </app-promo-countdown>
+                  <div class="fo-list-card-actions">
+                    <button *ngIf="prod.quantite > 0" class="fo-add-cart-btn"
+                            [class.success]="ajoutOk === prod.id"
+                            (click)="ajouterAuPanier($event, prod)"
+                            [disabled]="ajoutEnCours === prod.id">
+                      <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
+                      <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
+                      <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
+                      {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+                    </button>
+                    <a [routerLink]="['/catalogue', prod.id]" class="fo-list-card-detail-btn">
+                      <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.voirDetail') }}
+                    </a>
+                    <button class="fo-list-card-qv-btn" (click)="openQuickView($event, prod)">
+                      <i class="bi bi-zoom-in me-1"></i>{{ t.tr('catalogue.quickView') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <!-- Cart Error Toast -->
-        <div *ngIf="ajoutErreur" class="fo-toast fo-toast-error fade-in">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ ajoutErreur }}
-          <button (click)="ajoutErreur = ''" style="background: none; border: none; color: inherit; margin-left: 12px; cursor: pointer; font-size: 1.1rem;"><i class="bi bi-x-lg"></i></button>
-        </div>
+            <!-- Pagination -->
+            <div class="fo-pagination" *ngIf="!loading && totalPages > 1">
+              <div class="fo-pagination-info">
+                {{ t.tr('catalogue.affichage') }} {{ startIndex + 1 }}–{{ endIndex }} {{ t.tr('catalogue.sur') }} {{ filteredProducts.length }}
+              </div>
+              <div class="fo-pagination-controls">
+                <button (click)="goToPage(1)" [disabled]="page === 1"><i class="bi bi-chevron-double-left"></i></button>
+                <button (click)="goToPage(page - 1)" [disabled]="page === 1"><i class="bi bi-chevron-left"></i></button>
+                <button *ngFor="let p of visiblePages" (click)="goToPage(p)" [class.active]="p === page">{{ p }}</button>
+                <button (click)="goToPage(page + 1)" [disabled]="page === totalPages"><i class="bi bi-chevron-right"></i></button>
+                <button (click)="goToPage(totalPages)" [disabled]="page === totalPages"><i class="bi bi-chevron-double-right"></i></button>
+              </div>
+              <div class="fo-pagination-size">
+                <label>{{ t.tr('catalogue.parPage') }}</label>
+                <select [(ngModel)]="perPage" (ngModelChange)="onPerPageChange()">
+                  <option [ngValue]="6">6</option>
+                  <option [ngValue]="12">12</option>
+                  <option [ngValue]="24">24</option>
+                  <option [ngValue]="48">48</option>
+                </select>
+              </div>
+            </div>
 
-        <!-- Empty State -->
-        <div *ngIf="!loading && filteredProducts.length === 0" class="fo-empty-state">
-          <i class="bi bi-search"></i>
-          <p>{{ t.tr('catalogue.aucunProduit') }}</p>
-          <button class="fo-btn fo-btn-outline" (click)="resetFilters()">
-            <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.tr('catalogue.reinitialiser') }}
-          </button>
-        </div>
-      </div>
-    </div>
+            <!-- Toast -->
+            <div *ngIf="ajoutErreur" class="fo-toast fo-toast-error fade-in">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ ajoutErreur }}
+              <button (click)="ajoutErreur = ''" style="background:none;border:none;color:inherit;margin-left:12px;cursor:pointer;font-size:1.1rem;"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+          </div><!-- /cat-content -->
+        </div><!-- /cat-layout -->
+
+    </div><!-- /cat-page-wrap -->
 
     <!-- Quick View Modal -->
     <div *ngIf="quickViewProduct" class="fo-quickview-overlay" (click)="closeQuickView()" [@quickViewAnim]>
@@ -372,6 +479,12 @@ export class CatalogueComponent implements OnInit {
   selectedCategory = 0;
   selectedStock = 'tous';
 
+  // Price range filter
+  absoluteMin = 0;
+  absoluteMax = 1000;
+  priceRangeMin = 0;
+  priceRangeMax = 1000;
+
   // Sort
   sortBy = 'nom-asc';
 
@@ -390,6 +503,10 @@ export class CatalogueComponent implements OnInit {
 
   // View mode: grid | list
   viewMode: 'grid' | 'list' = 'grid';
+
+  // Sidebar collapsible sections
+  sectionOpen: Record<string, boolean> = { search: true, categories: true, price: true, availability: true };
+  toggleSection(key: string): void { this.sectionOpen[key] = !this.sectionOpen[key]; }
 
   // Quick View
   quickViewProduct: Produit | null = null;
@@ -411,6 +528,13 @@ export class CatalogueComponent implements OnInit {
     this.produitService.listerTout().subscribe({
       next: (prods) => {
         this.products = prods;
+        if (prods.length > 0) {
+          const prices = prods.map(p => p.prix);
+          this.absoluteMin = Math.floor(Math.min(...prices));
+          this.absoluteMax = Math.ceil(Math.max(...prices));
+          this.priceRangeMin = this.absoluteMin;
+          this.priceRangeMax = this.absoluteMax;
+        }
         this.applyFilters();
         this.loading = false;
       },
@@ -433,9 +557,40 @@ export class CatalogueComponent implements OnInit {
       let matchStock = true;
       if (this.selectedStock === 'en-stock') matchStock = p.quantite > 0;
       else if (this.selectedStock === 'en-promo') matchStock = !!p.enPromo;
-      return matchSearch && matchCategory && matchStock;
+      const matchPrice = p.prix >= this.priceRangeMin && p.prix <= this.priceRangeMax;
+      return matchSearch && matchCategory && matchStock && matchPrice;
     });
     this.applySort();
+  }
+
+  onMinChange(): void {
+    if (this.priceRangeMin >= this.priceRangeMax) {
+      this.priceRangeMin = this.priceRangeMax - 1;
+    }
+    this.applyFilters();
+  }
+
+  onMaxChange(): void {
+    if (this.priceRangeMax <= this.priceRangeMin) {
+      this.priceRangeMax = this.priceRangeMin + 1;
+    }
+    this.applyFilters();
+  }
+
+  get fillLeft(): number {
+    const range = this.absoluteMax - this.absoluteMin;
+    if (range === 0) return 0;
+    return ((this.priceRangeMin - this.absoluteMin) / range) * 100;
+  }
+
+  get fillRight(): number {
+    const range = this.absoluteMax - this.absoluteMin;
+    if (range === 0) return 0;
+    return 100 - ((this.priceRangeMax - this.absoluteMin) / range) * 100;
+  }
+
+  get isPriceFiltered(): boolean {
+    return this.priceRangeMin > this.absoluteMin || this.priceRangeMax < this.absoluteMax;
   }
 
   applySort(): void {
@@ -495,7 +650,7 @@ export class CatalogueComponent implements OnInit {
   }
 
   hasActiveFilters(): boolean {
-    return !!this.searchTerm || !!this.selectedCategory || this.selectedStock !== 'tous';
+    return !!this.searchTerm || !!this.selectedCategory || this.selectedStock !== 'tous' || this.isPriceFiltered;
   }
 
   resetFilters(): void {
@@ -503,11 +658,17 @@ export class CatalogueComponent implements OnInit {
     this.selectedCategory = 0;
     this.selectedStock = 'tous';
     this.sortBy = 'nom-asc';
+    this.priceRangeMin = this.absoluteMin;
+    this.priceRangeMax = this.absoluteMax;
     this.applyFilters();
   }
 
   getCategoryName(id: number): string {
     return this.categories.find(c => c.id === id)?.nom || '';
+  }
+
+  getCatCount(catId: number): number {
+    return this.products.filter(p => p.categorieId === catId).length;
   }
 
   getStockLabel(value: string): string {

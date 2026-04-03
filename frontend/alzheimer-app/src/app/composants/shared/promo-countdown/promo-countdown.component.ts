@@ -6,25 +6,30 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <!-- ─── CARD mode: compact single-row bar ─── -->
+    <!-- ─── CARD mode: full-width fire banner ─── -->
     <ng-container *ngIf="size === 'card' && dateFinPromo">
       <div *ngIf="!expired" class="pcd-card" [class.pcd-urgent]="urgent">
         <i class="bi bi-fire pcd-icon"></i>
+        <span class="pcd-label-text">{{ isFr ? 'Expire dans' : 'Ends in' }}</span>
         <div class="pcd-blocks-row">
           <div class="pcd-unit-block">
-            <span class="pcd-num">{{ pad(jours) }}</span><span class="pcd-lbl">j</span>
+            <span class="pcd-num">{{ pad(jours) }}</span>
+            <span class="pcd-lbl">{{ isFr ? 'J' : 'D' }}</span>
           </div>
           <span class="pcd-colon">:</span>
           <div class="pcd-unit-block">
-            <span class="pcd-num">{{ pad(heures) }}</span><span class="pcd-lbl">h</span>
+            <span class="pcd-num">{{ pad(heures) }}</span>
+            <span class="pcd-lbl">H</span>
           </div>
           <span class="pcd-colon">:</span>
           <div class="pcd-unit-block">
-            <span class="pcd-num">{{ pad(minutes) }}</span><span class="pcd-lbl">m</span>
+            <span class="pcd-num">{{ pad(minutes) }}</span>
+            <span class="pcd-lbl">M</span>
           </div>
           <span class="pcd-colon">:</span>
           <div class="pcd-unit-block">
-            <span class="pcd-num">{{ pad(secondes) }}</span><span class="pcd-lbl">s</span>
+            <span class="pcd-num">{{ pad(secondes) }}</span>
+            <span class="pcd-lbl">S</span>
           </div>
         </div>
       </div>
