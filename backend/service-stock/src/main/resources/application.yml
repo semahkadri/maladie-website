@@ -55,6 +55,15 @@ app:
     dir: uploads
   mail:
     admin-email: admin@pharmacare.tn
+  ai:
+    # Get a FREE key at: https://console.groq.com/keys
+    # Free tier: 6000 tokens/min, 100k tokens/day, no credit card needed
+    # 1. Replace YOUR_GROQ_API_KEY_HERE with your key
+    # 2. Set enabled: true
+    api-key: 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
+    api-url: https://api.groq.com/openai/v1/chat/completions
+    model: llama-3.3-70b-versatile
+    enabled: true
 
 eureka:
   client:

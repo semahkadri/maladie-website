@@ -7,6 +7,7 @@ import { Categorie } from '../../../modeles/categorie.model';
 import { ProduitService } from '../../../services/produit.service';
 import { CategorieService } from '../../../services/categorie.service';
 import { TraductionService } from '../../../services/traduction.service';
+import { AiService } from '../../../services/ai.service';
 
 @Component({
   selector: 'app-formulaire-produit',
@@ -61,10 +62,27 @@ import { TraductionService } from '../../../services/traduction.service';
                 </div>
 
                 <div class="mb-3">
-                  <label for="description" class="form-label">{{ t.tr('common.description') }}</label>
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <label for="description" class="form-label mb-0">{{ t.tr('common.description') }}</label>
+                    <button type="button" class="ai-gen-btn"
+                            (click)="genererDescriptionIA()"
+                            [disabled]="!produit.nom || generationEnCours"
+                            [title]="aiGenBtnTitle">
+                      <span *ngIf="generationEnCours" class="spinner-border spinner-border-sm me-1"></span>
+                      <i *ngIf="!generationEnCours" class="bi bi-stars me-1"></i>
+                      {{ generationEnCours ? (t.isFr ? 'Génération...' : 'Generating...') : (t.isFr ? 'Générer avec IA' : 'Generate with AI') }}
+                    </button>
+                  </div>
+                  <div *ngIf="aiGenSuccess" class="ai-gen-success mb-2">
+                    <i class="bi bi-check-circle-fill me-1"></i>
+                    {{ t.isFr ? 'Description générée avec succès !' : 'Description generated successfully!' }}
+                  </div>
                   <textarea class="form-control" id="description" name="description"
                             rows="3" [(ngModel)]="produit.description"
                             maxlength="500" [placeholder]="t.tr('fp.placeholderDesc')"></textarea>
+                  <div class="form-text" *ngIf="produit.description">
+                    {{ (produit.description && produit.description.length) || 0 }}/500 {{ t.isFr ? 'caractères' : 'characters' }}
+                  </div>
                 </div>
 
                 <div class="row">
@@ -298,13 +316,41 @@ export class FormulaireProduitComponent implements OnInit {
   isDragOver = false;
   erreurImage = '';
 
+  // AI generation state
+  generationEnCours = false;
+  aiGenSuccess = false;
+  private aiSuccessTimer: any;
+
   constructor(
     private produitService: ProduitService,
     private categorieService: CategorieService,
     private router: Router,
     private route: ActivatedRoute,
-    public t: TraductionService
+    public t: TraductionService,
+    private aiService: AiService
   ) {}
+
+  get aiGenBtnTitle(): string {
+    if (!this.produit.nom) return this.t.isFr ? 'Saisissez le nom du produit en premier' : 'Fill the product name first';
+    return '';
+  }
+
+  genererDescriptionIA(): void {
+    if (!this.produit.nom || this.generationEnCours) return;
+    const categorie = this.categories.find(c => c.id === this.produit.categorieId)?.nom || '';
+    this.generationEnCours = true;
+    this.aiGenSuccess = false;
+    this.aiService.genererDescription(this.produit.nom, categorie, this.produit.prix || 0, this.t.isFr ? 'fr' : 'en').subscribe({
+      next: (desc: string) => {
+        this.produit.description = desc;
+        this.generationEnCours = false;
+        this.aiGenSuccess = true;
+        clearTimeout(this.aiSuccessTimer);
+        this.aiSuccessTimer = setTimeout(() => this.aiGenSuccess = false, 3500);
+      },
+      error: () => { this.generationEnCours = false; }
+    });
+  }
 
   ngOnInit(): void {
     this.chargerCategories();

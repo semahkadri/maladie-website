@@ -117,7 +117,7 @@ import { TraductionService } from '../../../services/traduction.service';
                       </div>
                     </td>
                     <td class="text-muted" style="max-width: 200px;">
-                      {{ produit.description | slice:0:60 }}{{ (produit.description?.length || 0) > 60 ? '...' : '' }}
+                      {{ produit.description | slice:0:60 }}{{ (produit.description && produit.description.length > 60) ? '...' : '' }}
                     </td>
                     <td class="fw-semibold">
                       {{ produit.prix | number:'1.2-2' }}

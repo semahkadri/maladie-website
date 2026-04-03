@@ -184,7 +184,7 @@ import { Produit } from '../../../modeles/produit.model';
               <span>{{ t.isFr ? 'Description' : 'Description' }}</span>
             </div>
             <div *ngFor="let p of items" class="cmp-data-cell cmp-desc-cell">
-              {{ p.description | slice:0:120 }}{{ (p.description?.length || 0) > 120 ? '…' : '' }}
+              {{ p.description | slice:0:120 }}{{ (p.description && p.description.length > 120) ? '…' : '' }}
             </div>
           </div>
 

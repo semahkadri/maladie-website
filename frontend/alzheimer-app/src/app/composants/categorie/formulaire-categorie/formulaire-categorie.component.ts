@@ -64,7 +64,7 @@ import { TraductionService } from '../../../services/traduction.service';
                             rows="4" [(ngModel)]="categorie.description"
                             maxlength="500" #desc="ngModel"
                             [placeholder]="t.tr('fc.placeholderDesc')"></textarea>
-                  <small class="text-muted mt-1 d-block">{{ categorie.description?.length || 0 }}/500 {{ t.tr('fc.caracteres') }}</small>
+                  <small class="text-muted mt-1 d-block">{{ (categorie.description && categorie.description.length) || 0 }}/500 {{ t.tr('fc.caracteres') }}</small>
                 </div>
 
                 <div class="d-flex justify-content-between">

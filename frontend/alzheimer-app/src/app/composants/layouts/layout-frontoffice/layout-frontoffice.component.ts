@@ -11,13 +11,14 @@ import { CategorieService } from '../../../services/categorie.service';
 import { WishlistService } from '../../../services/wishlist.service';
 import { CompareService } from '../../../services/compare.service';
 import { CompareBarComponent } from '../../shared/compare-bar/compare-bar.component';
+import { AiAssistantComponent } from '../../shared/ai-assistant/ai-assistant.component';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Panier } from '../../../modeles/panier.model';
 
 @Component({
   selector: 'app-layout-frontoffice',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FormsModule, CompareBarComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FormsModule, CompareBarComponent, AiAssistantComponent],
   animations: [
     trigger('miniCartSlide', [
       transition(':enter', [
@@ -329,6 +330,9 @@ import { Panier } from '../../../modeles/panier.model';
         </a>
       </div>
     </div>
+
+    <!-- AI Assistant (floating bottom-left) -->
+    <app-ai-assistant></app-ai-assistant>
 
     <!-- Compare Bar (floating bottom) -->
     <app-compare-bar></app-compare-bar>

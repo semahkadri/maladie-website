@@ -281,7 +281,7 @@ import { TraductionService } from '../../services/traduction.service';
                   <div *ngFor="let cat of categories" class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
                     <div>
                       <span class="fw-semibold">{{ cat.nom }}</span>
-                      <small class="d-block text-muted">{{ (cat.description || '') | slice:0:50 }}{{ (cat.description?.length || 0) > 50 ? '...' : '' }}</small>
+                      <small class="d-block text-muted">{{ (cat.description || '') | slice:0:50 }}{{ (cat.description && cat.description.length > 50) ? '...' : '' }}</small>
                     </div>
                     <span class="badge badge-category">{{ cat.nombreProduits }} {{ cat.nombreProduits !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}</span>
                   </div>

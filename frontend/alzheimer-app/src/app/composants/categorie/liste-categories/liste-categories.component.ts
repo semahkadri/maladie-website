@@ -94,7 +94,7 @@ import { TraductionService } from '../../../services/traduction.service';
                       <td><span class="text-muted">#{{ categorie.id }}</span></td>
                       <td class="fw-semibold">{{ categorie.nom }}</td>
                       <td class="text-muted" style="max-width: 250px;">
-                        {{ categorie.description | slice:0:80 }}{{ (categorie.description?.length || 0) > 80 ? '...' : '' }}
+                        {{ categorie.description | slice:0:80 }}{{ (categorie.description && categorie.description.length > 80) ? '...' : '' }}
                       </td>
                       <td>
                         <button class="lc-products-toggle"
