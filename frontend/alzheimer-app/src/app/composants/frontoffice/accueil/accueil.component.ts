@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProduitService } from '../../../services/produit.service';
@@ -15,41 +15,63 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
   standalone: true,
   imports: [CommonModule, RouterLink, ScrollAnimateDirective, CountUpDirective, PromoCountdownComponent],
   template: `
-    <!-- Premium Animated Hero -->
-    <section class="fo-hero fo-hero-animated">
-      <!-- Floating Particles -->
-      <div class="fo-hero-particles">
-        <div class="fo-hero-particle"></div>
-        <div class="fo-hero-particle"></div>
-        <div class="fo-hero-particle"></div>
-        <div class="fo-hero-particle"></div>
-        <div class="fo-hero-particle"></div>
-        <div class="fo-hero-particle"></div>
-      </div>
-      <div class="fo-hero-inner">
-        <div class="fo-hero-text">
-          <div class="fo-hero-badge">
-            <i class="bi bi-shield-check"></i> {{ t.tr('hero.badge') }}
-          </div>
-          <h1>{{ t.tr('accueil.titre') }}</h1>
-          <p>{{ t.tr('accueil.sousTitre') }}</p>
-          <div class="fo-hero-buttons">
-            <a routerLink="/catalogue" class="fo-hero-btn">
-              <i class="bi bi-grid-3x3-gap me-2"></i>{{ t.tr('accueil.btnCatalogue') }}
-            </a>
-            <a routerLink="/catalogue" class="fo-hero-btn-secondary">
-              <i class="bi bi-stars me-2"></i>{{ t.tr('hero.nouveautes') }}
+    <!-- ══════════ HERO SLIDER ══════════ -->
+    <section class="fo-slider" (mouseenter)="pauseSlider()" (mouseleave)="resumeSlider()">
+
+      <div class="fo-slider-track" [style.transform]="'translateX(-' + currentSlide * 100 + '%)'">
+        <div *ngFor="let slide of slides" class="fo-slide" [ngClass]="'fo-slide-' + slide.theme">
+
+          <!-- Decorative blobs -->
+          <div class="fo-slide-blob fo-slide-blob-1"></div>
+          <div class="fo-slide-blob fo-slide-blob-2"></div>
+          <div class="fo-slide-blob fo-slide-blob-3"></div>
+
+          <!-- Left: text content -->
+          <div class="fo-slide-content">
+            <div class="fo-slide-badge">
+              <i class="bi" [ngClass]="slide.icon"></i>
+              {{ t.isFr ? slide.badge.fr : slide.badge.en }}
+            </div>
+            <h1 class="fo-slide-title">{{ t.isFr ? slide.titre.fr : slide.titre.en }}</h1>
+            <p class="fo-slide-desc">{{ t.isFr ? slide.desc.fr : slide.desc.en }}</p>
+            <a [routerLink]="slide.link" [queryParams]="slide.queryParams" class="fo-slide-cta">
+              {{ t.isFr ? slide.cta.fr : slide.cta.en }}
+              <i class="bi bi-arrow-right ms-2"></i>
             </a>
           </div>
-        </div>
-        <div class="fo-hero-visual">
-          <div class="fo-hero-promo-card">
-            <i class="bi bi-capsule"></i>
-            <h3>{{ t.tr('hero.promoTitre') }}</h3>
-            <p>{{ t.tr('hero.promoDesc') }}</p>
+
+          <!-- Right: decorative icon ring -->
+          <div class="fo-slide-icon-area">
+            <div class="fo-slide-icon-ring">
+              <i class="bi" [ngClass]="slide.icon"></i>
+            </div>
+            <div class="fo-slide-icon-ring fo-slide-icon-ring-outer"></div>
           </div>
+
         </div>
       </div>
+
+      <!-- Prev / Next arrows -->
+      <button class="fo-slider-arrow fo-slider-prev" (click)="prevSlide()" aria-label="Slide précédent">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <button class="fo-slider-arrow fo-slider-next" (click)="nextSlide()" aria-label="Slide suivant">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+
+      <!-- Dot indicators -->
+      <div class="fo-slider-dots">
+        <button *ngFor="let slide of slides; let i = index"
+                class="fo-slider-dot"
+                [class.active]="i === currentSlide"
+                (click)="goToSlide(i)"
+                [attr.aria-label]="'Slide ' + (i + 1)">
+        </button>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="fo-slider-progress" [class.running]="!paused" [style.animation-duration]="'5s'"></div>
+
     </section>
 
     <!-- Trust Strip with Scroll Animation & Count Up -->
@@ -302,11 +324,47 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
     </div>
   `
 })
-export class AccueilComponent implements OnInit {
+export class AccueilComponent implements OnInit, OnDestroy {
+  // ─── Slider ─────────────────────────────────────────────
+  currentSlide = 0;
+  paused = false;
+  private sliderInterval: ReturnType<typeof setInterval> | null = null;
+
+  slides = [
+    {
+      badge: { fr: 'Pharmacie certifiée', en: 'Certified pharmacy' },
+      titre: { fr: 'Votre santé,\nnotre priorité', en: 'Your health,\nour priority' },
+      desc: { fr: "Des produits certifiés, une équipe d'experts à votre service 7j/7.", en: 'Certified products, an expert team at your service 7 days a week.' },
+      cta: { fr: 'Découvrir le catalogue', en: 'Browse catalogue' },
+      link: '/catalogue', queryParams: null, theme: 'blue', icon: 'bi-shield-heart'
+    },
+    {
+      badge: { fr: 'Offres exclusives', en: 'Exclusive deals' },
+      titre: { fr: 'Promotions\nExclusives', en: 'Exclusive\nOffers' },
+      desc: { fr: "Jusqu'à -50% sur une large sélection de produits pharmaceutiques.", en: 'Up to -50% on a wide selection of pharmaceutical products.' },
+      cta: { fr: 'Voir toutes les offres', en: 'View all deals' },
+      link: '/catalogue', queryParams: { filtre: 'promo' }, theme: 'red', icon: 'bi-percent'
+    },
+    {
+      badge: { fr: 'Bien-être & Nutrition', en: 'Wellness & Nutrition' },
+      titre: { fr: 'Vitamines &\nCompléments', en: 'Vitamins &\nSupplements' },
+      desc: { fr: 'Renforcez votre immunité avec nos meilleurs produits naturels et compléments alimentaires.', en: 'Boost your immunity with our best natural products and dietary supplements.' },
+      cta: { fr: 'Explorer la gamme', en: 'Explore range' },
+      link: '/catalogue', queryParams: null, theme: 'green', icon: 'bi-capsule'
+    },
+    {
+      badge: { fr: 'Livraison express', en: 'Express delivery' },
+      titre: { fr: 'Livraison 24h\nPartout en Tunisie', en: 'Delivery 24h\nAcross Tunisia' },
+      desc: { fr: 'Commandez en ligne et recevez vos produits directement chez vous, rapidement et en toute sécurité.', en: 'Order online and receive your products directly at home, quickly and securely.' },
+      cta: { fr: 'Commander maintenant', en: 'Order now' },
+      link: '/catalogue', queryParams: null, theme: 'purple', icon: 'bi-truck'
+    }
+  ];
+
+  // ─── Products ────────────────────────────────────────────
   recentProducts: Produit[] = [];
   promoProducts: Produit[] = [];
   loading = true;
-
   ajoutEnCours: number | null = null;
   ajoutOk: number | null = null;
 
@@ -320,6 +378,7 @@ export class AccueilComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.startSlider();
     this.produitService.listerTout().subscribe({
       next: (prods) => {
         const sorted = prods.sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''));
@@ -333,6 +392,23 @@ export class AccueilComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  // ─── Hero Slider ─────────────────────────────────────────
+  startSlider(): void {
+    this.sliderInterval = setInterval(() => {
+      if (!this.paused) this.nextSlide();
+    }, 5000);
+  }
+
+  nextSlide(): void { this.currentSlide = (this.currentSlide + 1) % this.slides.length; }
+  prevSlide(): void { this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length; }
+  goToSlide(i: number): void { this.currentSlide = i; }
+  pauseSlider(): void { this.paused = true; }
+  resumeSlider(): void { this.paused = false; }
+
+  ngOnDestroy(): void {
+    if (this.sliderInterval) clearInterval(this.sliderInterval);
   }
 
   // ─── Carousel scroll ────────────────────────────────────
@@ -370,14 +446,4 @@ export class AccueilComponent implements OnInit {
     });
   }
 
-  getCategoryIcon(name: string): string {
-    const n = (name || '').toLowerCase();
-    if (n.includes('medic') || n.includes('médic') || n.includes('pharma')) return 'bi-capsule';
-    if (n.includes('beauté') || n.includes('beaute') || n.includes('beauty') || n.includes('cosm')) return 'bi-stars';
-    if (n.includes('bébé') || n.includes('bebe') || n.includes('baby') || n.includes('enfant')) return 'bi-emoji-smile';
-    if (n.includes('hygièn') || n.includes('hygien') || n.includes('soin')) return 'bi-droplet';
-    if (n.includes('vitamin') || n.includes('complémen') || n.includes('complemen') || n.includes('nutri')) return 'bi-lightning';
-    if (n.includes('équip') || n.includes('equip') || n.includes('matéri') || n.includes('materi')) return 'bi-bandaid';
-    return 'bi-tag-fill';
-  }
 }

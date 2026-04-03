@@ -6,6 +6,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { CategorieService } from '../../../services/categorie.service';
 import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
+import { WishlistService } from '../../../services/wishlist.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
@@ -30,7 +31,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
     ])
   ],
   template: `
-    <!-- Skeleton Loading -->
+    <!-- Skeleton -->
     <div class="fo-section" *ngIf="loading">
       <div class="fo-section-container">
         <app-skeleton-loader type="product-grid" [count]="6"></app-skeleton-loader>
@@ -39,6 +40,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
 
     <div class="fo-section" *ngIf="!loading">
       <div class="fo-section-container">
+
         <!-- Breadcrumb -->
         <div class="fo-breadcrumb">
           <a routerLink="/"><i class="bi bi-house-door"></i></a>
@@ -65,100 +67,89 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             <i class="bi bi-search"></i>
             <input type="text" [placeholder]="t.tr('catProd.rechercherDans')"
                    [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()">
+            <button *ngIf="searchTerm" class="fo-search-box-clear" (click)="searchTerm=''; applyFilters()">
+              <i class="bi bi-x"></i>
+            </button>
           </div>
           <select class="fo-filter-select fo-filter-stock" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
             <option value="tous">{{ t.tr('catalogue.toutStock') }}</option>
             <option value="en-stock">{{ t.tr('catalogue.disponible') }}</option>
             <option value="en-promo">{{ t.tr('catalogue.filtrePromo') }}</option>
           </select>
+          <div class="fo-sort-control">
+            <i class="bi bi-sort-down fo-sort-ico"></i>
+            <select [(ngModel)]="sortBy" (ngModelChange)="applySort()">
+              <option value="nom-asc">{{ t.tr('catalogue.nomAZ') }}</option>
+              <option value="nom-desc">{{ t.tr('catalogue.nomZA') }}</option>
+              <option value="prix-asc">{{ t.tr('catalogue.prixAsc') }}</option>
+              <option value="prix-desc">{{ t.tr('catalogue.prixDesc') }}</option>
+              <option value="date-desc">{{ t.tr('catalogue.dateDesc') }}</option>
+            </select>
+          </div>
           <a routerLink="/catalogue" class="fo-btn fo-btn-outline">
             <i class="bi bi-grid-3x3-gap me-1"></i>{{ t.tr('catalogue.toutParcourir') }}
           </a>
         </div>
 
-        <!-- Toolbar: Sort + Results Count -->
-        <div class="fo-toolbar">
-          <div class="fo-toolbar-left">
-            <span class="fo-results-count">
-              <strong>{{ filteredProducts.length }}</strong> {{ filteredProducts.length !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}
-              <span *ngIf="hasActiveFilters()" class="fo-results-filtered">
-                ({{ t.tr('catalogue.filtres') }}{{ filteredProducts.length !== 1 ? 's' : '' }})
-                <button class="fo-clear-filters" (click)="resetFilters()">
-                  <i class="bi bi-x-circle"></i> {{ t.tr('catalogue.toutEffacer') }}
-                </button>
-              </span>
-            </span>
-          </div>
-          <div class="fo-toolbar-right">
-            <div class="fo-sort-control">
-              <label><i class="bi bi-sort-down me-1"></i>{{ t.tr('catalogue.trierPar') }}</label>
-              <select [(ngModel)]="sortBy" (ngModelChange)="applySort()">
-                <option value="nom-asc">{{ t.tr('catalogue.nomAZ') }}</option>
-                <option value="nom-desc">{{ t.tr('catalogue.nomZA') }}</option>
-                <option value="prix-asc">{{ t.tr('catalogue.prixAsc') }}</option>
-                <option value="prix-desc">{{ t.tr('catalogue.prixDesc') }}</option>
-                <option value="date-desc">{{ t.tr('catalogue.dateDesc') }}</option>
-                <option value="date-asc">{{ t.tr('catalogue.dateAsc') }}</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active Filters Chips -->
+        <!-- Active filter chips -->
         <div class="fo-filter-chips" *ngIf="hasActiveFilters()">
           <span class="fo-chip" *ngIf="searchTerm">
-            {{ t.tr('catalogue.chipRecherche') }} : &laquo; {{ searchTerm }} &raquo;
+            <i class="bi bi-search me-1"></i>{{ searchTerm }}
             <button (click)="searchTerm = ''; applyFilters()"><i class="bi bi-x"></i></button>
           </span>
           <span class="fo-chip" *ngIf="selectedStock !== 'tous'">
-            {{ t.tr('catalogue.chipStock') }} : {{ getStockLabel(selectedStock) }}
+            <i class="bi bi-funnel me-1"></i>{{ getStockLabel(selectedStock) }}
             <button (click)="selectedStock = 'tous'; applyFilters()"><i class="bi bi-x"></i></button>
           </span>
+          <button class="fo-chip fo-chip-clear" (click)="resetFilters()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.tr('catalogue.toutEffacer') }}
+          </button>
         </div>
 
-        <!-- Product Grid (paginated) -->
+        <!-- Product Grid -->
         <div class="fo-product-grid" *ngIf="pagedProducts.length > 0">
           <div *ngFor="let prod of pagedProducts; let i = index" class="fo-product-card"
-               appScrollAnimate="fade-up" [animateDelay]="i * 100" appTilt [tiltMax]="6">
-            <a [routerLink]="['/catalogue', prod.id]" style="text-decoration: none; color: inherit;">
+               appScrollAnimate="fade-up" [animateDelay]="i * 60" appTilt [tiltMax]="6">
+
+            <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
               <div class="fo-product-card-img">
                 <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                <button class="fo-product-wishlist" (click)="$event.preventDefault(); $event.stopPropagation()">
-                  <i class="bi bi-heart"></i>
+                <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
+                        (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)"
+                        [title]="wishlistService.isInWishlist(prod.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
+                  <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
                 </button>
                 <button class="fo-product-quickview" (click)="openQuickView($event, prod)">
                   <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.quickView') }}
                 </button>
-                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
+                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
                 <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
               </div>
               <div class="fo-product-card-body">
                 <span class="fo-product-brand">{{ prod.categorieNom }}</span>
                 <h4>{{ prod.nom }}</h4>
-                <p>{{ prod.description | slice:0:80 }}{{ prod.description && prod.description.length > 80 ? '...' : '' }}</p>
-                <div class="fo-product-card-footer">
-                  <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
-                    <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
-                    <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
-                  </div>
-                  <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
-                  <span class="fo-product-stock"
-                        [class.in-stock]="prod.quantite > 0"
-                        [class.out-of-stock]="prod.quantite === 0">
-                    {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
-                  </span>
-                </div>
-                <app-promo-countdown
-                  *ngIf="prod.enPromo && prod.dateFinPromo"
-                  [dateFinPromo]="prod.dateFinPromo"
-                  size="card"
-                  [isFr]="t.isFr">
-                </app-promo-countdown>
+                <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
               </div>
             </a>
-            <div class="fo-product-card-body" style="padding-top: 0;">
-              <button *ngIf="prod.quantite > 0"
-                      class="fo-add-cart-btn"
+
+            <div class="fo-card-bottom">
+              <div class="fo-card-price-row">
+                <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                  <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                  <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
+                </div>
+                <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
+                  {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                </span>
+              </div>
+              <div class="fo-card-countdown-slot">
+                <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                  [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
+                </app-promo-countdown>
+              </div>
+              <button *ngIf="prod.quantite > 0" class="fo-add-cart-btn"
                       [class.success]="ajoutOk === prod.id"
                       (click)="ajouterAuPanier($event, prod)"
                       [disabled]="ajoutEnCours === prod.id">
@@ -167,11 +158,31 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                 <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
                 {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
               </button>
-              <span *ngIf="prod.quantite === 0" class="fo-product-stock out-of-stock mt-2" style="display: block; text-align: center;">
+              <button *ngIf="prod.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
                 <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
-              </span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="filteredProducts.length === 0" class="cat-empty">
+          <div class="cat-empty-icon-wrap">
+            <div class="cat-empty-ring cat-empty-ring-1"></div>
+            <div class="cat-empty-ring cat-empty-ring-2"></div>
+            <div class="cat-empty-icon-circle">
+              <i class="bi" [class.bi-funnel]="hasActiveFilters()" [class.bi-inbox]="!hasActiveFilters()"></i>
             </div>
           </div>
+          <h3 class="cat-empty-title">{{ t.tr('catalogue.aucunProduit') }}</h3>
+          <p class="cat-empty-desc">{{ hasActiveFilters() ? t.tr('catalogue.aucunProduitDesc') : t.tr('catProd.aucunProduit') }}</p>
+          <button *ngIf="hasActiveFilters()" class="cat-empty-reset" (click)="resetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>{{ t.tr('catalogue.reinitialiser') }}
+          </button>
+          <a *ngIf="!hasActiveFilters()" routerLink="/catalogue" class="cat-empty-reset">
+            <i class="bi bi-grid-3x3-gap"></i>{{ t.tr('catProd.parcourirCatalogue') }}
+          </a>
         </div>
 
         <!-- Pagination -->
@@ -180,23 +191,13 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             {{ t.tr('catalogue.affichage') }} {{ startIndex + 1 }}–{{ endIndex }} {{ t.tr('catalogue.sur') }} {{ filteredProducts.length }}
           </div>
           <div class="fo-pagination-controls">
-            <button (click)="goToPage(1)" [disabled]="page === 1" [title]="t.tr('catalogue.premierePage')">
-              <i class="bi bi-chevron-double-left"></i>
-            </button>
-            <button (click)="goToPage(page - 1)" [disabled]="page === 1" [title]="t.tr('catalogue.precedente')">
-              <i class="bi bi-chevron-left"></i>
-            </button>
-            <button *ngFor="let p of visiblePages" (click)="goToPage(p)"
-                    [class.active]="p === page">{{ p }}</button>
-            <button (click)="goToPage(page + 1)" [disabled]="page === totalPages" [title]="t.tr('catalogue.suivante')">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-            <button (click)="goToPage(totalPages)" [disabled]="page === totalPages" [title]="t.tr('catalogue.dernierePage')">
-              <i class="bi bi-chevron-double-right"></i>
-            </button>
+            <button (click)="goToPage(1)" [disabled]="page === 1"><i class="bi bi-chevron-double-left"></i></button>
+            <button (click)="goToPage(page - 1)" [disabled]="page === 1"><i class="bi bi-chevron-left"></i></button>
+            <button *ngFor="let p of visiblePages" (click)="goToPage(p)" [class.active]="p === page">{{ p }}</button>
+            <button (click)="goToPage(page + 1)" [disabled]="page === totalPages"><i class="bi bi-chevron-right"></i></button>
+            <button (click)="goToPage(totalPages)" [disabled]="page === totalPages"><i class="bi bi-chevron-double-right"></i></button>
           </div>
           <div class="fo-pagination-size">
-            <label>{{ t.tr('catalogue.parPage') }}</label>
             <select [(ngModel)]="perPage" (ngModelChange)="onPerPageChange()">
               <option [ngValue]="6">6</option>
               <option [ngValue]="12">12</option>
@@ -206,22 +207,6 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
           </div>
         </div>
 
-        <!-- Cart Error Toast -->
-        <div *ngIf="ajoutErreur" class="fo-toast fo-toast-error fade-in">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ ajoutErreur }}
-          <button (click)="ajoutErreur = ''" style="background: none; border: none; color: inherit; margin-left: 12px; cursor: pointer; font-size: 1.1rem;"><i class="bi bi-x-lg"></i></button>
-        </div>
-
-        <!-- Empty State -->
-        <div *ngIf="filteredProducts.length === 0 && !loading" class="fo-empty-state">
-          <i class="bi bi-inbox"></i>
-          <p *ngIf="!hasActiveFilters()">{{ t.tr('catProd.aucunProduit') }}</p>
-          <p *ngIf="hasActiveFilters()">{{ t.tr('catProd.aucunFiltre') }}</p>
-          <button *ngIf="hasActiveFilters()" class="fo-btn fo-btn-outline" (click)="resetFilters()">
-            <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.tr('catalogue.reinitialiser') }}
-          </button>
-          <a *ngIf="!hasActiveFilters()" routerLink="/catalogue" class="fo-btn fo-btn-outline">{{ t.tr('catProd.parcourirCatalogue') }}</a>
-        </div>
       </div>
     </div>
 
@@ -244,11 +229,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             <span class="fo-price-promo">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
           </div>
           <span *ngIf="!quickViewProduct.enPromo || !quickViewProduct.prixOriginal" class="fo-product-price">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
-          <app-promo-countdown
-            *ngIf="quickViewProduct.enPromo && quickViewProduct.dateFinPromo"
-            [dateFinPromo]="quickViewProduct.dateFinPromo"
-            size="card"
-            [isFr]="t.isFr">
+          <app-promo-countdown *ngIf="quickViewProduct.enPromo && quickViewProduct.dateFinPromo"
+            [dateFinPromo]="quickViewProduct.dateFinPromo" size="card" [isFr]="t.isFr">
           </app-promo-countdown>
           <span class="fo-product-stock"
                 [class.in-stock]="quickViewProduct.quantite > 0"
@@ -258,10 +240,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             {{ quickViewProduct.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
           </span>
           <div class="fo-quickview-actions">
-            <button *ngIf="quickViewProduct.quantite > 0"
-                    class="fo-add-cart-btn"
-                    (click)="quickViewAjouterPanier()"
-                    [disabled]="ajoutEnCours === quickViewProduct.id">
+            <button *ngIf="quickViewProduct.quantite > 0" class="fo-add-cart-btn"
+                    (click)="quickViewAjouterPanier()" [disabled]="ajoutEnCours === quickViewProduct.id">
               <span *ngIf="ajoutEnCours === quickViewProduct.id" class="spinner-border spinner-border-sm me-1"></span>
               <i *ngIf="ajoutEnCours !== quickViewProduct.id" class="bi bi-cart-plus me-1"></i>
               {{ t.tr('catalogue.ajouterPanier') }}
@@ -276,20 +256,15 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
   `
 })
 export class CategorieProduitsComponent implements OnInit {
-  // Data
   categorie: Categorie | null = null;
   products: Produit[] = [];
   filteredProducts: Produit[] = [];
   pagedProducts: Produit[] = [];
 
-  // Filters
   searchTerm = '';
   selectedStock = 'tous';
-
-  // Sort
   sortBy = 'nom-asc';
 
-  // Pagination
   page = 1;
   perPage = 12;
   totalPages = 1;
@@ -302,7 +277,6 @@ export class CategorieProduitsComponent implements OnInit {
   ajoutOk: number | null = null;
   ajoutErreur = '';
 
-  // Quick View
   quickViewProduct: Produit | null = null;
 
   constructor(
@@ -310,6 +284,7 @@ export class CategorieProduitsComponent implements OnInit {
     private categorieService: CategorieService,
     private produitService: ProduitService,
     private panierService: PanierService,
+    public wishlistService: WishlistService,
     public t: TraductionService
   ) {}
 
@@ -317,15 +292,11 @@ export class CategorieProduitsComponent implements OnInit {
     this.route.params.subscribe(params => {
       const id = +params['id'];
       this.loading = true;
-      this.categorieService.obtenirParId(id).subscribe({
-        next: (cat) => this.categorie = cat
-      });
+      this.searchTerm = '';
+      this.selectedStock = 'tous';
+      this.categorieService.obtenirParId(id).subscribe({ next: (cat) => this.categorie = cat });
       this.produitService.listerParCategorie(id).subscribe({
-        next: (prods) => {
-          this.products = prods;
-          this.applyFilters();
-          this.loading = false;
-        },
+        next: (prods) => { this.products = prods; this.applyFilters(); this.loading = false; },
         error: () => this.loading = false
       });
     });
@@ -348,17 +319,9 @@ export class CategorieProduitsComponent implements OnInit {
     const [field, direction] = this.sortBy.split('-');
     this.filteredProducts.sort((a, b) => {
       let cmp = 0;
-      switch (field) {
-        case 'nom':
-          cmp = a.nom.localeCompare(b.nom, 'fr');
-          break;
-        case 'prix':
-          cmp = a.prix - b.prix;
-          break;
-        case 'date':
-          cmp = (a.dateCreation || '').localeCompare(b.dateCreation || '');
-          break;
-      }
+      if (field === 'nom') cmp = a.nom.localeCompare(b.nom, 'fr');
+      else if (field === 'prix') cmp = a.prix - b.prix;
+      else if (field === 'date') cmp = (a.dateCreation || '').localeCompare(b.dateCreation || '');
       return direction === 'desc' ? -cmp : cmp;
     });
     this.page = 1;
@@ -378,37 +341,22 @@ export class CategorieProduitsComponent implements OnInit {
     const maxVisible = 5;
     let start = Math.max(1, this.page - Math.floor(maxVisible / 2));
     let end = start + maxVisible - 1;
-    if (end > this.totalPages) {
-      end = this.totalPages;
-      start = Math.max(1, end - maxVisible + 1);
-    }
+    if (end > this.totalPages) { end = this.totalPages; start = Math.max(1, end - maxVisible + 1); }
     this.visiblePages = [];
-    for (let i = start; i <= end; i++) {
-      this.visiblePages.push(i);
-    }
+    for (let i = start; i <= end; i++) this.visiblePages.push(i);
   }
 
   goToPage(p: number): void {
     if (p < 1 || p > this.totalPages) return;
-    this.page = p;
-    this.paginate();
+    this.page = p; this.paginate();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  onPerPageChange(): void {
-    this.page = 1;
-    this.paginate();
-  }
-
-  hasActiveFilters(): boolean {
-    return !!this.searchTerm || this.selectedStock !== 'tous';
-  }
+  onPerPageChange(): void { this.page = 1; this.paginate(); }
+  hasActiveFilters(): boolean { return !!this.searchTerm || this.selectedStock !== 'tous'; }
 
   resetFilters(): void {
-    this.searchTerm = '';
-    this.selectedStock = 'tous';
-    this.sortBy = 'nom-asc';
-    this.applyFilters();
+    this.searchTerm = ''; this.selectedStock = 'tous'; this.sortBy = 'nom-asc'; this.applyFilters();
   }
 
   getStockLabel(value: string): string {
@@ -420,50 +368,27 @@ export class CategorieProduitsComponent implements OnInit {
   }
 
   ajouterAuPanier(event: Event, produit: Produit): void {
-    event.preventDefault();
-    event.stopPropagation();
+    event.preventDefault(); event.stopPropagation();
     if (!produit.id || this.ajoutEnCours) return;
-    this.ajoutEnCours = produit.id;
-    this.ajoutOk = null;
-    this.ajoutErreur = '';
+    this.ajoutEnCours = produit.id; this.ajoutOk = null;
     this.panierService.ajouterProduit(produit.id, 1).subscribe({
       next: () => {
-        this.ajoutEnCours = null;
-        this.ajoutOk = produit.id!;
+        this.ajoutEnCours = null; this.ajoutOk = produit.id!;
         setTimeout(() => { if (this.ajoutOk === produit.id) this.ajoutOk = null; }, 2000);
       },
-      error: (err) => {
-        this.ajoutEnCours = null;
-        this.ajoutErreur = err.error?.message || this.t.tr('panier.ajouterErreur');
-        setTimeout(() => this.ajoutErreur = '', 5000);
-      }
+      error: (err) => { this.ajoutEnCours = null; this.ajoutErreur = err.error?.message || this.t.tr('panier.ajouterErreur'); setTimeout(() => this.ajoutErreur = '', 5000); }
     });
   }
 
-  // Quick View
-  openQuickView(event: Event, prod: Produit): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.quickViewProduct = prod;
-  }
-
-  closeQuickView(): void {
-    this.quickViewProduct = null;
-  }
+  openQuickView(event: Event, prod: Produit): void { event.preventDefault(); event.stopPropagation(); this.quickViewProduct = prod; }
+  closeQuickView(): void { this.quickViewProduct = null; }
 
   quickViewAjouterPanier(): void {
     if (!this.quickViewProduct?.id || this.ajoutEnCours) return;
     this.ajoutEnCours = this.quickViewProduct.id;
     this.panierService.ajouterProduit(this.quickViewProduct.id, 1).subscribe({
-      next: () => {
-        this.ajoutEnCours = null;
-        this.closeQuickView();
-      },
-      error: (err) => {
-        this.ajoutEnCours = null;
-        this.ajoutErreur = err.error?.message || this.t.tr('panier.ajouterErreur');
-        setTimeout(() => this.ajoutErreur = '', 5000);
-      }
+      next: () => { this.ajoutEnCours = null; this.closeQuickView(); },
+      error: (err) => { this.ajoutEnCours = null; this.ajoutErreur = err.error?.message || this.t.tr('panier.ajouterErreur'); setTimeout(() => this.ajoutErreur = '', 5000); }
     });
   }
 }

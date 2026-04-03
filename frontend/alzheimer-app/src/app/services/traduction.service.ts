@@ -156,6 +156,10 @@ const DICT: Record<string, TranslationEntry> = {
     fr: 'Aucun produit trouvé pour vos critères de recherche.',
     en: 'No products found matching your search criteria.'
   },
+  'catalogue.aucunProduitDesc': {
+    fr: 'Aucun produit ne correspond à vos critères. Essayez d\u2019ajuster vos filtres.',
+    en: 'No products match your search criteria. Try adjusting your filters.'
+  },
   'catalogue.reinitialiser': { fr: 'Réinitialiser les filtres', en: 'Reset filters' },
   'catalogue.affichage': { fr: 'Affichage', en: 'Showing' },
   'catalogue.sur': { fr: 'sur', en: 'of' },

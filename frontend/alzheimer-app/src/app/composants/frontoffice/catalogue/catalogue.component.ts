@@ -201,27 +201,19 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
 
             <!-- Toolbar -->
             <div class="cat-toolbar" *ngIf="!loading">
-              <span class="cat-results-count">
-                <strong>{{ filteredProducts.length }}</strong>
-                {{ filteredProducts.length !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}
-                {{ t.tr('catalogue.trouves') }}{{ filteredProducts.length !== 1 ? 's' : '' }}
-              </span>
               <div class="cat-toolbar-right">
                 <!-- View toggle -->
                 <div class="fo-view-toggle-group">
-                  <span class="fo-vt-label-prefix">{{ t.isFr ? 'Affichage' : 'View' }}</span>
-                  <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'grid'" (click)="setView('grid')">
+                  <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'grid'" (click)="setView('grid')" [title]="t.isFr ? 'Grille' : 'Grid'">
                     <i class="bi bi-grid-3x3-gap-fill"></i>
-                    <span>{{ t.isFr ? 'Grille' : 'Grid' }}</span>
                   </button>
-                  <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'list'" (click)="setView('list')">
+                  <button class="fo-vt-btn" [class.fo-vt-active]="viewMode === 'list'" (click)="setView('list')" [title]="t.isFr ? 'Liste' : 'List'">
                     <i class="bi bi-list-ul"></i>
-                    <span>{{ t.isFr ? 'Liste' : 'List' }}</span>
                   </button>
                 </div>
                 <!-- Sort -->
                 <div class="fo-sort-control">
-                  <label><i class="bi bi-sort-down me-1"></i>{{ t.tr('catalogue.trierPar') }}</label>
+                  <i class="bi bi-sort-down fo-sort-ico"></i>
                   <select [(ngModel)]="sortBy" (ngModelChange)="applySort()">
                     <option value="nom-asc">{{ t.tr('catalogue.nomAZ') }}</option>
                     <option value="nom-desc">{{ t.tr('catalogue.nomZA') }}</option>
@@ -237,21 +229,24 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             <!-- Active filter chips -->
             <div class="fo-filter-chips" *ngIf="hasActiveFilters()">
               <span class="fo-chip" *ngIf="searchTerm">
-                {{ t.tr('catalogue.chipRecherche') }} : &laquo;{{ searchTerm }}&raquo;
+                <i class="bi bi-search me-1"></i>{{ searchTerm }}
                 <button (click)="searchTerm = ''; applyFilters()"><i class="bi bi-x"></i></button>
               </span>
               <span class="fo-chip" *ngIf="selectedCategory">
-                {{ getCategoryName(selectedCategory) }}
+                <i class="bi bi-tag me-1"></i>{{ getCategoryName(selectedCategory) }}
                 <button (click)="selectedCategory = 0; applyFilters()"><i class="bi bi-x"></i></button>
               </span>
               <span class="fo-chip" *ngIf="selectedStock !== 'tous'">
-                {{ getStockLabel(selectedStock) }}
+                <i class="bi bi-funnel me-1"></i>{{ getStockLabel(selectedStock) }}
                 <button (click)="selectedStock = 'tous'; applyFilters()"><i class="bi bi-x"></i></button>
               </span>
               <span class="fo-chip fo-chip-price" *ngIf="isPriceFiltered">
-                {{ priceRangeMin | number:'1.0-0' }} — {{ priceRangeMax | number:'1.0-0' }} TND
+                <i class="bi bi-cash me-1"></i>{{ priceRangeMin | number:'1.0-0' }} — {{ priceRangeMax | number:'1.0-0' }} TND
                 <button (click)="priceRangeMin = absoluteMin; priceRangeMax = absoluteMax; applyFilters()"><i class="bi bi-x"></i></button>
               </span>
+              <button class="fo-chip fo-chip-clear" (click)="resetFilters()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.tr('catalogue.toutEffacer') }}
+              </button>
             </div>
 
             <!-- Skeleton -->
@@ -259,10 +254,18 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
 
             <!-- Empty state -->
             <div *ngIf="!loading && filteredProducts.length === 0" class="cat-empty">
-              <i class="bi bi-search"></i>
-              <p>{{ t.isFr ? 'Aucun produit ne correspond à vos filtres.' : 'No products match your filters.' }}</p>
+              <div class="cat-empty-icon-wrap">
+                <div class="cat-empty-ring cat-empty-ring-1"></div>
+                <div class="cat-empty-ring cat-empty-ring-2"></div>
+                <div class="cat-empty-icon-circle">
+                  <i class="bi bi-funnel"></i>
+                </div>
+              </div>
+              <h3 class="cat-empty-title">{{ t.tr('catalogue.aucunProduit') }}</h3>
+              <p class="cat-empty-desc">{{ t.tr('catalogue.aucunProduitDesc') }}</p>
               <button class="cat-empty-reset" (click)="resetFilters()">
-                <i class="bi bi-arrow-counterclockwise me-1"></i>{{ t.isFr ? 'Réinitialiser les filtres' : 'Reset filters' }}
+                <i class="bi bi-arrow-counterclockwise"></i>
+                {{ t.isFr ? 'Réinitialiser les filtres' : 'Reset filters' }}
               </button>
             </div>
 
@@ -526,9 +529,11 @@ export class CatalogueComponent implements OnInit {
     const saved = localStorage.getItem('catalogue-view-mode');
     if (saved === 'list' || saved === 'grid') this.viewMode = saved;
 
-    // Auto-apply filter from query param (e.g. ?filtre=promo from accueil)
+    // Auto-apply filters from query params
     const filtre = this.route.snapshot.queryParamMap.get('filtre');
     if (filtre === 'promo') this.selectedStock = 'en-promo';
+    const q = this.route.snapshot.queryParamMap.get('q');
+    if (q) this.searchTerm = q;
 
     this.categorieService.listerTout().subscribe({
       next: (cats) => this.categories = cats

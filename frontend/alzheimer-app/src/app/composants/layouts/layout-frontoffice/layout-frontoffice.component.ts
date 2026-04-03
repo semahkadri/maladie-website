@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -88,8 +88,11 @@ import { Panier } from '../../../modeles/panier.model';
         <!-- Search bar -->
         <div class="fo-nb-search">
           <i class="bi bi-search fo-nb-search-ico"></i>
-          <input type="text" class="fo-nb-search-input" [placeholder]="t.tr('nav.rechercher')">
-          <button class="fo-nb-search-btn">
+          <input type="text" class="fo-nb-search-input" [placeholder]="t.tr('nav.rechercher')"
+                 [(ngModel)]="navSearch"
+                 (keyup.enter)="doNavSearch()"
+                 (keyup.escape)="navSearch = ''">
+          <button class="fo-nb-search-btn" (click)="doNavSearch()">
             <i class="bi bi-search"></i>
             <span class="d-none d-xl-inline ms-1">{{ t.isFr ? 'Rechercher' : 'Search' }}</span>
           </button>
@@ -162,6 +165,12 @@ import { Panier } from '../../../modeles/panier.model';
 
       <!-- ── Mobile slide-down menu ── -->
       <div class="fo-nb-mobile" [class.fo-nb-mobile-open]="menuOpen">
+        <!-- Mobile search -->
+        <div class="fo-nb-mobile-search">
+          <i class="bi bi-search"></i>
+          <input type="text" [(ngModel)]="navSearch" [placeholder]="t.tr('nav.rechercher')"
+                 (keyup.enter)="doNavSearch()" class="fo-nb-mobile-search-input">
+        </div>
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
            class="fo-nb-mlink" (click)="menuOpen=false">
           <i class="bi bi-house-door-fill"></i> {{ t.tr('nav.accueil') }}
@@ -321,6 +330,7 @@ import { Panier } from '../../../modeles/panier.model';
 export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   annee = new Date().getFullYear();
   menuOpen = false;
+  navSearch = '';
   nombreArticles = 0;
   announcementClosed = false;
   topCategories: Categorie[] = [];
@@ -343,8 +353,17 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
     public th: ThemeService,
     private panierService: PanierService,
     private categorieService: CategorieService,
-    public wishlistService: WishlistService
+    public wishlistService: WishlistService,
+    private router: Router
   ) {}
+
+  doNavSearch(): void {
+    const q = this.navSearch.trim();
+    if (!q) return;
+    this.router.navigate(['/catalogue'], { queryParams: { q } });
+    this.navSearch = '';
+    this.menuOpen = false;
+  }
 
   ngOnInit(): void {
     this.panierService.chargerPanier().subscribe();
