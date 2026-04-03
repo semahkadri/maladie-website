@@ -8,6 +8,7 @@ import { TraductionService } from '../../../services/traduction.service';
 import { ThemeService } from '../../../services/theme.service';
 import { PanierService } from '../../../services/panier.service';
 import { CategorieService } from '../../../services/categorie.service';
+import { WishlistService } from '../../../services/wishlist.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Panier } from '../../../modeles/panier.model';
 
@@ -92,6 +93,11 @@ import { Panier } from '../../../modeles/panier.model';
           <button class="theme-toggle" (click)="th.toggle()" [attr.title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
             <i class="bi" [class.bi-moon-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
           </button>
+          <!-- Wishlist -->
+          <a routerLink="/wishlist" class="fo-navbar-action-btn fo-navbar-wishlist">
+            <i class="bi bi-heart"></i>
+            <span *ngIf="wishlistCount > 0" class="fo-wishlist-badge">{{ wishlistCount }}</span>
+          </a>
           <!-- Cart -->
           <a routerLink="/panier" class="fo-navbar-action-btn fo-navbar-cart">
             <i class="bi bi-cart3"></i>
@@ -140,6 +146,11 @@ import { Panier } from '../../../modeles/panier.model';
           <i class="bi bi-cart3"></i> {{ t.tr('nav.panier') }}
           <span *ngIf="nombreArticles > 0" class="fo-cart-badge">{{ nombreArticles }}</span>
         </a>
+        <a routerLink="/wishlist" routerLinkActive="active"
+           class="fo-navbar-link" (click)="menuOpen = false">
+          <i class="bi bi-heart"></i> {{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}
+          <span *ngIf="wishlistCount > 0" class="fo-cart-badge">{{ wishlistCount }}</span>
+        </a>
         <a routerLink="/admin" class="fo-navbar-link fo-navbar-admin" (click)="menuOpen = false">
           <i class="bi bi-gear"></i> {{ t.tr('nav.admin') }}
         </a>
@@ -176,6 +187,7 @@ import { Panier } from '../../../modeles/panier.model';
             <li><a routerLink="/">{{ t.tr('nav.accueil') }}</a></li>
             <li><a routerLink="/catalogue">{{ t.tr('nav.catalogue') }}</a></li>
             <li><a routerLink="/panier">{{ t.tr('nav.panier') }}</a></li>
+            <li><a routerLink="/wishlist">{{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}</a></li>
           </ul>
         </div>
 
@@ -273,6 +285,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   nombreArticles = 0;
   announcementClosed = false;
   topCategories: Categorie[] = [];
+  wishlistCount = 0;
 
   // Dynamic features
   scrollProgress = 0;
@@ -283,13 +296,15 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
 
   private panierSub!: Subscription;
   private itemAddedSub!: Subscription;
+  private wishlistSub!: Subscription;
   private miniCartTimer: any;
 
   constructor(
     public t: TraductionService,
     public th: ThemeService,
     private panierService: PanierService,
-    private categorieService: CategorieService
+    private categorieService: CategorieService,
+    public wishlistService: WishlistService
   ) {}
 
   ngOnInit(): void {
@@ -301,6 +316,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
     this.categorieService.listerTout().subscribe({
       next: (cats) => this.topCategories = cats.slice(0, 5)
     });
+    this.wishlistSub = this.wishlistService.wishlist$.subscribe(items => this.wishlistCount = items.length);
 
     // Mini-cart auto-open + badge bounce on item added
     this.itemAddedSub = this.panierService.itemAdded$.subscribe(() => {
@@ -330,6 +346,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.panierSub?.unsubscribe();
     this.itemAddedSub?.unsubscribe();
+    this.wishlistSub?.unsubscribe();
     clearTimeout(this.miniCartTimer);
   }
 }

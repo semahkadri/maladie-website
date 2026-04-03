@@ -9,6 +9,7 @@ import { PanierService } from '../../../services/panier.service';
 import { Produit } from '../../../modeles/produit.model';
 import { Categorie } from '../../../modeles/categorie.model';
 import { TraductionService } from '../../../services/traduction.service';
+import { WishlistService } from '../../../services/wishlist.service';
 import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
 import { TiltDirective } from '../../../directives/tilt.directive';
 import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
@@ -275,8 +276,9 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                   <div class="fo-product-card-img">
                     <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
                     <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
-                    <button class="fo-product-wishlist" (click)="$event.preventDefault();$event.stopPropagation()">
-                      <i class="bi bi-heart"></i>
+                    <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
+                            (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
+                      <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
                     </button>
                     <button class="fo-product-quickview" (click)="openQuickView($event, prod)">
                       <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.quickView') }}
@@ -516,7 +518,8 @@ export class CatalogueComponent implements OnInit {
     private categorieService: CategorieService,
     private panierService: PanierService,
     private route: ActivatedRoute,
-    public t: TraductionService
+    public t: TraductionService,
+    public wishlistService: WishlistService
   ) {}
 
   ngOnInit(): void {

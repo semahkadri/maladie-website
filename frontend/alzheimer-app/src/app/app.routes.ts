@@ -44,6 +44,12 @@ export const routes: Routes = [
             .then(m => m.CommanderComponent)
       },
       {
+        path: 'wishlist',
+        loadComponent: () =>
+          import('./composants/frontoffice/wishlist/wishlist.component')
+            .then(m => m.WishlistComponent)
+      },
+      {
         path: 'commande/:ref',
         loadComponent: () =>
           import('./composants/frontoffice/confirmation-commande/confirmation-commande.component')

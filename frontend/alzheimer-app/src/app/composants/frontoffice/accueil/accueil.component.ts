@@ -7,6 +7,7 @@ import { PanierService } from '../../../services/panier.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
+import { WishlistService } from '../../../services/wishlist.service';
 import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
 import { CountUpDirective } from '../../../directives/count-up.directive';
 import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
@@ -176,8 +177,9 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
                   <span *ngIf="prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                  <button class="fo-product-wishlist" (click)="$event.preventDefault();$event.stopPropagation()">
-                    <i class="bi bi-heart"></i>
+                  <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
+                          (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
+                    <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
                   </button>
                   <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
                   <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
@@ -263,8 +265,9 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                 <div class="fo-product-card-img">
                   <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
                   <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
-                  <button class="fo-product-wishlist" (click)="$event.preventDefault();$event.stopPropagation()">
-                    <i class="bi bi-heart"></i>
+                  <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
+                          (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
+                    <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
                   </button>
                   <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
                   <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
@@ -349,7 +352,8 @@ export class AccueilComponent implements OnInit {
     private categorieService: CategorieService,
     private produitService: ProduitService,
     private panierService: PanierService,
-    public t: TraductionService
+    public t: TraductionService,
+    public wishlistService: WishlistService
   ) {}
 
   ngOnInit(): void {
