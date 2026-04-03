@@ -1,8 +1,9 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CategorieService } from '../../../services/categorie.service';
 import { ProduitService } from '../../../services/produit.service';
+import { PanierService } from '../../../services/panier.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Produit } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
@@ -133,9 +134,95 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
         <div class="fo-promo-banner">
           <h2>{{ t.tr('promo.titre') }}</h2>
           <p>{{ t.tr('promo.desc') }}</p>
-          <a routerLink="/catalogue" class="fo-promo-banner-cta">
+          <a [routerLink]="['/catalogue']" [queryParams]="{filtre: 'promo'}" class="fo-promo-banner-cta">
             {{ t.tr('promo.cta') }} <i class="bi bi-arrow-right ms-2"></i>
           </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Promo Products Section -->
+    <section class="fo-section acc-promo-section" *ngIf="promoProducts.length > 0" appScrollAnimate="fade-up">
+      <div class="fo-section-container">
+        <div class="fo-section-header">
+          <div class="acc-promo-title">
+            <span class="acc-promo-fire">🔥</span>
+            <h2 class="fo-section-title fo-section-title-bar">
+              {{ t.isFr ? 'Offres Spéciales' : 'Special Offers' }}
+            </h2>
+            <span class="acc-promo-count-badge">{{ promoProducts.length }} {{ t.isFr ? 'offres' : 'deals' }}</span>
+          </div>
+          <div class="fo-carousel-nav-header">
+            <button class="fo-carousel-arrow fo-carousel-arrow-left" (click)="scrollCarousel(promoTrack, -1)"
+                    [class.disabled]="!canScrollLeft(promoTrack)">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="fo-carousel-arrow fo-carousel-arrow-right" (click)="scrollCarousel(promoTrack, 1)"
+                    [class.disabled]="!canScrollRight(promoTrack)">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <a [routerLink]="['/catalogue']" [queryParams]="{filtre: 'promo'}" class="fo-section-link acc-promo-link">
+              {{ t.isFr ? 'Toutes les promos' : 'All deals' }} <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="fo-carousel-wrapper">
+          <div class="fo-carousel-track fo-carousel-track-products" #promoTrack>
+            <div *ngFor="let prod of promoProducts; let i = index"
+                 class="fo-product-card fo-carousel-item fo-carousel-product-item">
+
+              <!-- ① Clickable zone (image + info) -->
+              <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
+                <div class="fo-product-card-img">
+                  <span *ngIf="prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                  <button class="fo-product-wishlist" (click)="$event.preventDefault();$event.stopPropagation()">
+                    <i class="bi bi-heart"></i>
+                  </button>
+                  <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
+                  <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
+                </div>
+                <div class="fo-product-card-body">
+                  <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                  <h4>{{ prod.nom }}</h4>
+                  <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
+                </div>
+              </a>
+
+              <!-- ② Static footer — identical structure on every card -->
+              <div class="fo-card-bottom">
+                <div class="fo-card-price-row">
+                  <div *ngIf="prod.prixOriginal" class="fo-price-block">
+                    <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                    <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  </div>
+                  <span *ngIf="!prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
+                    {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
+                  </span>
+                </div>
+                <div class="fo-card-countdown-slot">
+                  <app-promo-countdown *ngIf="prod.dateFinPromo"
+                    [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
+                  </app-promo-countdown>
+                </div>
+                <button *ngIf="prod.quantite > 0"
+                        class="fo-add-cart-btn"
+                        [class.success]="ajoutOk === prod.id"
+                        (click)="ajouterAuPanier($event, prod)"
+                        [disabled]="ajoutEnCours === prod.id">
+                  <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
+                  <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
+                  {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+                </button>
+                <button *ngIf="prod.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
+                  <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
+                </button>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -168,38 +255,60 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
         </div>
         <div class="fo-carousel-wrapper">
           <div class="fo-carousel-track fo-carousel-track-products" #prodTrack>
-            <a *ngFor="let prod of recentProducts; let i = index" [routerLink]="['/catalogue', prod.id]"
-               class="fo-product-card fo-carousel-item fo-carousel-product-item">
-              <div class="fo-product-card-img">
-                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
-                <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width: 100%; height: 100%; object-fit: cover;">
-                <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
-              </div>
-              <div class="fo-product-card-body">
-                <span class="fo-product-brand">{{ prod.categorieNom }}</span>
-                <h4>{{ prod.nom }}</h4>
-                <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
-                <div class="fo-product-card-footer">
+            <div *ngFor="let prod of recentProducts; let i = index"
+                 class="fo-product-card fo-carousel-item fo-carousel-product-item">
+
+              <!-- ① Clickable zone (image + info) -->
+              <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
+                <div class="fo-product-card-img">
+                  <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                  <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <button class="fo-product-wishlist" (click)="$event.preventDefault();$event.stopPropagation()">
+                    <i class="bi bi-heart"></i>
+                  </button>
+                  <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom" style="width:100%;height:100%;object-fit:cover;">
+                  <i *ngIf="!prod.imageUrl" class="bi bi-box-seam"></i>
+                </div>
+                <div class="fo-product-card-body">
+                  <span class="fo-product-brand">{{ prod.categorieNom }}</span>
+                  <h4>{{ prod.nom }}</h4>
+                  <p>{{ prod.description | slice:0:60 }}{{ prod.description && prod.description.length > 60 ? '...' : '' }}</p>
+                </div>
+              </a>
+
+              <!-- ② Static footer — identical structure on every card -->
+              <div class="fo-card-bottom">
+                <div class="fo-card-price-row">
                   <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
                     <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
                     <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
                   </div>
                   <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
-                  <span class="fo-product-stock"
-                        [class.in-stock]="prod.quantite > 0"
-                        [class.out-of-stock]="prod.quantite === 0">
+                  <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
                     {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
-                <app-promo-countdown
-                  *ngIf="prod.enPromo && prod.dateFinPromo"
-                  [dateFinPromo]="prod.dateFinPromo"
-                  size="card"
-                  [isFr]="t.isFr">
-                </app-promo-countdown>
+                <div class="fo-card-countdown-slot">
+                  <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                    [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
+                  </app-promo-countdown>
+                </div>
+                <button *ngIf="prod.quantite > 0"
+                        class="fo-add-cart-btn"
+                        [class.success]="ajoutOk === prod.id"
+                        (click)="ajouterAuPanier($event, prod)"
+                        [disabled]="ajoutEnCours === prod.id">
+                  <span *ngIf="ajoutEnCours === prod.id" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="ajoutEnCours !== prod.id && ajoutOk !== prod.id" class="bi bi-cart-plus me-1"></i>
+                  <i *ngIf="ajoutOk === prod.id" class="bi bi-check-lg me-1"></i>
+                  {{ ajoutOk === prod.id ? t.tr('panier.ajouterSuccess') : t.tr('catalogue.ajouterPanier') }}
+                </button>
+                <button *ngIf="prod.quantite === 0" class="fo-add-cart-btn fo-btn-rupture" disabled>
+                  <i class="bi bi-x-circle me-1"></i>{{ t.tr('common.rupture') }}
+                </button>
               </div>
-            </a>
+
+            </div>
           </div>
         </div>
       </div>
@@ -228,13 +337,18 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
 export class AccueilComponent implements OnInit {
   categories: Categorie[] = [];
   recentProducts: Produit[] = [];
+  promoProducts: Produit[] = [];
   loading = true;
+
+  ajoutEnCours: number | null = null;
+  ajoutOk: number | null = null;
 
   brands = ['Sanofi', 'Pfizer', 'Bayer', "L'Oréal Derma", 'Roche', 'Johnson & Johnson', 'Novartis', 'AstraZeneca'];
 
   constructor(
     private categorieService: CategorieService,
     private produitService: ProduitService,
+    private panierService: PanierService,
     public t: TraductionService
   ) {}
 
@@ -244,7 +358,9 @@ export class AccueilComponent implements OnInit {
     });
     this.produitService.listerTout().subscribe({
       next: (prods) => {
-        this.recentProducts = prods
+        const sorted = prods.sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''));
+        this.recentProducts = sorted.slice(0, 12);
+        this.promoProducts = prods.filter(p => p.enPromo)
           .sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''))
           .slice(0, 12);
         this.loading = false;
@@ -270,6 +386,24 @@ export class AccueilComponent implements OnInit {
   canScrollRight(track: HTMLElement): boolean {
     if (!track) return false;
     return track.scrollLeft < (track.scrollWidth - track.clientWidth - 2);
+  }
+
+  ajouterAuPanier(event: Event, produit: Produit): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!produit.id || this.ajoutEnCours) return;
+    this.ajoutEnCours = produit.id;
+    this.ajoutOk = null;
+    this.panierService.ajouterProduit(produit.id, 1).subscribe({
+      next: () => {
+        this.ajoutEnCours = null;
+        this.ajoutOk = produit.id!;
+        setTimeout(() => { if (this.ajoutOk === produit.id) this.ajoutOk = null; }, 2000);
+      },
+      error: () => {
+        this.ajoutEnCours = null;
+      }
+    });
   }
 
   getCategoryIcon(name: string): string {

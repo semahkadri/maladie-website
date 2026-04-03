@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ProduitService } from '../../../services/produit.service';
@@ -515,12 +515,17 @@ export class CatalogueComponent implements OnInit {
     private produitService: ProduitService,
     private categorieService: CategorieService,
     private panierService: PanierService,
+    private route: ActivatedRoute,
     public t: TraductionService
   ) {}
 
   ngOnInit(): void {
     const saved = localStorage.getItem('catalogue-view-mode');
     if (saved === 'list' || saved === 'grid') this.viewMode = saved;
+
+    // Auto-apply filter from query param (e.g. ?filtre=promo from accueil)
+    const filtre = this.route.snapshot.queryParamMap.get('filtre');
+    if (filtre === 'promo') this.selectedStock = 'en-promo';
 
     this.categorieService.listerTout().subscribe({
       next: (cats) => this.categories = cats
