@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 spring:
   application:
@@ -10,19 +10,19 @@ spring:
       max-file-size: 5MB
       max-request-size: 10MB
   datasource:
-    url: jdbc:postgresql://localhost:5432/alzheimer_stock
-    username: postgres
-    password: root
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/alzheimer_stock}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     defer-datasource-initialization: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: false
   sql:
     init:
       mode: always
@@ -56,17 +56,14 @@ app:
   mail:
     admin-email: admin@pharmacare.tn
   ai:
-    # Get a FREE key at: https://console.groq.com/keys
-    # Free tier: 6000 tokens/min, 100k tokens/day, no credit card needed
-    # 1. Replace YOUR_GROQ_API_KEY_HERE with your key
-    # 2. Set enabled: true
-    api-key: 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
+    api-key: ${GROQ_API_KEY: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}
     api-url: https://api.groq.com/openai/v1/chat/completions
     model: llama-3.3-70b-versatile
-    enabled: true
+    enabled: ${AI_ENABLED:true}
 
 eureka:
   client:
+    enabled: false
     service-url:
       defaultZone: http://localhost:8761/eureka/
   instance:

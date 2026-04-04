@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8080/api/stock'
+  apiUrl: 'https://alzheimer-detection-production-8fc7.up.railway.app/api'
 };
