@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { CategorieService } from '../../../services/categorie.service';
 import { ProduitService } from '../../../services/produit.service';
@@ -255,7 +256,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
     </div>
   `
 })
-export class CategorieProduitsComponent implements OnInit {
+export class CategorieProduitsComponent implements OnInit, OnDestroy {
   categorie: Categorie | null = null;
   products: Produit[] = [];
   filteredProducts: Produit[] = [];
@@ -278,6 +279,7 @@ export class CategorieProduitsComponent implements OnInit {
   ajoutErreur = '';
 
   quickViewProduct: Produit | null = null;
+  private routeSub!: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -288,8 +290,12 @@ export class CategorieProduitsComponent implements OnInit {
     public t: TraductionService
   ) {}
 
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+  }
+
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.routeSub = this.route.params.subscribe(params => {
       const id = +params['id'];
       this.loading = true;
       this.searchTerm = '';

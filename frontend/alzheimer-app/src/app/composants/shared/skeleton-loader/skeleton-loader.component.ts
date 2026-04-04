@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
   template: `
     <!-- Product Grid Skeleton -->
     <div *ngIf="type === 'product-grid'" class="fo-product-grid">
-      <div *ngFor="let item of items" class="skeleton-card" style="border-top: 3px solid #e0e0e0; border-radius: 16px;">
+      <div *ngFor="let item of items" class="skeleton-card" style="border-top: 3px solid var(--border); border-radius: 16px;">
         <div class="skeleton-img skeleton-pulse" style="height: 240px;"></div>
         <div style="padding: 18px;">
           <div class="skeleton-line skeleton-pulse" style="width: 35%; height: 10px; margin-bottom: 8px; border-radius: 20px;"></div>

@@ -2980,12 +2980,31 @@ html[data-theme="dark"] .fo-nb-mobile { background: var(--bg-card); border-top-c
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
+}
+
+/* Gradient top accent strip — z-index:10 so it sits above fo-product-card-img (position:relative) */
+.fo-product-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--pharmacy-green), var(--primary));
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.fo-product-card:hover::before {
+  opacity: 1;
 }
 
 .fo-product-card:hover {
-  box-shadow: 0 8px 24px rgba(78,128,238,0.12), 0 2px 8px rgba(0,0,0,0.06);
-  transform: translateY(-4px);
-  border-color: rgba(78,128,238,0.3);
+  box-shadow: 0 12px 32px rgba(78,128,238,0.18), 0 4px 12px rgba(0,0,0,0.07);
+  transform: translateY(-5px) scale(1.012);
+  border-color: rgba(78,128,238,0.25);
   text-decoration: none;
   color: var(--text-primary);
 }
@@ -3008,7 +3027,7 @@ html[data-theme="dark"] .fo-nb-mobile { background: var(--bg-card); border-top-c
   opacity: 0.32;
 }
 
-.fo-product-card-img::after {
+.fo-product-card-img::before {
   content: '';
   position: absolute;
   bottom: 0;
@@ -3174,14 +3193,13 @@ html[data-theme="dark"] .fo-nb-mobile { background: var(--bg-card); border-top-c
   border-top: 1px solid var(--border);
 }
 
-/* Price + stock on same row — FIXED height, identical for promo and non-promo */
+/* Price + stock on same row — min-height ensures consistent baseline without clipping */
 .fo-card-price-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  height: 24px;        /* locked: single line, always same height */
-  overflow: hidden;
+  min-height: 24px;
   flex-shrink: 0;
 }
 
@@ -5170,26 +5188,26 @@ html[data-theme="dark"] .fo-reco-divider-label {
 
 /* ==================== FO ADD TO CART ==================== */
 .fo-add-cart-btn {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--pharmacy-green) 100%);
   color: #fff;
   border: none;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.88rem;
   padding: 0;
-  height: 42px;
-  min-height: 42px;
+  height: 44px;
+  min-height: 44px;
   letter-spacing: 0.2px;
-  box-shadow: 0 4px 12px rgba(78,128,238,0.25);
+  box-shadow: 0 4px 14px rgba(78,128,238,0.30);
   flex-shrink: 0;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.2s;
 }
 
 .fo-add-cart-btn:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--pharmacy-green-dark) 100%);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(78,128,238,0.35);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(78,128,238,0.40);
+  transform: translateY(-2px);
 }
 
 .fo-add-cart-btn.success {
@@ -6919,8 +6937,8 @@ html[data-theme="dark"] .fo-product-card {
 }
 
 html[data-theme="dark"] .fo-product-card:hover {
-  box-shadow: 0 8px 24px rgba(96,165,250,0.15), 0 2px 8px rgba(0,0,0,0.25);
-  border-color: rgba(96,165,250,0.3);
+  box-shadow: 0 12px 32px rgba(96,165,250,0.22), 0 4px 12px rgba(0,0,0,0.3);
+  border-color: rgba(96,165,250,0.25);
 }
 
 html[data-theme="dark"] .fo-product-card-img::after {
@@ -6928,13 +6946,13 @@ html[data-theme="dark"] .fo-product-card-img::after {
 }
 
 html[data-theme="dark"] .fo-add-cart-btn {
-  background: var(--primary);
-  box-shadow: 0 4px 12px rgba(96,165,250,0.2);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--pharmacy-green) 100%);
+  box-shadow: 0 4px 14px rgba(96,165,250,0.25);
 }
 
 html[data-theme="dark"] .fo-add-cart-btn:hover:not(:disabled) {
-  background: var(--primary-dark);
-  box-shadow: 0 6px 16px rgba(96,165,250,0.3);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--pharmacy-green-dark) 100%);
+  box-shadow: 0 8px 20px rgba(96,165,250,0.35);
 }
 
 /* ==================== CAROUSEL — DocMorris-Style Horizontal Scroll ==================== */

@@ -315,18 +315,6 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
       </div>
     </section>
 
-    <!-- Newsletter -->
-    <section class="fo-newsletter" appScrollAnimate="fade-up">
-      <div class="fo-newsletter-inner">
-        <h2>{{ t.tr('newsletter.titre') }}</h2>
-        <p>{{ t.tr('newsletter.desc') }}</p>
-        <div class="fo-newsletter-form">
-          <input type="email" [placeholder]="t.tr('newsletter.placeholder')">
-          <button type="button">{{ t.tr('newsletter.btn') }}</button>
-        </div>
-      </div>
-    </section>
-
     <!-- Loading -->
     <div *ngIf="loading" class="fo-loading">
       <div class="spinner-border text-primary" role="status">

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
 import { WishlistService } from '../../../services/wishlist.service';
@@ -300,7 +301,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
     </div>
   `
 })
-export class DetailProduitComponent implements OnInit {
+export class DetailProduitComponent implements OnInit, OnDestroy {
   produit: Produit | null = null;
   relatedProducts: Produit[] = [];
   crossSellProducts: Produit[] = [];
@@ -312,6 +313,8 @@ export class DetailProduitComponent implements OnInit {
   ajoutRecoEnCours: number | null = null;
   ajoutRecoOk: number | null = null;
   Math = Math;
+
+  private routeSub!: Subscription;
 
   // Image Zoom
   zoomActive = false;
@@ -326,8 +329,12 @@ export class DetailProduitComponent implements OnInit {
     public t: TraductionService
   ) {}
 
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+  }
+
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.routeSub = this.route.params.subscribe(params => {
       const id = +params['id'];
       this.loading = true;
       this.quantite = 1;

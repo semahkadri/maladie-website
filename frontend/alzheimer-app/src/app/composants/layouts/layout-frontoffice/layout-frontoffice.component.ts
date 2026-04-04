@@ -243,79 +243,92 @@ import { Panier } from '../../../modeles/panier.model';
           <router-outlet></router-outlet>
         </div>
 
-        <!-- Footer -->
-        <footer class="fo-footer">
-          <div class="fo-footer-main">
-            <!-- Brand Column -->
-            <div class="fo-footer-brand-col">
-              <div class="fo-footer-brand">
-                <i class="bi bi-heart-pulse"></i>
-                <span>{{ t.tr('footer.brand') }}</span>
-              </div>
-              <p>{{ t.tr('footer.desc') }}</p>
-              <div class="fo-footer-social">
-                <a href="#"><i class="bi bi-facebook"></i></a>
-                <a href="#"><i class="bi bi-instagram"></i></a>
-                <a href="#"><i class="bi bi-twitter-x"></i></a>
-                <a href="#"><i class="bi bi-whatsapp"></i></a>
-              </div>
-            </div>
-
-            <!-- Quick Links -->
-            <div class="fo-footer-col">
-              <h4>{{ t.tr('footer.liens') }}</h4>
-              <ul>
-                <li><a routerLink="/">{{ t.tr('nav.accueil') }}</a></li>
-                <li><a routerLink="/catalogue">{{ t.tr('nav.catalogue') }}</a></li>
-                <li><a routerLink="/panier">{{ t.tr('nav.panier') }}</a></li>
-                <li><a routerLink="/wishlist">{{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}</a></li>
-              </ul>
-            </div>
-
-            <!-- Customer Service -->
-            <div class="fo-footer-col">
-              <h4>{{ t.tr('footer.service') }}</h4>
-              <ul>
-                <li><a href="#">{{ t.tr('footer.livraison') }}</a></li>
-                <li><a href="#">{{ t.tr('footer.retours') }}</a></li>
-                <li><a href="#">{{ t.tr('footer.faq') }}</a></li>
-              </ul>
-            </div>
-
-            <!-- Contact -->
-            <div class="fo-footer-col">
-              <h4>{{ t.tr('footer.contact') }}</h4>
-              <div class="fo-footer-contact-item">
-                <i class="bi bi-geo-alt-fill"></i>
-                <span>{{ t.tr('footer.adresse') }}</span>
-              </div>
-              <div class="fo-footer-contact-item">
-                <i class="bi bi-telephone-fill"></i>
-                <span>+216 71 000 000</span>
-              </div>
-              <div class="fo-footer-contact-item">
-                <i class="bi bi-envelope-fill"></i>
-                <span>contact&#64;pharmacare.tn</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom Bar -->
-          <div class="fo-footer-bottom">
-            <div class="fo-footer-bottom-inner">
-              <p>&copy; {{ annee }} {{ t.tr('footer.brand') }}. {{ t.tr('footer.droits') }}</p>
-              <div class="fo-footer-payment">
-                <span>Visa</span>
-                <span>Mastercard</span>
-                <span>D17</span>
-              </div>
-            </div>
-          </div>
-        </footer>
 
       </main>
 
     </div>
+
+    <!-- Newsletter — outside fo-app-container so it spans full viewport width -->
+    <section class="fo-newsletter">
+      <div class="fo-newsletter-inner">
+        <h2>{{ t.tr('newsletter.titre') }}</h2>
+        <p>{{ t.tr('newsletter.desc') }}</p>
+        <div class="fo-newsletter-form">
+          <input type="email" [placeholder]="t.tr('newsletter.placeholder')">
+          <button type="button">{{ t.tr('newsletter.btn') }}</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer — outside fo-app-container so it spans full viewport width -->
+    <footer class="fo-footer">
+      <div class="fo-footer-main">
+        <!-- Brand Column -->
+        <div class="fo-footer-brand-col">
+          <div class="fo-footer-brand">
+            <i class="bi bi-heart-pulse"></i>
+            <span>{{ t.tr('footer.brand') }}</span>
+          </div>
+          <p>{{ t.tr('footer.desc') }}</p>
+          <div class="fo-footer-social">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-instagram"></i></a>
+            <a href="#"><i class="bi bi-twitter-x"></i></a>
+            <a href="#"><i class="bi bi-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="fo-footer-col">
+          <h4>{{ t.tr('footer.liens') }}</h4>
+          <ul>
+            <li><a routerLink="/">{{ t.tr('nav.accueil') }}</a></li>
+            <li><a routerLink="/catalogue">{{ t.tr('nav.catalogue') }}</a></li>
+            <li><a routerLink="/panier">{{ t.tr('nav.panier') }}</a></li>
+            <li><a routerLink="/wishlist">{{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}</a></li>
+          </ul>
+        </div>
+
+        <!-- Customer Service -->
+        <div class="fo-footer-col">
+          <h4>{{ t.tr('footer.service') }}</h4>
+          <ul>
+            <li><a href="#">{{ t.tr('footer.livraison') }}</a></li>
+            <li><a href="#">{{ t.tr('footer.retours') }}</a></li>
+            <li><a href="#">{{ t.tr('footer.faq') }}</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div class="fo-footer-col">
+          <h4>{{ t.tr('footer.contact') }}</h4>
+          <div class="fo-footer-contact-item">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>{{ t.tr('footer.adresse') }}</span>
+          </div>
+          <div class="fo-footer-contact-item">
+            <i class="bi bi-telephone-fill"></i>
+            <span>+216 71 000 000</span>
+          </div>
+          <div class="fo-footer-contact-item">
+            <i class="bi bi-envelope-fill"></i>
+            <span>contact&#64;pharmacare.tn</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="fo-footer-bottom">
+        <div class="fo-footer-bottom-inner">
+          <p>&copy; {{ annee }} {{ t.tr('footer.brand') }}. {{ t.tr('footer.droits') }}</p>
+          <div class="fo-footer-payment">
+            <span>Visa</span>
+            <span>Mastercard</span>
+            <span>D17</span>
+          </div>
+        </div>
+      </div>
+    </footer>
 
     <!-- Mini-Cart Sidebar -->
     <div *ngIf="miniCartOpen" class="fo-minicart-overlay" [@miniCartOverlay] (click)="miniCartOpen = false"></div>

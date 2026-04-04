@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ProduitService } from '../../../services/produit.service';
 import { CategorieService } from '../../../services/categorie.service';
@@ -484,12 +485,13 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
     </div>
   `
 })
-export class CatalogueComponent implements OnInit {
+export class CatalogueComponent implements OnInit, OnDestroy {
   // Data
   products: Produit[] = [];
   filteredProducts: Produit[] = [];
   pagedProducts: Produit[] = [];
   categories: Categorie[] = [];
+  private paramSub!: Subscription;
 
   // Filters
   searchTerm = '';
@@ -557,11 +559,17 @@ export class CatalogueComponent implements OnInit {
     const saved = localStorage.getItem('catalogue-view-mode');
     if (saved === 'list' || saved === 'grid') this.viewMode = saved;
 
-    // Auto-apply filters from query params
-    const filtre = this.route.snapshot.queryParamMap.get('filtre');
-    if (filtre === 'promo') this.selectedStock = 'en-promo';
-    const q = this.route.snapshot.queryParamMap.get('q');
-    if (q) this.searchTerm = q;
+    // Subscribe (not snapshot) so every navigation to this route re-applies params.
+    // This fixes the topbar search "works only once" bug — snapshot only reads on
+    // first init; the component is reused on subsequent same-route navigations.
+    this.paramSub = this.route.queryParamMap.subscribe(params => {
+      const filtre = params.get('filtre');
+      this.selectedStock = filtre === 'promo' ? 'en-promo' : 'tous';
+      this.searchTerm = params.get('q') || '';
+      // Re-filter immediately if products are already loaded; otherwise the
+      // products subscription below will call applyFilters() once loaded.
+      if (this.products.length > 0) this.applyFilters();
+    });
 
     this.categorieService.listerTout().subscribe({
       next: (cats) => this.categories = cats
@@ -581,6 +589,10 @@ export class CatalogueComponent implements OnInit {
       },
       error: () => this.loading = false
     });
+  }
+
+  ngOnDestroy(): void {
+    this.paramSub?.unsubscribe();
   }
 
   setView(mode: 'grid' | 'list'): void {
