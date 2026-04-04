@@ -180,9 +180,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.emailSub = this.emailService.unreadCount$.subscribe(count => {
       this.unreadEmailCount = count;
     });
-    // Initial fetch + background refresh every 60s (short-circuits if email page is open)
+    // Initial fetch + background refresh every 10s for near-instant badge updates
     this.emailService.refreshUnreadCount();
-    this.emailInterval = setInterval(() => this.emailService.refreshUnreadCount(), 60000);
+    this.emailInterval = setInterval(() => this.emailService.refreshUnreadCount(), 10000);
   }
 
   ngOnDestroy(): void {

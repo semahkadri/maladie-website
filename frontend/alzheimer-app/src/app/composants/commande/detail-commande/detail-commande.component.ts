@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Commande, LigneCommande } from '../../../modeles/commande.model';
 import { CommandeService } from '../../../services/commande.service';
 import { TraductionService } from '../../../services/traduction.service';
+import { EmailLogService } from '../../../services/email-log.service';
 
 @Component({
   selector: 'app-detail-commande',
@@ -174,7 +175,8 @@ export class DetailCommandeComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private commandeService: CommandeService,
-    public t: TraductionService
+    public t: TraductionService,
+    private emailService: EmailLogService
   ) {}
 
   ngOnInit(): void {
@@ -206,6 +208,10 @@ export class DetailCommandeComponent implements OnInit {
         this.enCours = false;
         this.message = this.t.tr('dcmd.statutModifie');
         this.messageType = 'success';
+        // Refresh email count immediately (in case email was synchronous)
+        // then again after 1.5s to catch @Async email processing
+        this.emailService.refreshUnreadCount();
+        setTimeout(() => this.emailService.refreshUnreadCount(), 1500);
       },
       error: (err) => {
         this.enCours = false;
