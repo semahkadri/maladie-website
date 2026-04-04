@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -183,8 +184,13 @@ public class ProduitServiceImpl implements ProduitService {
     }
 
     private ProduitDTO convertirEnDTO(Produit produit) {
+        // Promo is active only if enPromo=true AND dateFinPromo is either null (eternal) or in the future
+        boolean promoActive = Boolean.TRUE.equals(produit.getEnPromo())
+                && (produit.getDateFinPromo() == null
+                    || produit.getDateFinPromo().isAfter(LocalDateTime.now()));
+
         Integer remise = null;
-        if (Boolean.TRUE.equals(produit.getEnPromo()) && produit.getPrixOriginal() != null
+        if (promoActive && produit.getPrixOriginal() != null
                 && produit.getPrixOriginal().compareTo(BigDecimal.ZERO) > 0
                 && produit.getPrix().compareTo(produit.getPrixOriginal()) < 0) {
             remise = produit.getPrixOriginal().subtract(produit.getPrix())
@@ -205,8 +211,8 @@ public class ProduitServiceImpl implements ProduitService {
                 .prix(produit.getPrix())
                 .quantite(produit.getQuantite())
                 .imageUrl(produit.getImageUrl())
-                .prixOriginal(produit.getPrixOriginal())
-                .enPromo(produit.getEnPromo())
+                .prixOriginal(promoActive ? produit.getPrixOriginal() : null)
+                .enPromo(promoActive)
                 .remise(remise)
                 .dateExpiration(produit.getDateExpiration())
                 .numeroLot(produit.getNumeroLot())

@@ -6,7 +6,7 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 import { CompareService } from '../../../services/compare.service';
 import { PanierService } from '../../../services/panier.service';
 import { TraductionService } from '../../../services/traduction.service';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 
 @Component({
   selector: 'app-comparer',
@@ -85,7 +85,7 @@ import { Produit } from '../../../modeles/produit.model';
               <div class="cmp-card-img">
                 <img *ngIf="p.imageUrl" [src]="p.imageUrl" [alt]="p.nom">
                 <i *ngIf="!p.imageUrl" class="bi bi-box-seam"></i>
-                <span *ngIf="p.enPromo && p.remise" class="cmp-promo-badge">-{{ p.remise }}%</span>
+                <span *ngIf="isPromoActive(p) && p.remise" class="cmp-promo-badge">-{{ p.remise }}%</span>
               </div>
               <div class="cmp-card-category">{{ p.categorieNom }}</div>
               <h3 class="cmp-card-name">{{ p.nom }}</h3>
@@ -102,12 +102,12 @@ import { Produit } from '../../../modeles/produit.model';
               <span>{{ t.isFr ? 'Prix' : 'Price' }}</span>
             </div>
             <div *ngFor="let p of items" class="cmp-data-cell" [class.cmp-best]="isBestPrice(p)">
-              <div *ngIf="p.enPromo && p.prixOriginal" class="cmp-price-promo-block">
+              <div *ngIf="isPromoActive(p) && p.prixOriginal" class="cmp-price-promo-block">
                 <span class="cmp-price-original">{{ p.prixOriginal | number:'1.2-2' }} TND</span>
                 <span class="cmp-price-current">{{ p.prix | number:'1.2-2' }} TND</span>
                 <span class="cmp-price-saving">{{ t.isFr ? 'Éco.' : 'Save' }} {{ (p.prixOriginal - p.prix) | number:'1.2-2' }} TND</span>
               </div>
-              <span *ngIf="!p.enPromo || !p.prixOriginal" class="cmp-price-current">{{ p.prix | number:'1.2-2' }} TND</span>
+              <span *ngIf="!isPromoActive(p) || !p.prixOriginal" class="cmp-price-current">{{ p.prix | number:'1.2-2' }} TND</span>
               <span *ngIf="isBestPrice(p)" class="cmp-best-badge">
                 <i class="bi bi-trophy-fill me-1"></i>{{ t.isFr ? 'Meilleur prix' : 'Best price' }}
               </span>
@@ -151,10 +151,10 @@ import { Produit } from '../../../modeles/produit.model';
               <span>{{ t.isFr ? 'Promotion' : 'Promotion' }}</span>
             </div>
             <div *ngFor="let p of items" class="cmp-data-cell">
-              <span *ngIf="p.enPromo" class="cmp-promo-yes">
+              <span *ngIf="isPromoActive(p)" class="cmp-promo-yes">
                 <i class="bi bi-check-lg me-1"></i>-{{ p.remise }}%
               </span>
-              <span *ngIf="!p.enPromo" class="cmp-promo-no">
+              <span *ngIf="!isPromoActive(p)" class="cmp-promo-no">
                 <i class="bi bi-dash-lg me-1"></i>{{ t.isFr ? 'Non' : 'No' }}
               </span>
             </div>
@@ -225,6 +225,8 @@ import { Produit } from '../../../modeles/produit.model';
   `
 })
 export class ComparerComponent implements OnInit, OnDestroy {
+  readonly isPromoActive = isPromoActive;
+
   items: Produit[] = [];
   addingId: number | null = null;
   addedId: number | null = null;

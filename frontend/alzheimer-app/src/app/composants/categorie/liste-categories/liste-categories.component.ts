@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Categorie } from '../../../modeles/categorie.model';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { CategorieService } from '../../../services/categorie.service';
 import { ProduitService } from '../../../services/produit.service';
 import { TraductionService } from '../../../services/traduction.service';
@@ -165,16 +165,16 @@ import { TraductionService } from '../../../services/traduction.service';
                                 </td>
                                 <td>
                                   <span class="fw-semibold">{{ prod.nom }}</span>
-                                  <span *ngIf="prod.enPromo" class="lc-promo-badge ms-2">
+                                  <span *ngIf="isPromoActive(prod)" class="lc-promo-badge ms-2">
                                     -{{ prod.remise }}%
                                   </span>
                                 </td>
                                 <td>
-                                  <div *ngIf="prod.enPromo && prod.prixOriginal">
+                                  <div *ngIf="isPromoActive(prod) && prod.prixOriginal">
                                     <span class="text-muted text-decoration-line-through" style="font-size:0.78rem;">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
                                     <span class="text-danger fw-bold ms-1">{{ prod.prix | number:'1.2-2' }} TND</span>
                                   </div>
-                                  <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fw-semibold">{{ prod.prix | number:'1.2-2' }} TND</span>
+                                  <span *ngIf="!isPromoActive(prod) || !prod.prixOriginal" class="fw-semibold">{{ prod.prix | number:'1.2-2' }} TND</span>
                                 </td>
                                 <td>
                                   <span class="lc-stock-badge" [class.in]="prod.quantite > 0" [class.out]="prod.quantite === 0">
@@ -253,6 +253,8 @@ import { TraductionService } from '../../../services/traduction.service';
   `
 })
 export class ListeCategoriesComponent implements OnInit {
+  readonly isPromoActive = isPromoActive;
+
   categories: Categorie[] = [];
   categoriesFiltrees: Categorie[] = [];
   categoriesPage: Categorie[] = [];

@@ -165,12 +165,17 @@ import { Panier } from '../../../modeles/panier.model';
       <main class="fo-main-area">
 
         <!-- Compact Topbar -->
-        <header class="fo-topbar-compact">
+        <header class="fo-topbar-compact" [class.fo-topbar-scrolled]="scrolled">
           <div class="fo-topbar-left">
             <!-- Hamburger (always visible — mobile: open drawer, desktop: collapse sidebar) -->
             <button class="fo-topbar-hamburger" (click)="onHamburgerClick()">
               <i class="bi bi-list"></i>
             </button>
+            <!-- Brand identity — slides in from left when page is scrolled -->
+            <a routerLink="/" class="fo-topbar-brand-chip fo-topbar-brand-chip-visible">
+              <i class="bi bi-heart-pulse-fill"></i>
+              <span>PharmaCare</span>
+            </a>
             <!-- Search bar -->
             <div class="fo-topbar-search">
               <i class="bi bi-search fo-topbar-search-ico"></i>
@@ -397,6 +402,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
 
   scrollProgress = 0;
   showBackToTop = false;
+  scrolled = false;
   miniCartOpen = false;
   cartBounce = false;
   panier: Panier | null = null;
@@ -479,6 +485,7 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
     const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     this.scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
     this.showBackToTop = scrollTop > 400;
+    this.scrolled = scrollTop > 20;
   }
 
   scrollToTop(): void {

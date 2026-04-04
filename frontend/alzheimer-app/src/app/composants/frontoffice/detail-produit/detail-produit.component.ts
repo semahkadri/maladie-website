@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
 import { WishlistService } from '../../../services/wishlist.service';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
 import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
@@ -52,14 +52,14 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
           <div class="fo-product-detail-info">
             <span class="fo-product-brand" style="font-size: 0.82rem;">{{ produit.categorieNom }}</span>
             <h1>{{ produit.nom }}
-              <span *ngIf="produit.enPromo && produit.remise" class="fo-detail-promo-badge">-{{ produit.remise }}%</span>
+              <span *ngIf="isPromoActive(produit) && produit.remise" class="fo-detail-promo-badge">-{{ produit.remise }}%</span>
             </h1>
             <p class="fo-product-detail-desc">{{ produit.description }}</p>
 
             <div class="fo-product-detail-meta">
               <div class="fo-product-detail-price">
                 <span class="label">{{ t.tr('detail.prix') }}</span>
-                <div *ngIf="produit.enPromo && produit.prixOriginal">
+                <div *ngIf="isPromoActive(produit) && produit.prixOriginal">
                   <span class="fo-price-original" style="font-size: 0.92rem;">{{ produit.prixOriginal | number:'1.2-2' }} TND</span>
                   <span class="fo-price-promo" style="font-size: 1.35rem;">{{ produit.prix | number:'1.2-2' }} TND</span>
                   <div class="fo-savings-line">
@@ -73,7 +73,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                     [isFr]="t.isFr">
                   </app-promo-countdown>
                 </div>
-                <span *ngIf="!produit.enPromo || !produit.prixOriginal" class="value">{{ produit.prix | number:'1.2-2' }} TND</span>
+                <span *ngIf="!isPromoActive(produit) || !produit.prixOriginal" class="value">{{ produit.prix | number:'1.2-2' }} TND</span>
               </div>
               <div class="fo-product-detail-stock">
                 <span class="label">{{ t.tr('detail.disponibilite') }}</span>
@@ -189,8 +189,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             <div *ngFor="let p of crossSellProducts" class="fo-product-card">
               <a [routerLink]="['/catalogue', p.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
-                  <span *ngIf="p.enPromo && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
-                  <span *ngIf="!p.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <span *ngIf="isPromoActive(p) && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
+                  <span *ngIf="!isPromoActive(p)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(p.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(p)"
                           [title]="wishlistService.isInWishlist(p.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
@@ -207,17 +207,17 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               </a>
               <div class="fo-card-bottom">
                 <div class="fo-card-price-row">
-                  <div *ngIf="p.enPromo && p.prixOriginal" class="fo-price-block">
+                  <div *ngIf="isPromoActive(p) && p.prixOriginal" class="fo-price-block">
                     <span class="fo-price-original">{{ p.prixOriginal | number:'1.2-2' }} TND</span>
                     <span class="fo-price-promo">{{ p.prix | number:'1.2-2' }} TND</span>
                   </div>
-                  <span *ngIf="!p.enPromo || !p.prixOriginal" class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
+                  <span *ngIf="!isPromoActive(p) || !p.prixOriginal" class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
                   <span class="fo-product-stock" [class.in-stock]="p.quantite > 0" [class.out-of-stock]="p.quantite === 0">
                     {{ p.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
                 <div class="fo-card-countdown-slot">
-                  <app-promo-countdown *ngIf="p.enPromo && p.dateFinPromo" [dateFinPromo]="p.dateFinPromo" size="card" [isFr]="t.isFr"></app-promo-countdown>
+                  <app-promo-countdown *ngIf="isPromoActive(p) && p.dateFinPromo" [dateFinPromo]="p.dateFinPromo" size="card" [isFr]="t.isFr"></app-promo-countdown>
                 </div>
                 <button *ngIf="p.quantite > 0" class="fo-add-cart-btn"
                         [class.success]="ajoutRecoOk === p.id"
@@ -246,13 +246,13 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             </div>
             <div class="fo-reco-divider-line"></div>
           </div>
-          <p class="fo-reco-desc">{{ t.isFr ? 'D\'autres produits de la même catégorie' : 'More products from the same category' }}</p>
+          <p class="fo-reco-desc">{{ t.tr('detail.similairesDesc') }}</p>
           <div class="fo-product-grid">
             <div *ngFor="let p of relatedProducts" class="fo-product-card">
               <a [routerLink]="['/catalogue', p.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
-                  <span *ngIf="p.enPromo && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
-                  <span *ngIf="!p.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <span *ngIf="isPromoActive(p) && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
+                  <span *ngIf="!isPromoActive(p)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(p.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(p)"
                           [title]="wishlistService.isInWishlist(p.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
@@ -269,17 +269,17 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               </a>
               <div class="fo-card-bottom">
                 <div class="fo-card-price-row">
-                  <div *ngIf="p.enPromo && p.prixOriginal" class="fo-price-block">
+                  <div *ngIf="isPromoActive(p) && p.prixOriginal" class="fo-price-block">
                     <span class="fo-price-original">{{ p.prixOriginal | number:'1.2-2' }} TND</span>
                     <span class="fo-price-promo">{{ p.prix | number:'1.2-2' }} TND</span>
                   </div>
-                  <span *ngIf="!p.enPromo || !p.prixOriginal" class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
+                  <span *ngIf="!isPromoActive(p) || !p.prixOriginal" class="fo-product-price">{{ p.prix | number:'1.2-2' }} TND</span>
                   <span class="fo-product-stock" [class.in-stock]="p.quantite > 0" [class.out-of-stock]="p.quantite === 0">
                     {{ p.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
                 <div class="fo-card-countdown-slot">
-                  <app-promo-countdown *ngIf="p.enPromo && p.dateFinPromo" [dateFinPromo]="p.dateFinPromo" size="card" [isFr]="t.isFr"></app-promo-countdown>
+                  <app-promo-countdown *ngIf="isPromoActive(p) && p.dateFinPromo" [dateFinPromo]="p.dateFinPromo" size="card" [isFr]="t.isFr"></app-promo-countdown>
                 </div>
                 <button *ngIf="p.quantite > 0" class="fo-add-cart-btn"
                         [class.success]="ajoutRecoOk === p.id"
@@ -328,6 +328,8 @@ export class DetailProduitComponent implements OnInit, OnDestroy {
     public wishlistService: WishlistService,
     public t: TraductionService
   ) {}
+
+  readonly isPromoActive = isPromoActive;
 
   ngOnDestroy(): void {
     this.routeSub?.unsubscribe();

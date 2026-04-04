@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { Categorie } from '../../../modeles/categorie.model';
 import { ProduitService } from '../../../services/produit.service';
 import { CategorieService } from '../../../services/categorie.service';
@@ -121,7 +121,7 @@ import { TraductionService } from '../../../services/traduction.service';
                     </td>
                     <td class="fw-semibold">
                       {{ produit.prix | number:'1.2-2' }}
-                      <span *ngIf="produit.enPromo" class="fo-admin-promo-badge">Promo</span>
+                      <span *ngIf="isPromoActive(produit)" class="fo-admin-promo-badge">Promo</span>
                     </td>
                     <td>
                       <span class="badge badge-stock"
@@ -205,6 +205,8 @@ import { TraductionService } from '../../../services/traduction.service';
   `
 })
 export class ListeProduitsComponent implements OnInit {
+  readonly isPromoActive = isPromoActive;
+
   tousLesProduits: Produit[] = [];
   produitsFiltres: Produit[] = [];
   produitsPage: Produit[] = [];

@@ -6,7 +6,7 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 import { AiService, ConversationMessage, AiChatResponse } from '../../../services/ai.service';
 import { PanierService } from '../../../services/panier.service';
 import { TraductionService } from '../../../services/traduction.service';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -150,9 +150,9 @@ interface ChatMessage {
                   <div class="ai-product-name">{{ prod.nom }}</div>
                   <div class="ai-product-cat">{{ prod.categorieNom }}</div>
                   <div class="ai-product-price-row">
-                    <span *ngIf="prod.enPromo && prod.prixOriginal" class="ai-product-orig">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
-                    <span class="ai-product-price" [class.ai-promo-price]="prod.enPromo">{{ prod.prix | number:'1.2-2' }} TND</span>
-                    <span *ngIf="prod.enPromo && prod.remise" class="ai-promo-tag">-{{ prod.remise }}%</span>
+                    <span *ngIf="isPromoActive(prod) && prod.prixOriginal" class="ai-product-orig">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
+                    <span class="ai-product-price" [class.ai-promo-price]="isPromoActive(prod)">{{ prod.prix | number:'1.2-2' }} TND</span>
+                    <span *ngIf="isPromoActive(prod) && prod.remise" class="ai-promo-tag">-{{ prod.remise }}%</span>
                   </div>
                 </div>
                 <div class="ai-product-actions">
@@ -204,6 +204,8 @@ interface ChatMessage {
   `
 })
 export class AiAssistantComponent implements OnInit, AfterViewChecked {
+  readonly isPromoActive = isPromoActive;
+
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('inputField') private inputField!: ElementRef;
 

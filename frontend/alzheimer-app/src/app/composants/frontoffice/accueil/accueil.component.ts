@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { WishlistService } from '../../../services/wishlist.service';
 import { CompareService } from '../../../services/compare.service';
@@ -164,7 +164,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <!-- ① Clickable zone (image + info) -->
               <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
-                  <span *ngIf="prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                  <span *ngIf="isPromoActive(prod) && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
                     <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
@@ -187,17 +187,17 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <!-- ② Static footer — identical structure on every card -->
               <div class="fo-card-bottom">
                 <div class="fo-card-price-row">
-                  <div *ngIf="prod.prixOriginal" class="fo-price-block">
+                  <div *ngIf="isPromoActive(prod) && prod.prixOriginal" class="fo-price-block">
                     <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
                     <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
                   </div>
-                  <span *ngIf="!prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  <span *ngIf="!isPromoActive(prod) || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
                   <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
                     {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
                 <div class="fo-card-countdown-slot">
-                  <app-promo-countdown *ngIf="prod.dateFinPromo"
+                  <app-promo-countdown *ngIf="isPromoActive(prod) && prod.dateFinPromo"
                     [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
                   </app-promo-countdown>
                 </div>
@@ -256,8 +256,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <!-- ① Clickable zone (image + info) -->
               <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
-                  <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                  <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <span *ngIf="isPromoActive(prod) && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                  <span *ngIf="!isPromoActive(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
                     <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
@@ -280,17 +280,17 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <!-- ② Static footer — identical structure on every card -->
               <div class="fo-card-bottom">
                 <div class="fo-card-price-row">
-                  <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                  <div *ngIf="isPromoActive(prod) && prod.prixOriginal" class="fo-price-block">
                     <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
                     <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
                   </div>
-                  <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                  <span *ngIf="!isPromoActive(prod) || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
                   <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
                     {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                   </span>
                 </div>
                 <div class="fo-card-countdown-slot">
-                  <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                  <app-promo-countdown *ngIf="isPromoActive(prod) && prod.dateFinPromo"
                     [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
                   </app-promo-countdown>
                 </div>
@@ -324,6 +324,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
   `
 })
 export class AccueilComponent implements OnInit, OnDestroy {
+  readonly isPromoActive = isPromoActive;
+
   // ─── Slider ─────────────────────────────────────────────
   currentSlide = 0;
   paused = false;
@@ -383,7 +385,7 @@ export class AccueilComponent implements OnInit, OnDestroy {
       next: (prods) => {
         const sorted = prods.sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''));
         this.recentProducts = sorted.slice(0, 12);
-        this.promoProducts = prods.filter(p => p.enPromo)
+        this.promoProducts = prods.filter(p => isPromoActive(p))
           .sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''))
           .slice(0, 12);
         this.loading = false;

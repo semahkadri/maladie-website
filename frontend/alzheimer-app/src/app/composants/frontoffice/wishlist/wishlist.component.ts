@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { WishlistService } from '../../../services/wishlist.service';
 import { PanierService } from '../../../services/panier.service';
 import { TraductionService } from '../../../services/traduction.service';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
 
 @Component({
@@ -29,7 +29,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
         <div class="fo-wl-titlebar">
           <div>
             <h1 class="fo-page-title">
-              <i class="bi bi-heart-fill me-2" style="color:#d32f2f;"></i>
+              <i class="bi bi-heart-fill me-2" style="color:var(--promo-red, #d32f2f);"></i>
               {{ t.isFr ? 'Ma Liste de Souhaits' : 'My Wishlist' }}
             </h1>
             <p class="fo-page-subtitle">
@@ -45,7 +45,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
 
         <!-- Empty state — same style as panier -->
         <div *ngIf="items.length === 0" class="fo-empty-state">
-          <i class="bi bi-heart" style="color:#d32f2f;opacity:0.35;"></i>
+          <i class="bi bi-heart" style="color:var(--promo-red, #d32f2f);opacity:0.35;"></i>
           <p>{{ t.isFr ? 'Votre liste de souhaits est vide.' : 'Your wishlist is empty.' }}</p>
           <a routerLink="/catalogue" class="fo-btn fo-btn-outline">
             <i class="bi bi-grid-3x3-gap me-2"></i>{{ t.isFr ? 'Parcourir le catalogue' : 'Browse catalogue' }}
@@ -59,8 +59,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             <!-- ① Clickable zone -->
             <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
               <div class="fo-product-card-img">
-                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                <span *ngIf="isPromoActive(prod) && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                <span *ngIf="!isPromoActive(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                 <!-- Heart button: filled red, click = remove from wishlist -->
                 <button class="fo-product-wishlist wl-active"
                         (click)="removeItem($event, prod.id!)"
@@ -81,11 +81,11 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             <!-- ② Static footer — identical to catalogue cards -->
             <div class="fo-card-bottom">
               <div class="fo-card-price-row">
-                <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                <div *ngIf="isPromoActive(prod) && prod.prixOriginal" class="fo-price-block">
                   <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
                   <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
                 </div>
-                <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">
+                <span *ngIf="!isPromoActive(prod) || !prod.prixOriginal" class="fo-product-price">
                   {{ prod.prix | number:'1.2-2' }} TND
                 </span>
                 <span class="fo-product-stock"
@@ -95,7 +95,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                 </span>
               </div>
               <div class="fo-card-countdown-slot">
-                <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                <app-promo-countdown *ngIf="isPromoActive(prod) && prod.dateFinPromo"
                   [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
                 </app-promo-countdown>
               </div>
@@ -122,6 +122,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
   `
 })
 export class WishlistComponent implements OnInit, OnDestroy {
+  readonly isPromoActive = isPromoActive;
+
   items: Produit[] = [];
   ajoutEnCours: number | null = null;
   ajoutOk: number | null = null;

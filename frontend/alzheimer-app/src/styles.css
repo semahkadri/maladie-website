@@ -4007,7 +4007,7 @@ html[data-theme="dark"] .fo-reco-divider-label {
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: hidden;          /* clip content as width animates */
+  overflow: hidden;             /* clip content as width animates */
   scrollbar-width: none;
   /* Single smooth transition — no min-width fighting it */
   transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -4036,18 +4036,17 @@ html[data-theme="dark"] .fo-reco-divider-label {
   justify-content: center;
 }
 
-/* Sidebar header */
+/* Sidebar header — 64px: sits flush behind the fixed topbar, same height, zero gap */
 .fo-lsidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border-color, #E2E8F0);
+  padding: 0 16px;
+  height: 64px;
   min-height: 64px;
   flex-shrink: 0;
   transition: justify-content 0.3s ease;
 }
-/* When collapsed: only the toggle button remains — center it exactly like backoffice */
 .fo-lsidebar-header-collapsed {
   justify-content: center;
 }
@@ -4131,7 +4130,7 @@ html[data-theme="dark"] .fo-reco-divider-label {
 /* Navigation — flex column so spacer can push bottom section down */
 .fo-lsidebar-nav {
   flex: 1;
-  padding: 10px 10px 0;   /* no bottom padding — admin link handles its own margin */
+  padding: 10px 10px 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -4338,13 +4337,16 @@ html[data-theme="dark"] .fo-reco-divider-label {
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  padding-top: 64px; /* push content below fixed topbar */
 }
 
 /* ── Compact Topbar ── */
 .fo-topbar-compact {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 150;
+  left: 0;
+  right: 0;
+  z-index: 160;
   height: 64px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-color, #E2E8F0);
@@ -4355,6 +4357,61 @@ html[data-theme="dark"] .fo-reco-divider-label {
   gap: 16px;
   flex-shrink: 0;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: background 0.35s ease,
+              box-shadow 0.35s ease,
+              border-color 0.35s ease,
+              backdrop-filter 0.35s ease;
+  will-change: background, box-shadow;
+}
+
+/* ── Scrolled state — glassmorphism elevation ── */
+.fo-topbar-scrolled {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom-color: rgba(78, 128, 238, 0.16) !important;
+  box-shadow:
+    0 1px 0 rgba(78, 128, 238, 0.10),
+    0 4px 16px rgba(0, 0, 0, 0.07),
+    0 16px 48px rgba(78, 128, 238, 0.07);
+}
+
+/* ── Brand identity chip — slides in when scrolled ── */
+.fo-topbar-brand-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  text-decoration: none;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.32s ease 0.06s;
+}
+.fo-topbar-brand-chip i {
+  font-size: 1.15rem;
+  color: var(--promo-red, #d32f2f);
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(211, 47, 47, 0.35));
+}
+.fo-topbar-brand-chip span {
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--accent-color, #4E80EE);
+  padding-right: 8px; /* prevents text clipping at max-width boundary */
+  background: linear-gradient(135deg, var(--accent-color, #4E80EE), var(--pharmacy-green, #10B981));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.fo-topbar-brand-chip-visible {
+  max-width: 160px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .fo-topbar-left {
@@ -4564,14 +4621,13 @@ html[data-theme="dark"] .fo-reco-divider-label {
   /* Hide lang toggle on very small screens */
   .fo-topbar-lang { display: none; }
   .fo-topbar-sep { display: none; }
+  /* Brand chip hides on mobile — sidebar has the logo already */
+  .fo-topbar-brand-chip { display: none !important; }
 }
 
 /* Dark mode for FO sidebar */
 [data-theme="dark"] .fo-lsidebar {
   background: var(--bg-sidebar, #1E293B);
-  border-color: var(--border-color, #334155);
-}
-[data-theme="dark"] .fo-lsidebar-header {
   border-color: var(--border-color, #334155);
 }
 [data-theme="dark"] .fo-lsidebar-footer {
@@ -4580,6 +4636,22 @@ html[data-theme="dark"] .fo-reco-divider-label {
 [data-theme="dark"] .fo-topbar-compact {
   background: var(--bg-card, #1E293B);
   border-color: var(--border-color, #334155);
+}
+[data-theme="dark"] .fo-topbar-scrolled {
+  background: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border-bottom-color: rgba(78, 128, 238, 0.22) !important;
+  box-shadow:
+    0 1px 0 rgba(78, 128, 238, 0.18),
+    0 4px 16px rgba(0, 0, 0, 0.28),
+    0 16px 48px rgba(0, 0, 0, 0.18);
+}
+[data-theme="dark"] .fo-topbar-brand-chip span {
+  background: linear-gradient(135deg, #7BA7FF, #34D399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 [data-theme="dark"] .fo-topbar-hamburger {
   border-color: var(--border-color, #334155);
@@ -11292,8 +11364,8 @@ body.fo-sidebar-collapsed .ai-fab-wrap {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: var(--bg-elevated, #f1f3f4);
-  color: var(--text-muted);
+  background: var(--border-color, #E2E8F0);
+  color: var(--text-secondary, #64748B);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11303,7 +11375,7 @@ body.fo-sidebar-collapsed .ai-fab-wrap {
 }
 
 .ai-product-link:hover {
-  background: #6366f1;
+  background: var(--accent-color, #6366f1);
   color: #fff;
 }
 

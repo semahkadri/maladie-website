@@ -9,7 +9,7 @@ import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
 import { WishlistService } from '../../../services/wishlist.service';
 import { Categorie } from '../../../modeles/categorie.model';
-import { Produit } from '../../../modeles/produit.model';
+import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
 import { ScrollAnimateDirective } from '../../../directives/scroll-animate.directive';
 import { TiltDirective } from '../../../directives/tilt.directive';
@@ -114,8 +114,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
 
             <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
               <div class="fo-product-card-img">
-                <span *ngIf="prod.enPromo && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                <span *ngIf="!prod.enPromo" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                <span *ngIf="isPromoActive(prod) && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
+                <span *ngIf="!isPromoActive(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                 <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
                         (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)"
                         [title]="wishlistService.isInWishlist(prod.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
@@ -136,17 +136,17 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
 
             <div class="fo-card-bottom">
               <div class="fo-card-price-row">
-                <div *ngIf="prod.enPromo && prod.prixOriginal" class="fo-price-block">
+                <div *ngIf="isPromoActive(prod) && prod.prixOriginal" class="fo-price-block">
                   <span class="fo-price-original">{{ prod.prixOriginal | number:'1.2-2' }} TND</span>
                   <span class="fo-price-promo">{{ prod.prix | number:'1.2-2' }} TND</span>
                 </div>
-                <span *ngIf="!prod.enPromo || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
+                <span *ngIf="!isPromoActive(prod) || !prod.prixOriginal" class="fo-product-price">{{ prod.prix | number:'1.2-2' }} TND</span>
                 <span class="fo-product-stock" [class.in-stock]="prod.quantite > 0" [class.out-of-stock]="prod.quantite === 0">
                   {{ prod.quantite > 0 ? t.tr('common.enStock') : t.tr('common.rupture') }}
                 </span>
               </div>
               <div class="fo-card-countdown-slot">
-                <app-promo-countdown *ngIf="prod.enPromo && prod.dateFinPromo"
+                <app-promo-countdown *ngIf="isPromoActive(prod) && prod.dateFinPromo"
                   [dateFinPromo]="prod.dateFinPromo" size="card" [isFr]="t.isFr">
                 </app-promo-countdown>
               </div>
@@ -222,15 +222,15 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
         <div class="fo-quickview-body">
           <span class="fo-product-brand">{{ quickViewProduct.categorieNom }}</span>
           <h2>{{ quickViewProduct.nom }}
-            <span *ngIf="quickViewProduct.enPromo && quickViewProduct.remise" class="fo-detail-promo-badge">-{{ quickViewProduct.remise }}%</span>
+            <span *ngIf="isPromoActive(quickViewProduct) && quickViewProduct.remise" class="fo-detail-promo-badge">-{{ quickViewProduct.remise }}%</span>
           </h2>
           <p class="fo-quickview-desc">{{ quickViewProduct.description }}</p>
-          <div *ngIf="quickViewProduct.enPromo && quickViewProduct.prixOriginal" class="fo-price-block">
+          <div *ngIf="isPromoActive(quickViewProduct) && quickViewProduct.prixOriginal" class="fo-price-block">
             <span class="fo-price-original">{{ quickViewProduct.prixOriginal | number:'1.2-2' }} TND</span>
             <span class="fo-price-promo">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
           </div>
-          <span *ngIf="!quickViewProduct.enPromo || !quickViewProduct.prixOriginal" class="fo-product-price">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
-          <app-promo-countdown *ngIf="quickViewProduct.enPromo && quickViewProduct.dateFinPromo"
+          <span *ngIf="!isPromoActive(quickViewProduct) || !quickViewProduct.prixOriginal" class="fo-product-price">{{ quickViewProduct.prix | number:'1.2-2' }} TND</span>
+          <app-promo-countdown *ngIf="isPromoActive(quickViewProduct) && quickViewProduct.dateFinPromo"
             [dateFinPromo]="quickViewProduct.dateFinPromo" size="card" [isFr]="t.isFr">
           </app-promo-countdown>
           <span class="fo-product-stock"
@@ -257,6 +257,8 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
   `
 })
 export class CategorieProduitsComponent implements OnInit, OnDestroy {
+  readonly isPromoActive = isPromoActive;
+
   categorie: Categorie | null = null;
   products: Produit[] = [];
   filteredProducts: Produit[] = [];
@@ -315,7 +317,7 @@ export class CategorieProduitsComponent implements OnInit, OnDestroy {
         (p.description || '').toLowerCase().includes(this.searchTerm.toLowerCase());
       let matchStock = true;
       if (this.selectedStock === 'en-stock') matchStock = p.quantite > 0;
-      else if (this.selectedStock === 'en-promo') matchStock = !!p.enPromo;
+      else if (this.selectedStock === 'en-promo') matchStock = isPromoActive(p);
       return matchSearch && matchStock;
     });
     this.applySort();

@@ -180,6 +180,7 @@ const DICT: Record<string, TranslationEntry> = {
   'detail.categorie': { fr: 'Catégorie', en: 'Category' },
   'detail.retourCatalogue': { fr: 'Retour au catalogue', en: 'Back to catalog' },
   'detail.similaires': { fr: 'Produits similaires', en: 'Related Products' },
+  'detail.similairesDesc': { fr: "D'autres produits de la même catégorie", en: 'More products from the same category' },
 
   // ─── Categorie Produits ──────────────────────────────────
   'catProd.rechercherDans': { fr: 'Rechercher dans cette catégorie...', en: 'Search in this category...' },

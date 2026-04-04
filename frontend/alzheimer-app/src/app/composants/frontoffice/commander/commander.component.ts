@@ -50,7 +50,7 @@ import { CreerCommande } from '../../../modeles/commande.model';
             <!-- Client Info Form -->
             <div class="col-lg-7">
               <div class="card">
-                <div class="card-header" style="background: linear-gradient(135deg, #1a73e8, #1557b0); color: white;">
+                <div class="card-header" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark, #1557b0)); color: white;">
                   <h5 class="mb-0"><i class="bi bi-person-fill me-2"></i>{{ t.tr('checkout.infosClient') }}</h5>
                 </div>
                 <div class="card-body">
