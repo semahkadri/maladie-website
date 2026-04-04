@@ -8,6 +8,7 @@ import { CategorieService } from '../../../services/categorie.service';
 import { ProduitService } from '../../../services/produit.service';
 import { PanierService } from '../../../services/panier.service';
 import { WishlistService } from '../../../services/wishlist.service';
+import { CompareService } from '../../../services/compare.service';
 import { Categorie } from '../../../modeles/categorie.model';
 import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { TraductionService } from '../../../services/traduction.service';
@@ -120,6 +121,12 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                         (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)"
                         [title]="wishlistService.isInWishlist(prod.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
                   <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
+                </button>
+                <button class="fo-product-compare"
+                        [class.fo-compare-active]="compareService.isInCompare(prod.id!)"
+                        (click)="$event.preventDefault();$event.stopPropagation();compareService.toggle(prod)"
+                        [title]="compareService.isInCompare(prod.id!) ? (t.isFr ? 'Retirer de la comparaison' : 'Remove from comparison') : (t.isFr ? 'Comparer' : 'Compare')">
+                  <i class="bi" [class.bi-bar-chart-steps]="!compareService.isInCompare(prod.id!)" [class.bi-bar-chart-fill]="compareService.isInCompare(prod.id!)"></i>
                 </button>
                 <button class="fo-product-quickview" (click)="openQuickView($event, prod)">
                   <i class="bi bi-eye me-1"></i>{{ t.tr('catalogue.quickView') }}
@@ -289,6 +296,7 @@ export class CategorieProduitsComponent implements OnInit, OnDestroy {
     private produitService: ProduitService,
     private panierService: PanierService,
     public wishlistService: WishlistService,
+    public compareService: CompareService,
     public t: TraductionService
   ) {}
 

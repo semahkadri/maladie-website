@@ -10140,7 +10140,8 @@ html[data-theme="dark"] .wl-empty-icon {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
+  /* nowrap = single row always → bar height stays fixed ~80px so AI panel can clear it */
+  flex-wrap: nowrap;
 }
 
 .cmp-bar-items {
@@ -10148,8 +10149,14 @@ html[data-theme="dark"] .wl-empty-icon {
   align-items: center;
   gap: 12px;
   flex: 1;
-  flex-wrap: wrap;
+  /* nowrap + overflow-x: auto: items scroll horizontally instead of wrapping to 2nd row */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  /* hide scrollbar visually but still scrollable */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.cmp-bar-items::-webkit-scrollbar { display: none; }
 
 .cmp-bar-item {
   display: flex;
@@ -11555,4 +11562,2158 @@ body.fo-sidebar-collapsed .ai-fab-wrap {
 @keyframes aiSuccessFade {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   MOBILE RESPONSIVENESS — COMPREHENSIVE OVERHAUL
+   Frontoffice + Backoffice — all devices: iPhone, Android, tablets
+   ============================================================ */
+
+/* ---- Global base fixes ---- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.08);
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---- iOS safe area insets (notch + home bar) ---- */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .fo-topbar-compact {
+    padding-top: env(safe-area-inset-top);
+    height: calc(64px + env(safe-area-inset-top));
+  }
+  /* Main area must also push content below the taller notch topbar */
+  .fo-main-area {
+    padding-top: calc(64px + env(safe-area-inset-top));
+  }
+  .fo-lsidebar {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .fo-minicart-panel {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .fo-cookie-bar,
+  .fo-announcement {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* ---- Prevent iOS auto-zoom (font-size < 16px triggers zoom) ---- */
+@media (max-width: 991px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ================================================================
+   FRONTOFFICE
+   ================================================================ */
+
+/* Sidebar bg column: hide at 991px (not 768px — sidebar drawer starts at 991px) */
+@media (max-width: 991px) {
+  .fo-app-container::before {
+    display: none !important;
+  }
+}
+
+/* Topbar: hide compare on phones, hide wishlist on very small phones */
+@media (max-width: 767px) {
+  .fo-topbar-compare-btn {
+    display: none !important;
+  }
+  .fo-topbar-sep {
+    display: none !important;
+  }
+}
+@media (max-width: 479px) {
+  .fo-topbar-wishlist-btn {
+    display: none !important;
+  }
+}
+
+/* Topbar search: let it fill available space on phones (already has flex:1) */
+@media (max-width: 991px) {
+  .fo-topbar-search {
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+  /* Fix font-size on search input to prevent iOS auto-zoom */
+  .fo-topbar-search-input {
+    font-size: 16px !important;
+  }
+}
+@media (max-width: 479px) {
+  /* Hide the search submit button on very small phones — submit via Enter key */
+  .fo-topbar-search-btn {
+    display: none !important;
+  }
+  /* Give back that space to the input */
+  .fo-topbar-search-input {
+    padding: 10px 8px !important;
+  }
+}
+
+/* Touch targets: min 44×44px */
+@media (hover: none), (pointer: coarse) {
+  .fo-topbar-hamburger {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .fo-topbar-icon-btn {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .fo-quantity-btn {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .fo-btn, .btn {
+    min-height: 44px;
+  }
+  /* Always show wishlist heart on touch devices */
+  .fo-product-wishlist {
+    opacity: 1 !important;
+  }
+  /* Disable card hover effects — stay stuck after tap on touch */
+  .fo-product-card:hover {
+    transform: none !important;
+    box-shadow: var(--fo-shadow-md) !important;
+  }
+  .fo-product-card:hover .fo-product-image img {
+    transform: none !important;
+  }
+  /* Disable zoom lens on touch */
+  .fo-zoom-lens,
+  .fo-zoom-result {
+    display: none !important;
+  }
+}
+
+/* Product grid: 2 columns on phones */
+@media (max-width: 767px) {
+  .fo-product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+@media (max-width: 399px) {
+  .fo-product-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Product card image: smaller on very small phones */
+@media (max-width: 479px) {
+  .fo-product-image {
+    height: 160px !important;
+  }
+}
+
+/* Mini-cart: full width on phones */
+@media (max-width: 767px) {
+  .fo-minicart-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+}
+
+/* Announcement bar: prevent close button overlap */
+@media (max-width: 479px) {
+  .fo-announcement-content {
+    padding-right: 36px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Catalogue filter bar: wrap and stack on small phones */
+@media (max-width: 576px) {
+  .fo-filter-bar {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .fo-filter-select {
+    font-size: 0.82rem !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+/* Product detail: full-width action buttons */
+@media (max-width: 767px) {
+  .fo-detail-actions {
+    flex-direction: column !important;
+  }
+  .fo-detail-add-btn,
+  .fo-detail-secondary-btn {
+    width: 100% !important;
+  }
+}
+
+/* Comparison page: horizontal scroll */
+@media (max-width: 767px) {
+  .cmp-card {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* AI assistant panel: full-width bottom sheet on phones
+   Base CSS has left:28px; width:380px — BOTH must be overridden */
+@media (max-width: 480px) {
+  .ai-panel {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    bottom: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 75vh !important;
+  }
+}
+
+/* Trust strip: 2 columns on mid phones */
+@media (max-width: 600px) {
+  .fo-trust-strip-inner {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+/* Newsletter: stack form on very small phones */
+@media (max-width: 479px) {
+  .fo-newsletter-form {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .fo-newsletter-form input,
+  .fo-newsletter-form button {
+    width: 100% !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* Footer: single column on phones */
+@media (max-width: 767px) {
+  .fo-footer-main {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+/* Pagination: touch-friendly 44px targets */
+@media (max-width: 767px) {
+  .fo-pagination .page-link,
+  .fo-pagination .page-item a {
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* Dark mode: safe overrides for panels */
+[data-theme="dark"] .fo-minicart-panel,
+[data-theme="dark"] .ai-panel {
+  background: var(--fo-surface) !important;
+}
+
+/* ================================================================
+   BACKOFFICE
+   ================================================================ */
+
+/* Sidebar: hidden on mobile, shown as drawer when .open */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease, width 0.3s ease;
+    z-index: 1100;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  /* Topbar spans full width — no sidebar offset */
+  .topbar {
+    left: 0 !important;
+  }
+  /* Main content full width */
+  .main-content {
+    margin-left: 0 !important;
+  }
+  /* Collapsed state irrelevant on mobile — full sidebar when open */
+  body.sidebar-collapsed .main-content {
+    margin-left: 0 !important;
+  }
+  body.sidebar-collapsed .topbar {
+    left: 0 !important;
+  }
+  /* Show the hamburger toggle in topbar */
+  .topbar-toggle {
+    display: flex !important;
+  }
+  /* Topbar padding tighter on mobile */
+  .topbar {
+    padding: 0 16px !important;
+  }
+  /* Topbar right: hide clock on small phones */
+  .topbar-clock {
+    display: none;
+  }
+}
+
+/* Safe area for backoffice topbar on iPhone */
+@supports (padding-top: env(safe-area-inset-top)) {
+  @media (max-width: 768px) {
+    .topbar {
+      padding-top: env(safe-area-inset-top) !important;
+      height: calc(var(--topbar-height) + env(safe-area-inset-top)) !important;
+    }
+    .main-content {
+      padding-top: calc(var(--topbar-height) + env(safe-area-inset-top)) !important;
+    }
+  }
+}
+
+/* Backoffice touch targets */
+@media (hover: none), (pointer: coarse) {
+  .sidebar-nav-item {
+    min-height: 44px !important;
+  }
+  .topbar-toggle,
+  .sidebar-toggle-btn,
+  .theme-toggle {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* Backoffice filter bars: wrap on phones */
+@media (max-width: 576px) {
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .filter-bar .form-select,
+  .filter-bar .search-input,
+  .filter-bar input {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .filter-bar .text-muted {
+    white-space: normal !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Backoffice dashboard header: fix negative margins on small screens */
+@media (max-width: 576px) {
+  .dashboard-header {
+    margin: -16px -16px 20px -16px !important;
+    padding: 20px 16px !important;
+  }
+}
+
+/* Backoffice order detail: remove sticky sidebar on mobile */
+@media (max-width: 767px) {
+  .dc-sidebar-sticky {
+    position: static !important;
+    top: auto !important;
+  }
+}
+
+/* Stock analysis: add md breakpoints (col-lg-5/7 have no mid breakpoint) */
+@media (max-width: 991px) {
+  .col-lg-5,
+  .col-lg-7 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Upload zone padding on narrow phones */
+@media (max-width: 360px) {
+  .upload-zone {
+    padding: 1rem !important;
+  }
+}
+
+/* ================================================================
+   MOBILE PHASE 2 — DEEP FIXES (sidebar bg, cart, countdown, etc.)
+   ================================================================ */
+
+/* FIX 1: fo-lsidebar transparent in light mode on mobile
+   The sidebar uses background:transparent + parent ::before for its bg.
+   On mobile it becomes position:fixed so the parent ::before is no longer behind it. */
+@media (max-width: 991px) {
+  .fo-lsidebar {
+    background: var(--bg-card, #ffffff) !important;
+    border-right: 1px solid var(--border-color, #e2e8f0) !important;
+  }
+}
+[data-theme="dark"] .fo-lsidebar {
+  background: var(--bg-sidebar, #1E293B) !important;
+}
+
+/* FIX 2: Reduce fo-section-container padding on phones (was 32px each side = 64px total) */
+@media (max-width: 576px) {
+  .fo-section-container {
+    padding: 0 14px !important;
+  }
+}
+
+/* FIX 3: Cart item row — restructure as wrapped grid on mobile
+   Structure: [IMG] [INFO] wraps to row 1, then [QTY] [SUBTOTAL] [X] row 2 */
+@media (max-width: 576px) {
+  .fo-cart-item-row {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    padding: 12px !important;
+    gap: 6px !important;
+  }
+  /* (1) Product image */
+  .fo-cart-item-row > *:nth-child(1) {
+    flex: 0 0 auto !important;
+    margin: 0 4px 0 0 !important;
+  }
+  /* (2) Product info: fills rest of row 1 */
+  .fo-cart-item-row > *:nth-child(2) {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  /* (3) Quantity control: pushed to right on row 2 */
+  .fo-cart-item-row > *:nth-child(3) {
+    order: 10;
+    flex: 0 0 auto !important;
+    margin: 0 0 0 auto !important;
+  }
+  /* (4) Subtotal */
+  .fo-cart-item-row > *:nth-child(4) {
+    order: 11;
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    font-size: 0.82rem !important;
+    white-space: nowrap;
+  }
+  /* (5) Remove button */
+  .fo-cart-item-row > *:nth-child(5) {
+    order: 12;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+  }
+}
+
+/* FIX 4: Cart/checkout sticky summary — not sticky when stacked on mobile
+   Covers col-lg-4 (panier) AND col-lg-5 (commander checkout) */
+@media (max-width: 991px) {
+  .fo-section .col-lg-4 > .card,
+  .fo-section .col-lg-4 > div > .card,
+  .fo-section .col-lg-5 > .card,
+  .fo-section .col-lg-5 > div > .card {
+    position: static !important;
+    top: auto !important;
+  }
+}
+
+/* FIX 5: Promo countdown — shrink content for narrow mobile cards */
+@media (max-width: 480px) {
+  .pcd-card {
+    padding: 0 5px !important;
+    gap: 3px !important;
+  }
+  /* Hide "Expire dans" text — no room in 2-col card layout */
+  .pcd-label-text {
+    display: none !important;
+  }
+  .pcd-icon {
+    font-size: 0.82rem !important;
+  }
+  .pcd-blocks-row {
+    gap: 1px !important;
+  }
+  .pcd-unit-block {
+    min-width: 22px !important;
+    padding: 2px 3px !important;
+  }
+  .pcd-num {
+    font-size: 0.76rem !important;
+    line-height: 1 !important;
+  }
+  .pcd-lbl {
+    font-size: 0.52rem !important;
+    line-height: 1 !important;
+  }
+  .pcd-colon {
+    font-size: 0.7rem !important;
+    padding: 0;
+    line-height: 1;
+  }
+}
+
+/* FIX 6: Wishlist grid — single column on small phones */
+@media (max-width: 480px) {
+  .fo-wl-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* FIX 7: Product detail — smaller headings and price on mobile */
+@media (max-width: 576px) {
+  .fo-product-detail-info h1 {
+    font-size: 1.3rem !important;
+    letter-spacing: 0 !important;
+    word-break: break-word !important;
+  }
+  .fo-product-detail-price .value {
+    font-size: 1.2rem !important;
+  }
+  /* Description: wrap long words */
+  .fo-product-detail-desc {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    font-size: 0.88rem !important;
+  }
+  /* Quantity row: allow wrapping when label + selector don't fit */
+  .fo-quantity-selector {
+    flex-shrink: 1 !important;
+  }
+}
+
+/* FIX 8: Compare page — scroll handled by .cmp-scroll-wrap wrapper (Phase 4 FIX G) */
+
+/* FIX 9: Product detail image — shorter on very small phones */
+@media (max-width: 480px) {
+  .fo-product-detail-img {
+    height: 200px !important;
+  }
+}
+
+/* FIX 10: Global word-break for product names / long text in cards */
+.fo-product-card-body h4,
+.fo-product-card-body p,
+.fo-list-card-title-link,
+.fo-list-card-desc {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* FIX 11: fo-detail-actions already added, ensure it wraps buttons vertically */
+@media (max-width: 576px) {
+  .fo-detail-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .fo-detail-add-btn {
+    width: 100% !important;
+  }
+  .fo-detail-secondary-btn {
+    width: 100% !important;
+  }
+}
+
+/* FIX 12: Panier product price block — prevent clipping */
+@media (max-width: 576px) {
+  .fo-price-block {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+  .fo-price-original {
+    font-size: 0.78rem !important;
+  }
+  .fo-price-promo {
+    font-size: 1rem !important;
+  }
+}
+
+/* FIX 13: Horizontal overflow protection — body only, not fo-section
+   (fo-section overflow-x:hidden would clip position:fixed children like sidebar) */
+
+/* FIX 14: Bootstrap row overflow protection on mobile */
+@media (max-width: 576px) {
+  .row {
+    --bs-gutter-x: 1rem;
+  }
+}
+
+/* ================================================================
+   MOBILE PHASE 3 — REMAINING QA FIXES
+   ================================================================ */
+
+/* FIX 15: Catalogue category/radio lists — single column on very narrow phones
+   At 768px they go to 2-col grid, but at ≤400px (320px iPhone SE) 2 cols = ~145px
+   each which is too narrow for long category names */
+@media (max-width: 400px) {
+  .cat-cat-list,
+  .cat-radio-list {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* FIX 16: Trust strip — single column at very narrow phones
+   4 trust badges at 2-col (≤600px → ~155px each at 320px) is tight; go 1-col at ≤440px */
+@media (max-width: 440px) {
+  .fo-trust-strip-inner {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}
+
+/* FIX 17: Confirmation page — reference badge responsive
+   Inline-block with 16px/28px padding on 320px phones can look clipped */
+@media (max-width: 480px) {
+  .fo-section-container .text-center [style*="padding: 16px 28px"],
+  .fo-section-container .text-center [style*="padding:16px 28px"] {
+    padding: 12px 16px !important;
+    display: block !important;
+  }
+}
+
+/* FIX 18: Confirmation action buttons — stack on phones */
+@media (max-width: 480px) {
+  .fo-section-container .text-center .d-flex.justify-content-center.gap-3 {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .fo-section-container .text-center .d-flex.justify-content-center.gap-3 a.btn {
+    width: 100% !important;
+    text-align: center !important;
+  }
+}
+
+/* FIX 19: Order confirmation line — prevent left column from pushing price off-screen */
+.fo-confirm-ligne-left {
+  flex: 1;
+  min-width: 0;
+}
+.fo-confirm-ligne-left span.fw-semibold {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* FIX 20: Commander checkout form — stack form buttons on very small phones */
+@media (max-width: 480px) {
+  .fo-section .d-flex.justify-content-between > a.btn,
+  .fo-section .d-flex.justify-content-between > button.btn {
+    flex: 1 1 auto;
+  }
+  /* Prevent btn overflow in commander checkout's back/submit row */
+  .fo-section form .d-flex.justify-content-between {
+    gap: 8px !important;
+  }
+}
+
+/* FIX 21: Detail page quantity row — allow wrapping on very narrow phones
+   Label has white-space: nowrap which causes overflow at 320px */
+@media (max-width: 400px) {
+  .fo-section .d-flex.align-items-center.gap-3.mb-3 {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .fo-section .d-flex.align-items-center.gap-3.mb-3 label {
+    white-space: normal !important;
+    width: 100% !important;
+  }
+}
+
+/* FIX 22: fo-savings-line — prevent overflow on narrow screens */
+@media (max-width: 576px) {
+  .fo-savings-line {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* FIX 23: Backoffice topbar breadcrumb — truncate on small phones */
+@media (max-width: 576px) {
+  .breadcrumb-nav {
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    max-width: 160px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .topbar-left {
+    overflow: hidden !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+}
+
+/* FIX 24: Cat results count — wrap on narrow screens (has white-space: nowrap) */
+@media (max-width: 480px) {
+  .cat-results-count {
+    white-space: normal !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* FIX 25: Catalogue toolbar right — full width sort on narrow phones */
+@media (max-width: 480px) {
+  .cat-toolbar-right {
+    width: 100% !important;
+  }
+  .fo-sort-control {
+    flex: 1 !important;
+  }
+}
+
+/* FIX 26: Wishlist page — ensure wl-grid doesn't create overflow */
+@media (max-width: 576px) {
+  .fo-wl-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* FIX 27: Catalogue list view — ensure list cards don't overflow on mobile */
+@media (max-width: 576px) {
+  .fo-list-card {
+    flex-direction: column !important;
+  }
+  .fo-list-card-img {
+    width: 100% !important;
+    height: 160px !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+}
+
+/* FIX 28: Formulaire backoffice — upload zone on narrow phones */
+@media (max-width: 480px) {
+  .upload-zone {
+    padding: 1.25rem !important;
+  }
+}
+
+/* FIX 29: Detail promo badge next to title — prevent badge from wrapping awkwardly */
+@media (max-width: 576px) {
+  .fo-detail-promo-badge {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    font-size: 0.7rem !important;
+    padding: 2px 6px !important;
+  }
+}
+
+/* FIX 30: Dark mode — ensure FIX 15-29 respect dark mode transparencies */
+[data-theme="dark"] .fo-confirm-ligne-left span.fw-semibold {
+  color: var(--text-primary);
+}
+
+/* ================================================================
+   MOBILE PHASE 4 — FULL QA SWEEP
+   ================================================================ */
+
+/* ── A: Search bar icon — hide magnifying glass on very small phones
+        to give input ~30px more space for placeholder text ── */
+@media (max-width: 480px) {
+  .fo-topbar-search-ico {
+    display: none !important;
+  }
+  .fo-topbar-search-input {
+    padding-left: 12px !important;
+  }
+}
+
+/* ── B: Product card overlay buttons (wishlist + compare)
+        Always visible on touch devices (hover doesn't work on mobile) ── */
+@media (hover: none), (pointer: coarse) {
+  .fo-product-wishlist,
+  .fo-product-compare {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+  /* Wishlist: always show the heart, slightly smaller */
+  .fo-product-wishlist {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+  }
+  /* Compare: always show, smaller */
+  .fo-product-compare {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.8rem !important;
+  }
+  /* Quick view: keep hidden on mobile (no hover) */
+  .fo-product-quickview {
+    display: none !important;
+  }
+}
+
+/* ── C: Product card price row — better layout on narrow cards
+        On mobile 2-col grid, cards are ~165px each ── */
+@media (max-width: 576px) {
+  .fo-card-price-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+  /* Stock badge takes full width, tighter text */
+  .fo-card-price-row .fo-product-stock {
+    font-size: 0.7rem !important;
+    padding: 2px 7px !important;
+  }
+  /* Promo price block: ensure column layout */
+  .fo-price-block {
+    flex-direction: column !important;
+    gap: 1px !important;
+  }
+  .fo-price-original {
+    font-size: 0.72rem !important;
+  }
+  .fo-price-promo {
+    font-size: 0.95rem !important;
+  }
+  /* Regular price: smaller on cards */
+  .fo-card-bottom .fo-product-price {
+    font-size: 0.95rem !important;
+  }
+}
+
+/* ── D: List view card — reduce image width on mobile ── */
+@media (max-width: 767px) {
+  .fo-list-card-img {
+    width: 120px !important;
+    min-height: 120px !important;
+    font-size: 2rem !important;
+  }
+}
+@media (max-width: 480px) {
+  .fo-list-card {
+    flex-direction: column !important;
+  }
+  .fo-list-card-img {
+    width: 100% !important;
+    height: 160px !important;
+    min-height: 0 !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+}
+
+/* ── E: Topbar — restore wishlist button visibility on mobile
+        (was hidden at ≤479px — now always visible) ── */
+@media (max-width: 479px) {
+  .fo-topbar-wishlist-btn {
+    display: flex !important;
+  }
+}
+/* Topbar icon buttons: smaller on phones to fit more in less space */
+@media (max-width: 480px) {
+  .fo-topbar-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 1rem !important;
+  }
+  .fo-topbar-hamburger {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 1.1rem !important;
+  }
+  .fo-topbar-right {
+    gap: 4px !important;
+  }
+}
+
+/* ── F: AI Assistant — move FAB to right side on mobile to avoid
+        sidebar admin link overlap and compare bar overlap ── */
+@media (max-width: 991px) {
+  .ai-fab-wrap {
+    left: auto !important;
+    right: 16px !important;
+    bottom: 88px !important;  /* above compare bar (~70px) + safe margin */
+  }
+}
+/* AI panel on mobile: right side, above compare bar */
+@media (max-width: 480px) {
+  .ai-panel {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    bottom: 88px !important;
+    border-radius: 16px !important;
+    max-height: 70vh !important;
+  }
+}
+/* When compare bar is NOT visible, FAB can be lower */
+/* AI fab moves even higher when on screens where compare bar shows */
+
+/* ── G: Compare page — proper horizontal scroll wrapper ── */
+.cmp-scroll-wrap {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+  border-radius: var(--radius, 16px);
+  /* Show scroll hint shadow on right */
+  box-shadow: inset -8px 0 8px -8px rgba(0,0,0,0.08);
+}
+.cmp-scroll-wrap .cmp-card {
+  /* Card min-width so columns don't collapse */
+  min-width: max-content !important;
+}
+@media (max-width: 900px) {
+  /* Fixed-width columns on mobile for consistent layout */
+  .cmp-row {
+    grid-template-columns: 140px repeat(var(--cols, 2), 155px) !important;
+  }
+  .cmp-label-cell {
+    padding: 14px 12px !important;
+    font-size: 0.76rem !important;
+  }
+  .cmp-data-cell {
+    padding: 14px 12px !important;
+    font-size: 0.82rem !important;
+  }
+  .cmp-card-img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  .cmp-detail-num {
+    font-size: 1.5rem !important;
+  }
+  /* Scroll hint label */
+  .cmp-scroll-wrap::after {
+    content: '';
+    display: block;
+    position: sticky;
+    right: 0;
+    width: 24px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.5));
+    pointer-events: none;
+  }
+}
+
+/* ── H: Commander checkout page — stack form buttons on mobile ── */
+@media (max-width: 576px) {
+  /* Checkout form: both submit and back buttons full-width stacked */
+  .fo-section form .d-flex.justify-content-between,
+  .fo-section .d-flex.justify-content-between.fo-checkout-btns {
+    flex-direction: column-reverse !important;
+    gap: 10px !important;
+  }
+  .fo-section form .d-flex.justify-content-between a.btn,
+  .fo-section form .d-flex.justify-content-between button.btn {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── I: Confirmation page — symmetric equal-width buttons ── */
+/* Desktop: min-width so both buttons appear same width */
+.fo-section-container .text-center .d-flex.justify-content-center a.btn {
+  min-width: 160px;
+  text-align: center;
+}
+/* Mobile: full-width stacked */
+@media (max-width: 576px) {
+  .fo-section-container .text-center .d-flex.justify-content-center.gap-3 {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 0 8px !important;
+  }
+  .fo-section-container .text-center .d-flex.justify-content-center.gap-3 a.btn {
+    min-width: 0 !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── J: Product detail page — fix all cut-off issues ── */
+/* Ensure detail page container doesn't clip */
+@media (max-width: 767px) {
+  .fo-product-detail {
+    gap: 24px !important;
+  }
+  .fo-product-detail-info h1 {
+    font-size: 1.25rem !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  .fo-product-detail-desc {
+    font-size: 0.88rem !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    display: block !important;
+    overflow: visible !important;
+    max-height: none !important;
+    -webkit-line-clamp: unset !important;
+  }
+}
+/* Promo countdown detail mode: responsive on mobile */
+@media (max-width: 480px) {
+  .pcd-detail {
+    margin-top: 12px !important;
+  }
+  .pcd-detail-header {
+    padding: 8px 12px !important;
+    font-size: 0.72rem !important;
+  }
+  .pcd-detail-blocks {
+    padding: 12px 8px !important;
+    gap: 4px !important;
+  }
+  .pcd-detail-block {
+    min-width: 52px !important;
+    padding: 8px 10px !important;
+  }
+  .pcd-detail-num {
+    font-size: 1.5rem !important;
+  }
+  .pcd-detail-lbl {
+    font-size: 0.55rem !important;
+  }
+  .pcd-detail-sep {
+    font-size: 1.4rem !important;
+    padding-bottom: 16px !important;
+  }
+}
+/* Detail actions: full width on mobile */
+@media (max-width: 576px) {
+  .fo-detail-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+  .fo-detail-add-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  .fo-detail-secondary-btn {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+  /* Detail guarantees: smaller text */
+  .fo-detail-guarantee span {
+    font-size: 0.8rem !important;
+  }
+}
+/* Detail page quantity label: allow wrap on very narrow */
+@media (max-width: 360px) {
+  .fo-product-detail-info .d-flex.align-items-center.gap-3.mb-3 {
+    flex-wrap: wrap !important;
+  }
+  .fo-product-detail-info label.fw-semibold {
+    white-space: normal !important;
+    width: 100% !important;
+  }
+}
+
+/* ── K: Remove duplicate Phase 2 fixes that conflict with Phase 4 ── */
+/* Phase 4 FIX C supersedes Phase 2 FIX 12 */
+
+/* ── L: Compare bar — ensure it doesn't overlap AI fab on mobile ── */
+@media (max-width: 991px) {
+  .cmp-bar-inner {
+    padding: 8px 16px !important;
+    gap: 10px !important;
+  }
+  .cmp-bar-item {
+    min-width: 130px !important;
+    max-width: 160px !important;
+    padding: 4px 8px 4px 4px !important;
+  }
+  .cmp-bar-item-img {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+@media (max-width: 576px) {
+  /* On phones, compare bar shows only count + buttons, items wrap or hide */
+  .cmp-bar-items {
+    display: none !important;  /* Hide individual items on very small phones */
+  }
+  .cmp-bar-inner {
+    justify-content: space-between !important;
+  }
+  /* Show compact count badge instead */
+  .cmp-bar-count-num {
+    font-size: 1.4rem !important;
+  }
+}
+
+/* ── M: Product list view actions on mobile ── */
+@media (max-width: 576px) {
+  .fo-list-card-actions {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .fo-list-card-actions .fo-add-cart-btn,
+  .fo-list-card-actions .fo-list-card-detail-btn {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    font-size: 0.8rem !important;
+  }
+  .fo-list-card-actions .fo-list-card-qv-btn {
+    display: none !important;
+  }
+}
+
+/* ── N: Ensure product detail page content is properly centered ── */
+@media (max-width: 992px) {
+  .fo-product-detail {
+    max-width: 100% !important;
+  }
+  .fo-product-detail-info {
+    text-align: left !important;
+  }
+}
+
+/* ── O: Topbar — also show compare on tablets (≥576px) ── */
+@media (min-width: 576px) and (max-width: 767px) {
+  .fo-topbar-compare-btn {
+    display: flex !important;
+  }
+}
+
+/* ── P: Dark mode support for Phase 4 ── */
+[data-theme="dark"] .cmp-scroll-wrap {
+  box-shadow: inset -8px 0 8px -8px rgba(0,0,0,0.25);
+}
+[data-theme="dark"] .fo-list-card-img {
+  background: linear-gradient(135deg, #1a1d23, #22252e);
+}
+
+/* ================================================================
+   MOBILE PHASE 5 — FULL SECOND QA PASS
+   ================================================================ */
+
+/* ── Q: Language toggle — always visible on ALL screen sizes
+        (base CSS hides it at ≤991px — override that) ── */
+@media (max-width: 991px) {
+  .fo-topbar-lang {
+    display: flex !important;
+  }
+}
+/* Compact pill on phones to save horizontal space */
+@media (max-width: 576px) {
+  .fo-topbar-lang {
+    padding: 2px !important;
+    gap: 1px !important;
+  }
+  .fo-topbar-lang button {
+    padding: 3px 7px !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0 !important;
+  }
+}
+
+/* ── R: Compare icon in topbar — always visible on every screen size ── */
+/* Phase 2 hides it at ≤767px; Phase 4 FIX O shows it at 576–767px.
+   This rule covers the missing ≤576px range. */
+@media (max-width: 575px) {
+  .fo-topbar-compare-btn {
+    display: flex !important;
+  }
+}
+
+/* ── S: Product detail page — wishlist button stays compact icon
+        (FIX 11 / Phase 2 & J / Phase 4 make it full-width — override here)
+        Keep the add-to-cart button as primary, heart as compact icon next to it ── */
+@media (max-width: 767px) {
+  .fo-detail-actions {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .fo-detail-add-btn {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  /* Heart button: compact square icon, NOT full-width */
+  .fo-detail-secondary-btn {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: auto !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.1rem !important;
+  }
+}
+
+/* ── T: Catalogue — prevent product grid right-column cut-off on mobile ── */
+@media (max-width: 767px) {
+  .cat-page-wrap {
+    overflow-x: hidden !important;
+  }
+  .cat-content {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  .fo-product-grid {
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+  .fo-product-card {
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ── U: Pagination — fully centered and properly wrapped on mobile ── */
+@media (max-width: 767px) {
+  .fo-pagination {
+    padding: 14px 12px !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .fo-pagination-controls {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 4px !important;
+  }
+  .fo-pagination-controls button {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.8rem !important;
+  }
+  .fo-pagination-info {
+    font-size: 0.78rem !important;
+    text-align: center !important;
+  }
+  .fo-pagination-size {
+    justify-content: center !important;
+  }
+  .fo-pagination-size label {
+    font-size: 0.78rem !important;
+  }
+}
+
+/* ── V: Compare page — fix cmp-card overflow so cmp-scroll-wrap can scroll ──
+        Root cause: cmp-card { overflow: hidden } clips columns even inside scroll-wrap.
+        Setting overflow: visible lets the grid rows extend; scroll-wrap catches the overflow. ── */
+.cmp-scroll-wrap .cmp-card {
+  overflow: visible !important;
+  /* Fixed min-width so all 4 columns always have room (140 label + 4 × 155 data = 760px) */
+  min-width: max-content !important;
+}
+
+/* Ensure cmp-scroll-wrap always provides horizontal scroll */
+.cmp-scroll-wrap {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Round corners on the outer wrapper instead of the card */
+@media (max-width: 900px) {
+  .cmp-scroll-wrap {
+    border-radius: 16px !important;
+    border: 1px solid var(--border, #e2e8f0) !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06) !important;
+  }
+  /* Card no longer needs border/shadow (wrapper has them) */
+  .cmp-scroll-wrap .cmp-card {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* ── W: Compare/cart toast — prevent cut-off and overlap with compare bar ── */
+@media (max-width: 576px) {
+  .fo-toast {
+    left: 12px !important;
+    right: 12px !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    font-size: 0.8rem !important;
+    padding: 10px 14px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    /* Position above compare bar (70px) + safe margin */
+    bottom: 84px !important;
+  }
+}
+
+/* ── X: Compare button always visible on product cards (wishlist & detail cross-sell)
+        Force visible on all devices, not just touch — matches user expectation ── */
+.fo-product-compare {
+  /* On desktop: show on hover. On mobile: always visible via FIX B.
+     Wishlist/FBT/Related use same card structure so FIX B already covers mobile.
+     This rule makes compare also visible when parent card is :focus-within */
+}
+/* Ensure compare btn is visible in all card contexts on mobile */
+@media (hover: none), (pointer: coarse) {
+  .fo-product-card .fo-product-compare,
+  .fo-product-card .fo-product-wishlist {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* ── Y: Topbar right — ensure all icons fit without clipping on very small phones ── */
+@media (max-width: 360px) {
+  .fo-topbar-right {
+    gap: 3px !important;
+  }
+  .fo-topbar-icon-btn {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.9rem !important;
+  }
+  .fo-topbar-lang button {
+    padding: 2px 5px !important;
+    font-size: 0.58rem !important;
+  }
+}
+
+/* ── Z: Dark mode support for Phase 5 ── */
+[data-theme="dark"] .cmp-scroll-wrap {
+  border-color: var(--border-color, #334155) !important;
+}
+
+/* ================================================================
+   COMPARE PAGE — COMPLETE REDESIGN & DARK MODE FIX
+   ================================================================ */
+
+/* ── 1. UNDO Phase 5 FIX V on DESKTOP (>900px)
+        On desktop we do NOT want overflow-x:auto on the scroll-wrap
+        and we do NOT want the card to be min-width:max-content.
+        The 1fr columns fill the container naturally. ── */
+@media (min-width: 901px) {
+  .cmp-scroll-wrap {
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .cmp-scroll-wrap .cmp-card {
+    overflow: hidden !important;   /* restore: clips border-radius */
+    min-width: 0 !important;       /* restore: 1fr fills container */
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07) !important;
+    border-radius: 20px !important;
+    margin-bottom: 24px !important;
+  }
+}
+
+/* ── 2. FIX: cmp-data-cell and cmp-card-name use var(--text) which
+        may be undefined — replace with var(--text-primary) ── */
+.cmp-data-cell {
+  color: var(--text-primary) !important;
+}
+.cmp-card-name {
+  color: var(--text-primary) !important;
+  font-size: 0.88rem !important;
+}
+.cmp-card-category {
+  color: var(--text-secondary, #64748B) !important;
+}
+.cmp-row-desc .cmp-data-cell {
+  color: var(--text-secondary) !important;
+}
+
+/* ── 3. DARK MODE — fix all hardcoded light backgrounds ── */
+
+/* Label column in dark mode */
+[data-theme="dark"] .cmp-label-cell {
+  background: linear-gradient(135deg,
+    rgba(99,102,241,0.18) 0%,
+    rgba(139,92,246,0.12) 100%) !important;
+  color: #a5b4fc !important;
+  border-right-color: rgba(99,102,241,0.25) !important;
+}
+
+/* Data cell base */
+[data-theme="dark"] .cmp-data-cell {
+  background: var(--bg-card, #1E293B) !important;
+  color: var(--text-primary) !important;
+  border-right-color: var(--border, #334155) !important;
+}
+
+/* Row hover */
+[data-theme="dark"] .cmp-row {
+  border-bottom-color: var(--border, #334155) !important;
+}
+
+/* Card header row */
+[data-theme="dark"] .cmp-row-header .cmp-data-cell {
+  background: var(--bg-elevated, #1a2438) !important;
+}
+
+/* Product image bg */
+[data-theme="dark"] .cmp-card-img {
+  background: rgba(255,255,255,0.05) !important;
+}
+
+/* Remove button */
+[data-theme="dark"] .cmp-remove-btn {
+  background: rgba(255,255,255,0.08) !important;
+  color: var(--text-secondary) !important;
+}
+[data-theme="dark"] .cmp-remove-btn:hover {
+  background: rgba(220,38,38,0.18) !important;
+  color: #f87171 !important;
+}
+
+/* Best price cell */
+[data-theme="dark"] .cmp-data-cell.cmp-best {
+  background: linear-gradient(180deg,
+    rgba(34,197,94,0.12) 0%,
+    rgba(34,197,94,0.06) 100%) !important;
+  border-left-color: #4ade80 !important;
+}
+
+/* Price saving tag */
+[data-theme="dark"] .cmp-price-saving {
+  background: rgba(22,163,74,0.18) !important;
+  color: #4ade80 !important;
+}
+
+/* Best badge */
+[data-theme="dark"] .cmp-best-badge {
+  background: rgba(22,163,74,0.15) !important;
+  border-color: rgba(74,222,128,0.3) !important;
+  color: #4ade80 !important;
+}
+
+/* Stock badges */
+[data-theme="dark"] .cmp-stock-good {
+  background: rgba(34,197,94,0.14) !important;
+  color: #4ade80 !important;
+}
+[data-theme="dark"] .cmp-stock-low {
+  background: rgba(245,158,11,0.14) !important;
+  color: #fbbf24 !important;
+}
+[data-theme="dark"] .cmp-stock-out {
+  background: rgba(220,38,38,0.14) !important;
+  color: #f87171 !important;
+}
+
+/* Category pill */
+[data-theme="dark"] .cmp-category-pill {
+  background: rgba(99,102,241,0.15) !important;
+  border-color: rgba(99,102,241,0.28) !important;
+  color: #a5b4fc !important;
+}
+
+/* Promo yes/no */
+[data-theme="dark"] .cmp-promo-yes {
+  background: rgba(220,38,38,0.14) !important;
+  color: #f87171 !important;
+}
+[data-theme="dark"] .cmp-promo-no {
+  color: var(--text-secondary) !important;
+}
+
+/* Price display */
+[data-theme="dark"] .cmp-price-original {
+  color: var(--text-secondary) !important;
+}
+[data-theme="dark"] .cmp-price-current {
+  color: var(--primary, #4E80EE) !important;
+}
+[data-theme="dark"] .cmp-data-cell.cmp-best .cmp-price-current {
+  color: #4ade80 !important;
+}
+
+/* View link */
+[data-theme="dark"] .cmp-card-view-link {
+  color: #a5b4fc !important;
+}
+[data-theme="dark"] .cmp-card-view-link:hover {
+  color: var(--primary) !important;
+}
+
+/* CTA row */
+[data-theme="dark"] .cmp-row-cta .cmp-data-cell {
+  background: var(--bg-card) !important;
+}
+
+/* Expiry soon */
+[data-theme="dark"] .cmp-expiry-soon {
+  color: #f87171 !important;
+}
+
+/* ── 4. VISUAL ENHANCEMENTS — make it match the site's design language ── */
+
+/* Product header card: gradient top accent strip (same as fo-product-card) */
+.cmp-row-header .cmp-data-cell {
+  position: relative !important;
+  padding-top: 28px !important;
+}
+.cmp-row-header .cmp-data-cell::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary, #4E80EE), var(--pharmacy-green, #10B981));
+  border-radius: 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.cmp-row-header .cmp-data-cell:hover::before {
+  opacity: 1;
+}
+
+/* Table card: top border accent */
+.cmp-card {
+  border-top: 3px solid transparent !important;
+  background-image: linear-gradient(var(--bg-card, #fff), var(--bg-card, #fff)),
+                    linear-gradient(90deg, var(--primary, #4E80EE), var(--pharmacy-green, #10B981)) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+}
+
+/* Page heading: consistent with other pages */
+.cmp-page-heading {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  margin-bottom: 24px !important;
+}
+
+/* Count pill: matches site pill style */
+.cmp-count-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: var(--primary-light, #EFF6FF) !important;
+  color: var(--primary, #4E80EE) !important;
+  border: 1.5px solid rgba(78,128,238,0.2) !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+}
+
+/* Heading actions: spacing */
+.cmp-heading-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* Label cell icon: primary tint */
+.cmp-label-cell i {
+  color: var(--primary, #4E80EE) !important;
+  font-size: 1rem !important;
+}
+[data-theme="dark"] .cmp-label-cell i {
+  color: #a5b4fc !important;
+}
+
+/* Product image: slightly larger on desktop */
+@media (min-width: 901px) {
+  .cmp-card-img {
+    width: 110px !important;
+    height: 110px !important;
+  }
+  .cmp-card-name {
+    font-size: 0.92rem !important;
+  }
+}
+
+/* Row alternating subtle background on desktop */
+@media (min-width: 901px) {
+  .cmp-row:nth-child(even):not(.cmp-row-header) .cmp-data-cell {
+    background: var(--bg-elevated, #f8fafc) !important;
+  }
+  [data-theme="dark"] .cmp-row:nth-child(even):not(.cmp-row-header) .cmp-data-cell {
+    background: rgba(255,255,255,0.02) !important;
+  }
+  .cmp-row:nth-child(even):not(.cmp-row-header) .cmp-data-cell.cmp-best {
+    background: linear-gradient(180deg, rgba(34,197,94,0.09) 0%, rgba(34,197,94,0.04) 100%) !important;
+  }
+}
+
+/* Footer "add more products" link matches site style */
+.cmp-footer-actions .fo-btn {
+  min-width: 200px !important;
+}
+
+/* Scroll-wrap: subtle outer border on mobile to contain scrollable area */
+@media (max-width: 900px) {
+  .cmp-scroll-wrap {
+    border: 1px solid var(--border, #e2e8f0) !important;
+    border-radius: 16px !important;
+  }
+  [data-theme="dark"] .cmp-scroll-wrap {
+    border-color: var(--border, #334155) !important;
+  }
+}
+
+/* ── CANCEL gradient border trick on cmp-card (too complex, use simple top accent) ── */
+.cmp-card {
+  border-top: none !important;
+  background-image: none !important;
+  background-origin: padding-box !important;
+  background-clip: border-box !important;
+  /* Simple primary top accent via box-shadow inset on top */
+  box-shadow: inset 0 3px 0 0 var(--primary, #4E80EE),
+              0 4px 24px rgba(0,0,0,0.07) !important;
+}
+/* Restore cmp-card border per context */
+@media (min-width: 901px) {
+  .cmp-scroll-wrap .cmp-card {
+    box-shadow: inset 0 3px 0 0 var(--primary, #4E80EE),
+                0 4px 24px rgba(0,0,0,0.07) !important;
+  }
+}
+@media (max-width: 900px) {
+  .cmp-scroll-wrap .cmp-card {
+    box-shadow: none !important;
+  }
+  .cmp-scroll-wrap {
+    box-shadow: inset 0 3px 0 0 var(--primary, #4E80EE),
+                0 4px 24px rgba(0,0,0,0.07) !important;
+  }
+}
+
+/* ================================================================
+   HARMONY & SYMMETRY — Phase 6
+   Align compare, wishlist, panier heading+action styles so every
+   page uses the same design language.
+   ================================================================ */
+
+/* ── 1. fo-wl-clear-btn — dark mode support & disabled state ── */
+[data-theme="dark"] .fo-wl-clear-btn {
+  border-color: var(--border, #334155);
+  color: var(--text-secondary, #94A3B8);
+  background: transparent;
+}
+[data-theme="dark"] .fo-wl-clear-btn:hover {
+  border-color: #f87171;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.08);
+}
+.fo-wl-clear-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── 2. Compare page heading — mirrors fo-wl-titlebar responsive behaviour ── */
+/* On desktop the heading is a flex row (already set in Phase 5).
+   On tablet/mobile it stacks vertically, left-aligned. */
+@media (max-width: 768px) {
+  .cmp-page-heading {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+  .cmp-heading-actions {
+    align-self: flex-start !important;
+  }
+}
+@media (max-width: 480px) {
+  .cmp-heading-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+  .cmp-count-pill {
+    flex: 1 !important;
+  }
+  .fo-wl-clear-btn {
+    flex-shrink: 0 !important;
+  }
+}
+
+/* ── 3. Wishlist titlebar — also ensure it aligns centre on large screens ── */
+@media (min-width: 769px) {
+  .fo-wl-titlebar {
+    align-items: center !important;
+  }
+}
+
+/* ── 4. Panier card header — align "N produits" label and clear button
+        so it mirrors the wishlist/compare pattern ── */
+.card-header .fo-wl-clear-btn {
+  /* Inside Bootstrap card-header: remove the top/bottom of card padding
+     so the button aligns vertically with the h6 label */
+  margin: -2px 0;
+}
+
+/* ── 5. fo-wl-clear-btn — ensure it is always min touch target on mobile ── */
+@media (hover: none), (pointer: coarse) {
+  .fo-wl-clear-btn {
+    min-height: 40px !important;
+    padding: 8px 18px !important;
+  }
+}
+
+/* ── 6. Count pill — also appears in the compare page; ensure it is
+        visually consistent with fo-product-stock / fo-chip pill style ── */
+.cmp-count-pill {
+  /* Inherit the site's pill sizing conventions */
+  padding: 6px 14px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  border-radius: 50px !important;
+  white-space: nowrap !important;
+}
+
+/* ── 7. Compare page cmp-title-icon — match accent colour of other page title icons ── */
+.cmp-title-icon {
+  color: var(--primary, #4E80EE) !important;
+}
+
+/* ── 8. Ensure fo-wl-titlebar and cmp-page-heading share the same bottom spacing ── */
+.fo-wl-titlebar,
+.cmp-page-heading {
+  margin-bottom: 28px !important;
+}
+
+/* ================================================================
+   COMPARE PAGE — FINAL DESKTOP FIX + AI FAB COMPARE-BAR CLEARANCE
+   ================================================================ */
+
+/* ── ISSUE 1: Compare table columns clipped on desktop ──────────────
+   Root cause: CSS Grid `1fr` has minimum = auto (= min-content).
+   If product name/image content is wider than the allocated 1fr,
+   the track EXPANDS and overflow:hidden on cmp-card clips col 2+.
+   Fix: use minmax(0, 1fr) — the 0 forces min to zero, so 1fr never
+   expands past its fair share. Also add min-width:0 to cells.
+   ──────────────────────────────────────────────────────────────── */
+
+/* GLOBAL BASE: replace 1fr with minmax(0, 1fr) on the grid */
+.cmp-row {
+  grid-template-columns: 180px repeat(var(--cols, 2), minmax(0, 1fr)) !important;
+}
+
+/* Data cell: allow shrinking below content min-width */
+.cmp-data-cell {
+  min-width: 0 !important;
+  overflow: hidden !important;       /* clip content that overflows the cell */
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Card image: responsive — never wider than the cell */
+.cmp-card-img {
+  max-width: 100% !important;
+  flex-shrink: 0;
+}
+@media (min-width: 901px) {
+  .cmp-card-img {
+    width: clamp(70px, 15vw, 100px) !important;
+    height: clamp(70px, 15vw, 100px) !important;
+  }
+}
+
+/* Card name: always wraps, never forces horizontal expansion */
+.cmp-card-name {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  line-clamp: 3 !important;
+  -webkit-line-clamp: 3 !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+/* Label cell: slightly narrower so data columns get more room */
+.cmp-label-cell {
+  min-width: 0 !important;
+}
+@media (min-width: 901px) {
+  .cmp-label-cell {
+    width: 180px !important;
+  }
+}
+
+/* On mobile (≤900px): fixed columns with scroll (overrides the global minmax) */
+@media (max-width: 900px) {
+  .cmp-row {
+    grid-template-columns: 130px repeat(var(--cols, 2), 150px) !important;
+  }
+}
+
+/* Ensure cmp-card never has narrower width than the viewport content area
+   (prevents any ancestor width constraint from being the bottleneck) */
+@media (min-width: 901px) {
+  .cmp-scroll-wrap {
+    width: 100% !important;
+  }
+  .cmp-scroll-wrap .cmp-card {
+    width: 100% !important;
+  }
+}
+
+/* ── ISSUE 2: AI FAB partially hidden by compare bar on desktop ────
+   Compare bar is fixed at bottom:0, height ≈ 68px (12px padding×2 +
+   44px image = 68px). AI FAB is at bottom:28px, height 52px.
+   When compare bar is visible, FAB overlaps it.
+
+   Fix: CSS :has() detects compare bar in DOM — raise FAB above it.
+   :has() is supported in all modern browsers (Chrome 105+, Safari 15.4+,
+   Firefox 121+). ─────────────────────────────────────────────────── */
+
+/* Desktop only — mobile already has bottom:88px from Phase 4 FIX F */
+@media (min-width: 992px) {
+  /* Compare bar height ≈ 68px — raise FAB to 68 + 16px gap = 84px */
+  body:has(.cmp-bar) .ai-fab-wrap {
+    bottom: 90px !important;
+    transition: bottom 0.3s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+}
+/* Also add transition to base rule for smooth movement */
+.ai-fab-wrap {
+  transition: bottom 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* ╔══════════════════════════════════════════════════════════════════════
+   ║  AI ASSISTANT — COMPLETE VISUAL REDESIGN v2
+   ║  Root causes fixed:
+   ║  1. var(--fo-surface) undefined → transparent dark panel
+   ║  2. var(--text) undefined → invisible text
+   ║  3. .ai-messages flex:1 without min-height:0 → input area pushed off-screen
+   ║  4. No explicit background on messages area → bleeds through panel
+   ╚══════════════════════════════════════════════════════════════════════ */
+
+/* ── PANEL: always solid, always fully visible ── */
+.ai-panel {
+  background: #ffffff !important;
+  border: 1px solid rgba(99,102,241,0.14) !important;
+  box-shadow:
+    0 32px 80px rgba(0,0,0,0.15),
+    0 8px 32px rgba(99,102,241,0.13),
+    0 0 0 1px rgba(99,102,241,0.07) !important;
+  /* Critical flex fix: panel must be a proper flex column */
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* ── MESSAGES AREA: own background, flex:1 keeps original grow behaviour ── */
+.ai-messages {
+  background: #f3f3fb !important;
+  flex: 1 !important;             /* flex: 1 = 1 1 auto — messages area grows to fill panel */
+  overflow-y: auto !important;
+}
+
+/* ── AI BUBBLE: opaque + readable ── */
+.ai-bubble-ai {
+  background: #edefff !important;
+  color: #1e1b4b !important;
+  box-shadow: 0 1px 3px rgba(99,102,241,0.09) !important;
+  /* Premium left-accent on AI messages */
+  border-left: 3px solid rgba(99,102,241,0.35) !important;
+}
+
+/* ── USER BUBBLE ── */
+.ai-bubble-user {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: #ffffff !important;
+  border-left: none !important;
+}
+
+/* ── WELCOME SCREEN ── */
+.ai-welcome h4 {
+  color: #1e1b4b !important;
+}
+.ai-welcome p {
+  color: #64748b !important;
+}
+
+/* ── CHIPS ── */
+.ai-chip {
+  background: rgba(99,102,241,0.07) !important;
+  border-color: rgba(99,102,241,0.28) !important;
+  color: #6366f1 !important;
+}
+.ai-chip:hover {
+  background: #6366f1 !important;
+  color: #fff !important;
+  border-color: #6366f1 !important;
+}
+
+/* ── PRODUCT CARDS IN PANEL ── */
+.ai-product-card {
+  background: #ffffff !important;
+  border-color: rgba(99,102,241,0.15) !important;
+}
+.ai-product-name {
+  color: #1e1b4b !important;
+}
+.ai-product-cat {
+  color: #64748b !important;
+}
+.ai-products-label {
+  color: #6366f1 !important;
+}
+.ai-promo-tag {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+.ai-product-link {
+  background: #eff0ff !important;
+  color: #6366f1 !important;
+}
+.ai-product-link:hover {
+  background: #6366f1 !important;
+  color: #fff !important;
+}
+
+/* ── INPUT AREA: always solid white, always on top ── */
+.ai-input-area {
+  background: #ffffff !important;
+  border-top: 1px solid rgba(99,102,241,0.1) !important;
+  flex-shrink: 0 !important;       /* ← never compress, always visible */
+  position: relative !important;
+  z-index: 2 !important;
+  padding: 12px 16px 14px !important;
+}
+.ai-input-wrap {
+  background: #f3f3fb !important;
+  border: 1.5px solid rgba(99,102,241,0.2) !important;
+}
+.ai-input-wrap:focus-within {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+}
+.ai-input {
+  color: #1e1b4b !important;
+  background: transparent !important;
+}
+.ai-input::placeholder {
+  color: #94a3b8 !important;
+}
+.ai-input-footer {
+  color: #94a3b8 !important;
+}
+
+/* ── TIMESTAMPS ── */
+.ai-msg-time {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* ── TYPING DOTS ── */
+.ai-typing span {
+  background: #6366f1 !important;
+}
+
+/* ── SCROLLBAR ── */
+.ai-messages::-webkit-scrollbar-thumb {
+  background: rgba(99,102,241,0.25) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   DARK MODE — rich, fully opaque, purple-deep palette
+   ════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .ai-panel {
+  background: #1a1a30 !important;
+  border: 1px solid rgba(99,102,241,0.28) !important;
+  box-shadow:
+    0 32px 80px rgba(0,0,0,0.65),
+    0 8px 32px rgba(99,102,241,0.22),
+    0 0 0 1px rgba(99,102,241,0.16) !important;
+}
+
+[data-theme="dark"] .ai-messages {
+  background: #111125 !important;
+}
+
+[data-theme="dark"] .ai-bubble-ai {
+  background: #26264a !important;
+  color: #dde0f8 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4) !important;
+  border-left: 3px solid rgba(99,102,241,0.55) !important;
+}
+
+[data-theme="dark"] .ai-bubble-user {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: #ffffff !important;
+  border-left: none !important;
+}
+
+[data-theme="dark"] .ai-welcome h4 {
+  color: #e2e4f8 !important;
+}
+[data-theme="dark"] .ai-welcome p {
+  color: #8888b0 !important;
+}
+
+[data-theme="dark"] .ai-chip {
+  background: rgba(99,102,241,0.16) !important;
+  border-color: rgba(99,102,241,0.38) !important;
+  color: #a5b4fc !important;
+}
+[data-theme="dark"] .ai-chip:hover {
+  background: #6366f1 !important;
+  color: #fff !important;
+  border-color: #6366f1 !important;
+}
+
+[data-theme="dark"] .ai-product-card {
+  background: #26264a !important;
+  border-color: rgba(99,102,241,0.22) !important;
+}
+[data-theme="dark"] .ai-product-card:hover {
+  border-color: rgba(99,102,241,0.55) !important;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.22) !important;
+}
+[data-theme="dark"] .ai-product-name {
+  color: #e2e4f8 !important;
+}
+[data-theme="dark"] .ai-product-cat {
+  color: #8888b0 !important;
+}
+[data-theme="dark"] .ai-products-label {
+  color: #a5b4fc !important;
+}
+[data-theme="dark"] .ai-promo-tag {
+  background: rgba(220,38,38,0.22) !important;
+  color: #fca5a5 !important;
+}
+[data-theme="dark"] .ai-product-img {
+  background: rgba(99,102,241,0.12) !important;
+}
+[data-theme="dark"] .ai-product-link {
+  background: rgba(99,102,241,0.12) !important;
+  color: #a5b4fc !important;
+}
+[data-theme="dark"] .ai-product-link:hover {
+  background: #6366f1 !important;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .ai-input-area {
+  background: #1a1a30 !important;
+  border-top-color: rgba(99,102,241,0.22) !important;
+}
+[data-theme="dark"] .ai-input-wrap {
+  background: #26264a !important;
+  border-color: rgba(99,102,241,0.26) !important;
+}
+[data-theme="dark"] .ai-input-wrap:focus-within {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.2) !important;
+}
+[data-theme="dark"] .ai-input {
+  color: #dde0f8 !important;
+}
+[data-theme="dark"] .ai-input::placeholder {
+  color: #555580 !important;
+}
+[data-theme="dark"] .ai-input-footer {
+  color: #555580 !important;
+}
+[data-theme="dark"] .ai-msg-time {
+  color: #555580 !important;
+}
+[data-theme="dark"] .ai-typing span {
+  background: #a5b4fc !important;
+}
+[data-theme="dark"] .ai-messages::-webkit-scrollbar-thumb {
+  background: rgba(99,102,241,0.3) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MOBILE — panel fits screen properly, input always reachable
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Phones ≤480px: floating panel, always above FAB + compare bar ──
+   bottom: 88px = same as FAB bottom → panel sits right above the FAB.
+   This guarantees the input area (inside panel) is always above the
+   compare bar (height ≈ 68px) even without :has() support.           */
+@media (max-width: 480px) {
+  .ai-panel {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    bottom: 88px !important;
+    border-radius: 16px !important;
+    max-height: 70vh !important;
+  }
+}
+
+/* Tablets 481–767px */
+@media (min-width: 481px) and (max-width: 767px) {
+  .ai-panel {
+    width: 340px !important;
+    max-height: 72vh !important;
+    bottom: 92px !important;
+  }
+}
+
+/* Desktop */
+@media (min-width: 992px) {
+  .ai-panel {
+    width: 400px !important;
+    max-height: 600px !important;
+  }
+}
+
+/* ── DEFINITIVE FIX: AI panel clears the compare bar on ALL screen sizes ──
+   Compare bar is now single-row (flex-wrap: nowrap) so its height is stable:
+   desktop ≈ 12+44+12 = 68px content + 2px border = 70px.
+   We raise the panel to bottom: 84px (14px breathing room) when bar is active.
+
+   For mobile ≤480px the panel is already at bottom: 88px which clears the
+   mobile bar (~50px). These rules add extra safety and cover mid-size screens. */
+
+/* Mid-size screens 481–991px */
+@media (min-width: 481px) and (max-width: 991px) {
+  body:has(.cmp-bar) .ai-panel {
+    bottom: 84px !important;
+  }
+}
+
+/* Desktop ≥992px: base is 92px which already clears single-row bar (70px).
+   Keep it at 92px and ensure the rule is explicit. */
+@media (min-width: 992px) {
+  body:has(.cmp-bar) .ai-panel {
+    bottom: 92px !important;
+  }
+}
+
+/* Mobile ≤480px: panel is at 88px, compare bar (items hidden) ≈ 50px. Safe. */
+@media (max-width: 480px) {
+  body:has(.cmp-bar) .ai-panel {
+    bottom: 88px !important;
+  }
 }

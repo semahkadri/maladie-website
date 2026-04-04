@@ -204,7 +204,7 @@ import { Panier } from '../../../modeles/panier.model';
               <i class="bi" [class.bi-moon-stars-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
             </button>
             <!-- Compare -->
-            <a routerLink="/comparer" class="fo-topbar-icon-btn"
+            <a routerLink="/comparer" class="fo-topbar-icon-btn fo-topbar-compare-btn"
                [title]="t.isFr ? 'Comparateur' : 'Compare'">
               <i class="bi bi-bar-chart-steps"></i>
               <span class="fo-topbar-badge fo-topbar-badge-green" *ngIf="compareCount > 0">{{ compareCount }}</span>

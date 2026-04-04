@@ -62,13 +62,13 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
                     <i class="bi bi-bag-fill me-2 text-primary"></i>
                     {{ panier.nombreArticles }} {{ panier.nombreArticles !== 1 ? t.tr('common.produits') : t.tr('common.produit') }}
                   </h6>
-                  <button class="btn btn-sm btn-outline-danger" (click)="viderPanier()" [disabled]="enCours">
-                    <i class="bi bi-trash me-1"></i>{{ t.tr('panier.viderPanier') }}
+                  <button class="fo-wl-clear-btn" (click)="viderPanier()" [disabled]="enCours">
+                    <i class="bi bi-trash3 me-1"></i>{{ t.tr('panier.viderPanier') }}
                   </button>
                 </div>
                 <div class="card-body p-0">
                   <div *ngFor="let ligne of panier.lignes; let last = last"
-                       class="d-flex align-items-center p-4"
+                       class="fo-cart-item-row d-flex align-items-center p-4"
                        [style.border-bottom]="!last ? '1px solid var(--border)' : 'none'">
                     <!-- Product Image -->
                     <div class="me-3" style="width: 60px; height: 60px; background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">

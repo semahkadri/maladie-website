@@ -53,8 +53,8 @@ import { Produit, isPromoActive } from '../../../modeles/produit.model';
             <span class="cmp-count-pill">
               <i class="bi bi-layers me-1"></i>{{ items.length }}/4 {{ t.isFr ? 'produits' : 'products' }}
             </span>
-            <button class="btn btn-sm btn-outline-danger" (click)="clear()">
-              <i class="bi bi-trash me-1"></i>{{ t.isFr ? 'Vider' : 'Clear all' }}
+            <button class="fo-wl-clear-btn" (click)="clear()">
+              <i class="bi bi-trash3 me-1"></i>{{ t.isFr ? 'Tout vider' : 'Clear all' }}
             </button>
           </div>
         </div>
@@ -69,8 +69,9 @@ import { Produit, isPromoActive } from '../../../modeles/produit.model';
           </a>
         </div>
 
-        <!-- Comparison Table -->
-        <div *ngIf="items.length > 0" class="card cmp-card" [@colsAnim]="items.length">
+        <!-- Comparison Table — wrapped for horizontal scroll on mobile -->
+        <div *ngIf="items.length > 0" class="cmp-scroll-wrap">
+        <div class="card cmp-card" [@colsAnim]="items.length">
 
           <!-- Row: Product Cards -->
           <div class="cmp-row cmp-row-header" [style.--cols]="items.length">
@@ -212,6 +213,7 @@ import { Produit, isPromoActive } from '../../../modeles/produit.model';
           </div>
 
         </div><!-- /card -->
+        </div><!-- /cmp-scroll-wrap -->
 
         <!-- Continue shopping -->
         <div *ngIf="items.length > 0" class="cmp-footer-actions">

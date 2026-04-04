@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WishlistService } from '../../../services/wishlist.service';
 import { PanierService } from '../../../services/panier.service';
+import { CompareService } from '../../../services/compare.service';
 import { TraductionService } from '../../../services/traduction.service';
 import { Produit, isPromoActive } from '../../../modeles/produit.model';
 import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-countdown.component';
@@ -66,6 +67,12 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                         (click)="removeItem($event, prod.id!)"
                         [title]="t.isFr ? 'Retirer de la liste' : 'Remove from wishlist'">
                   <i class="bi bi-heart-fill"></i>
+                </button>
+                <button class="fo-product-compare"
+                        [class.fo-compare-active]="compareService.isInCompare(prod.id!)"
+                        (click)="$event.preventDefault();$event.stopPropagation();compareService.toggle(prod)"
+                        [title]="compareService.isInCompare(prod.id!) ? (t.isFr ? 'Retirer de la comparaison' : 'Remove from comparison') : (t.isFr ? 'Comparer' : 'Compare')">
+                  <i class="bi" [class.bi-bar-chart-steps]="!compareService.isInCompare(prod.id!)" [class.bi-bar-chart-fill]="compareService.isInCompare(prod.id!)"></i>
                 </button>
                 <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" [alt]="prod.nom"
                      style="width:100%;height:100%;object-fit:cover;">
@@ -132,6 +139,7 @@ export class WishlistComponent implements OnInit, OnDestroy {
   constructor(
     public wishlistService: WishlistService,
     private panierService: PanierService,
+    public compareService: CompareService,
     public t: TraductionService
   ) {}
 
