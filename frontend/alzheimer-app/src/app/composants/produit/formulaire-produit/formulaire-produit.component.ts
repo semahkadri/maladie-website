@@ -202,7 +202,7 @@ import { AiService } from '../../../services/ai.service';
                       </span>
                       <span class="fo-promo-preview-item savings">
                         <i class="bi bi-piggy-bank-fill"></i>
-                        {{ t.tr('promo.economie') }}: {{ (produit.prixOriginal - produit.prix).toFixed(2) }} TND
+                        {{ t.tr('promo.economie') }}: {{ (+produit.prixOriginal - +produit.prix).toFixed(2) }} TND
                       </span>
                     </div>
 

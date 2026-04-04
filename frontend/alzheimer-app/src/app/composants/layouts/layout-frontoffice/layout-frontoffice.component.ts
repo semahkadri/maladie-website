@@ -73,7 +73,7 @@ import { Panier } from '../../../modeles/panier.model';
         <!-- Navigation -->
         <nav class="fo-lsidebar-nav">
 
-          <div class="fo-lsidebar-label" *ngIf="!sidebarCollapsed">{{ t.isFr ? 'Navigation' : 'Menu' }}</div>
+          <div class="fo-lsidebar-label">{{ t.isFr ? 'Navigation' : 'Menu' }}</div>
 
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
              class="fo-lsidebar-link" (click)="sidebarOpen=false"
@@ -114,7 +114,7 @@ import { Panier } from '../../../modeles/panier.model';
           </a>
 
           <!-- Categories section -->
-          <div class="fo-lsidebar-label" *ngIf="!sidebarCollapsed && topCategories.length > 0">
+          <div class="fo-lsidebar-label" *ngIf="topCategories.length > 0">
             {{ t.isFr ? 'Catégories' : 'Categories' }}
           </div>
 

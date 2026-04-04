@@ -595,6 +595,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.paramSub?.unsubscribe();
+    if (this.compareToastTimer) clearTimeout(this.compareToastTimer);
   }
 
   setView(mode: 'grid' | 'list'): void {

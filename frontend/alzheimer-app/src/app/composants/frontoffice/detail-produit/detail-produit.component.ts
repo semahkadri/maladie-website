@@ -64,7 +64,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                   <span class="fo-price-promo" style="font-size: 1.35rem;">{{ produit.prix | number:'1.2-2' }} TND</span>
                   <div class="fo-savings-line">
                     <i class="bi bi-piggy-bank-fill"></i>
-                    {{ t.tr('promo.economie') }}: {{ produit.prixOriginal - produit.prix | number:'1.2-2' }} TND (-{{ produit.remise }}%)
+                    {{ t.tr('promo.economie') }}: {{ (+produit.prixOriginal - +produit.prix) | number:'1.2-2' }} TND (-{{ produit.remise }}%)
                   </div>
                   <app-promo-countdown
                     *ngIf="produit.dateFinPromo"

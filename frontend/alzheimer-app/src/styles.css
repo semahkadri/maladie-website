@@ -57,6 +57,10 @@
   --promo-orange: #F59E0B;
   --trust-gold: #F59E0B;
   --shadow-card-hover: 0 8px 30px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+
+  /* === SEMANTIC UTILITY VARS (used across 20+ components) === */
+  --text-muted: #94A3B8;
+  --bg-elevated: #F8FAFC;
 }
 
 html {
@@ -108,6 +112,10 @@ html[data-theme="dark"] {
   --promo-red: #F87171;
   --promo-red-light: rgba(248,113,113,0.12);
   --trust-gold: #FCD34D;
+
+  /* Semantic utility vars — dark overrides */
+  --text-muted: #64748B;
+  --bg-elevated: #1E293B;
 }
 
 /* Dark mode overrides for hardcoded colors */
@@ -3993,6 +4001,32 @@ html[data-theme="dark"] .fo-reco-divider-label {
   min-height: 100vh;
   background: var(--bg);
   overflow-x: hidden;
+  position: relative; /* anchors ::before for full-height sidebar column */
+}
+
+/* Sidebar background column — extends the full height of the app container
+   so the sidebar colour doesn't stop at 100vh when content is longer */
+.fo-app-container::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 260px;          /* matches var(--sidebar-width) */
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  pointer-events: none;
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Collapsed sidebar: narrow the background column too */
+.fo-app-container:has(.fo-lsidebar-collapsed)::before {
+  width: 76px;           /* matches var(--sidebar-collapsed-width) */
+}
+
+/* Mobile: sidebar is a drawer — no inline column background */
+@media (max-width: 768px) {
+  .fo-app-container::before { display: none; }
 }
 
 /* ── FO Left Sidebar ── */
@@ -4000,14 +4034,14 @@ html[data-theme="dark"] .fo-reco-divider-label {
   /* width only — no min-width fighting the animation */
   width: 260px;
   flex-shrink: 0;
-  background: var(--sidebar-bg, #F4F7FC);
-  border-right: 1px solid var(--border-color, #E2E8F0);
+  background: transparent;       /* ::before on parent paints the column background */
+  border-right: none;            /* ::before on parent paints the border */
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: hidden;             /* clip content as width animates */
+  overflow: hidden;              /* clip content as width animates */
   scrollbar-width: none;
   /* Single smooth transition — no min-width fighting it */
   transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -4020,9 +4054,26 @@ html[data-theme="dark"] .fo-reco-divider-label {
   width: 76px;
 }
 .fo-lsidebar-collapsed .fo-lsidebar-link-text,
-.fo-lsidebar-collapsed .fo-lsidebar-label,
 .fo-lsidebar-collapsed .fo-lsidebar-badge,
 .fo-lsidebar-collapsed .fo-lsidebar-footer {
+  display: none;
+}
+
+/* Collapsed labels → become subtle divider lines instead of disappearing */
+.fo-lsidebar-collapsed .fo-lsidebar-label {
+  display: block;
+  height: 0;
+  border-top: 1px solid var(--border-color, #E2E8F0);
+  margin: 6px 10px;
+  padding: 0;
+  font-size: 0;
+  overflow: hidden;
+  letter-spacing: 0;
+  margin-top: 8px;
+}
+
+/* Collapsed spacer → hide so the admin icon doesn't float alone at the very bottom */
+.fo-lsidebar-collapsed .fo-lsidebar-spacer {
   display: none;
 }
 .fo-lsidebar-collapsed .fo-lsidebar-link {
@@ -8107,7 +8158,7 @@ html[data-theme="dark"] .fo-carousel-arrow:hover:not(.disabled) {
 .pcd-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
   width: 100%;
   height: 100%;          /* fills the 44px slot exactly */
@@ -8163,17 +8214,18 @@ html[data-theme="dark"] .fo-carousel-arrow:hover:not(.disabled) {
   display: flex;
   align-items: center;
   gap: 3px;
-  margin-left: auto;
 }
 
 .pcd-unit-block {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: rgba(0,0,0,0.28);
   border-radius: 6px;
   padding: 3px 7px 2px;
   min-width: 30px;
+  text-align: center;
 }
 
 .pcd-num {
@@ -10801,30 +10853,6 @@ html[data-theme="dark"] .wl-empty-icon {
   animation: cartRipple 0.35s ease;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   COMPARE BUTTON TOOLTIP
-   ═══════════════════════════════════════════════════════════════ */
-.fo-product-compare::before {
-  content: attr(title);
-  position: absolute;
-  right: 42px;
-  top: 50%;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  background: rgba(17,24,39,0.92);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 6px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-
-.fo-product-compare:hover::before {
-  opacity: 1;
-}
 
 /* ═══════════════════════════════════════════════════════════════
    AI ASSISTANT — Floating Chat Widget
