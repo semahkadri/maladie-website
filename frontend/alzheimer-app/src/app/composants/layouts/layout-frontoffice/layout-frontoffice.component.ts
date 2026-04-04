@@ -77,39 +77,39 @@ import { Panier } from '../../../modeles/panier.model';
 
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
              class="fo-lsidebar-link" (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? t.tr('nav.accueil') : ''">
+             [title]="t.tr('nav.accueil')">
             <span class="fo-lsidebar-icon"><i class="bi bi-house-door-fill"></i></span>
-            <span class="fo-lsidebar-link-text">{{ t.tr('nav.accueil') }}</span>
+            <span class="fo-lsidebar-link-text"><span>{{ t.tr('nav.accueil') }}</span></span>
           </a>
 
           <a routerLink="/catalogue" routerLinkActive="active"
              class="fo-lsidebar-link" (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? t.tr('nav.catalogue') : ''">
+             [title]="t.tr('nav.catalogue')">
             <span class="fo-lsidebar-icon"><i class="bi bi-grid-3x3-gap-fill"></i></span>
-            <span class="fo-lsidebar-link-text">{{ t.tr('nav.catalogue') }}</span>
+            <span class="fo-lsidebar-link-text"><span>{{ t.tr('nav.catalogue') }}</span></span>
           </a>
 
           <a routerLink="/wishlist" routerLinkActive="active"
              class="fo-lsidebar-link" (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? (t.isFr ? 'Souhaits' : 'Wishlist') : ''">
+             [title]="t.isFr ? 'Souhaits' : 'Wishlist'">
             <span class="fo-lsidebar-icon"><i class="bi bi-heart"></i></span>
-            <span class="fo-lsidebar-link-text">{{ t.isFr ? 'Souhaits' : 'Wishlist' }}</span>
+            <span class="fo-lsidebar-link-text"><span>{{ t.isFr ? 'Souhaits' : 'Wishlist' }}</span></span>
             <span class="fo-lsidebar-badge fo-lsidebar-badge-red" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
           </a>
 
           <a routerLink="/panier" routerLinkActive="active"
              class="fo-lsidebar-link" (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? t.tr('nav.panier') : ''">
+             [title]="t.tr('nav.panier')">
             <span class="fo-lsidebar-icon"><i class="bi bi-cart3"></i></span>
-            <span class="fo-lsidebar-link-text">{{ t.tr('nav.panier') }}</span>
+            <span class="fo-lsidebar-link-text"><span>{{ t.tr('nav.panier') }}</span></span>
             <span class="fo-lsidebar-badge" *ngIf="nombreArticles > 0" [class.bounce]="cartBounce">{{ nombreArticles }}</span>
           </a>
 
           <a routerLink="/comparer" routerLinkActive="active"
              class="fo-lsidebar-link" (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? (t.isFr ? 'Comparer' : 'Compare') : ''">
+             [title]="t.isFr ? 'Comparer' : 'Compare'">
             <span class="fo-lsidebar-icon"><i class="bi bi-bar-chart-steps"></i></span>
-            <span class="fo-lsidebar-link-text">{{ t.isFr ? 'Comparer' : 'Compare' }}</span>
+            <span class="fo-lsidebar-link-text"><span>{{ t.isFr ? 'Comparer' : 'Compare' }}</span></span>
             <span class="fo-lsidebar-badge fo-lsidebar-badge-green" *ngIf="compareCount > 0">{{ compareCount }}</span>
           </a>
 
@@ -120,16 +120,16 @@ import { Panier } from '../../../modeles/panier.model';
 
           <a *ngFor="let cat of topCategories" [routerLink]="['/categories', cat.id]"
              routerLinkActive="active" class="fo-lsidebar-link" (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? cat.nom : ''">
+             [title]="cat.nom">
             <span class="fo-lsidebar-icon"><i class="bi bi-tag"></i></span>
-            <span class="fo-lsidebar-link-text">{{ cat.nom }}</span>
+            <span class="fo-lsidebar-link-text"><span>{{ cat.nom }}</span></span>
           </a>
 
           <a [routerLink]="['/catalogue']" [queryParams]="{filtre:'promo'}"
              class="fo-lsidebar-link fo-lsidebar-link-promo" (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? (t.isFr ? 'Promos' : 'Deals') : ''">
+             [title]="t.isFr ? 'Promotions' : 'Deals'">
             <span class="fo-lsidebar-icon"><i class="bi bi-fire"></i></span>
-            <span class="fo-lsidebar-link-text">{{ t.isFr ? 'Promotions' : 'Deals' }}</span>
+            <span class="fo-lsidebar-link-text"><span>{{ t.isFr ? 'Promotions' : 'Deals' }}</span></span>
           </a>
 
           <!-- ── Flexible spacer: pushes bottom section to the bottom of the nav ── -->
@@ -152,9 +152,9 @@ import { Panier } from '../../../modeles/panier.model';
           <!-- ── Admin shortcut (inside nav — no white space below) ── -->
           <a routerLink="/admin" class="fo-lsidebar-link fo-lsidebar-admin-nav"
              (click)="sidebarOpen=false"
-             [title]="sidebarCollapsed ? 'Admin' : ''">
+             title="Administration">
             <span class="fo-lsidebar-icon"><i class="bi bi-shield-lock-fill"></i></span>
-            <span class="fo-lsidebar-link-text">Administration</span>
+            <span class="fo-lsidebar-link-text"><span>Administration</span></span>
           </a>
 
         </nav>

@@ -50,3 +50,9 @@ package-lock.json
 # Dump files
 *.sql.bak
 *.dump
+
+# Seed / data injection scripts + local dev guide (local use only)
+seed.sql
+seed.sh
+run_seed.bat
+DEV_LAUNCH.md

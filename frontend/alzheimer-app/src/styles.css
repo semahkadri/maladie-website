@@ -4097,7 +4097,7 @@ html[data-theme="dark"] .fo-reco-divider-label {
   color: var(--accent-color, #4E80EE);
   text-decoration: none;
 }
-.fo-lsidebar-link:hover .fo-lsidebar-icon { transform: translateX(2px); }
+.fo-lsidebar-link:hover .fo-lsidebar-icon { color: var(--accent-color, #4E80EE); }
 .fo-lsidebar-link.active {
   background: var(--sidebar-active, rgba(78,128,238,0.1));
   color: var(--accent-color, #4E80EE);
@@ -4113,7 +4113,39 @@ html[data-theme="dark"] .fo-reco-divider-label {
   flex-shrink: 0;
   transition: transform 0.25s ease;
 }
-.fo-lsidebar-link-text { flex: 1; }
+.fo-lsidebar-link-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;        /* clips the inner span — stays in place, never touches icon */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+/* Inner span is what actually moves — outer element never shifts */
+.fo-lsidebar-link-text > span {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.fo-lsidebar-link:hover .fo-lsidebar-link-text {
+  text-overflow: clip;
+}
+
+.fo-lsidebar-link:hover .fo-lsidebar-link-text > span {
+  animation: fo-sidebar-marquee 2.5s ease-in-out 0s infinite;
+}
+
+/* No animation when collapsed */
+.fo-lsidebar-collapsed .fo-lsidebar-link:hover .fo-lsidebar-link-text > span {
+  animation: none;
+}
+
+@keyframes fo-sidebar-marquee {
+  0%,  15% { transform: translateX(0); }
+  50%, 70% { transform: translateX(-90px); }
+  100%     { transform: translateX(0); }
+}
 
 .fo-lsidebar-badge {
   background: var(--accent-color, #4E80EE);
