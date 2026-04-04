@@ -250,8 +250,8 @@ import { AiService } from '../../../services/ai.service';
                 </div>
 
                 <div class="d-flex justify-content-between">
-                  <a routerLink="/admin/produits" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>{{ t.tr('common.retour') }}
+                  <a routerLink="/admin/produits" class="btn-ghost-nav">
+                    <i class="bi bi-arrow-left"></i>{{ t.tr('common.retour') }}
                   </a>
                   <button type="submit" class="btn btn-primary"
                           [disabled]="formulaire.invalid || enCours || produit.categorieId === 0 || (produit.enPromo && produit.prixOriginal != null && produit.prix != null && produit.prixOriginal <= produit.prix)">

@@ -5,6 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { EmailLogService } from '../../../services/email-log.service';
 import { EmailLog } from '../../../modeles/email-log.model';
 import { TraductionService } from '../../../services/traduction.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-liste-emails',
@@ -64,7 +65,7 @@ import { TraductionService } from '../../../services/traduction.service';
     <div *ngIf="!loading && erreur" class="alert alert-danger d-flex align-items-center m-3">
       <i class="bi bi-exclamation-triangle-fill me-2"></i>
       <span>{{ t.isFr ? 'Impossible de charger les emails. Vérifiez la connexion au serveur.' : 'Failed to load emails. Check server connection.' }}</span>
-      <button class="btn btn-sm btn-outline-danger ms-auto" (click)="loading = true; erreur = false; charger()">
+      <button class="btn btn-sm btn-outline-danger ms-auto" (click)="reessayer()">
         <i class="bi bi-arrow-clockwise me-1"></i>{{ t.isFr ? 'Réessayer' : 'Retry' }}
       </button>
     </div>
@@ -114,7 +115,7 @@ import { TraductionService } from '../../../services/traduction.service';
             {{ t.tr('email.retour') }}
           </button>
           <div class="email-preview-actions">
-            <button class="email-action-btn" (click)="supprimerEmail(selectedEmail)" title="Supprimer">
+            <button class="email-action-btn danger" (click)="supprimerEmail(selectedEmail!)" title="Supprimer">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -130,12 +131,16 @@ import { TraductionService } from '../../../services/traduction.service';
           </div>
         </div>
         <div class="email-preview-body">
-          <iframe #previewFrame
+          <iframe *ngIf="selectedEmail.contenuHtml"
                   [srcdoc]="getSafeHtml(selectedEmail.contenuHtml)"
                   class="email-preview-iframe"
                   sandbox="allow-same-origin"
                   frameborder="0">
           </iframe>
+          <div *ngIf="!selectedEmail.contenuHtml" class="email-no-content">
+            <i class="bi bi-file-earmark-x"></i>
+            <p>{{ t.isFr ? 'Contenu vide' : 'Empty content' }}</p>
+          </div>
         </div>
       </div>
 
@@ -158,6 +163,7 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
   filtreType = 'TOUS';
   unreadCount = 0;
   private refreshInterval: any;
+  private unreadSub!: Subscription;
 
   constructor(
     private emailService: EmailLogService,
@@ -166,19 +172,32 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Mirror the shared unread count from the service
+    this.unreadSub = this.emailService.unreadCount$.subscribe(count => {
+      this.unreadCount = count;
+    });
     this.charger();
-    this.refreshInterval = setInterval(() => this.charger(), 30000);
+    this.refreshInterval = setInterval(() => this.charger(), 60000);
   }
 
   ngOnDestroy(): void {
+    this.unreadSub?.unsubscribe();
     if (this.refreshInterval) clearInterval(this.refreshInterval);
+  }
+
+  reessayer(): void {
+    this.loading = true;
+    this.erreur = false;
+    this.charger();
   }
 
   charger(): void {
     this.emailService.listerTout().subscribe({
       next: (emails) => {
         this.emails = emails;
-        this.unreadCount = emails.filter(e => !e.lu).length;
+        const count = emails.filter(e => !e.lu).length;
+        // Push computed count to shared service so sidebar updates too
+        this.emailService.setUnreadCount(count);
         this.filtrer();
         this.loading = false;
         this.erreur = false;
@@ -221,36 +240,47 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
   selectEmail(email: EmailLog): void {
     this.selectedEmail = email;
     if (!email.lu) {
+      // Optimistic update: mark as read in UI immediately, then confirm with server
+      email.lu = true;
       this.emailService.marquerCommeLu(email.id).subscribe({
-        next: (updated) => {
-          email.lu = true;
-          this.unreadCount = this.emails.filter(e => !e.lu).length;
+        error: () => {
+          // Rollback on failure
+          email.lu = false;
+          this.emailService.setUnreadCount(this.emails.filter(e => !e.lu).length);
         }
       });
+      // marquerCommeLu already calls decrementUnread() via tap() in the service
     }
   }
 
   marquerToutLu(): void {
+    // Optimistic update
+    this.emails.forEach(e => e.lu = true);
     this.emailService.marquerToutCommeLu().subscribe({
-      next: () => {
-        this.emails.forEach(e => e.lu = true);
-        this.unreadCount = 0;
+      error: () => {
+        // Rollback on failure
+        this.charger();
       }
     });
+    // marquerToutCommeLu already sets count to 0 via tap() in the service
   }
 
   supprimerEmail(email: EmailLog): void {
     this.emailService.supprimer(email.id).subscribe({
       next: () => {
+        const wasUnread = !email.lu;
         this.emails = this.emails.filter(e => e.id !== email.id);
         this.selectedEmail = null;
-        this.unreadCount = this.emails.filter(e => !e.lu).length;
+        if (wasUnread) {
+          this.emailService.setUnreadCount(this.emails.filter(e => !e.lu).length);
+        }
         this.filtrer();
       }
     });
   }
 
-  getSafeHtml(html: string): SafeHtml {
+  getSafeHtml(html: string | null | undefined): SafeHtml {
+    if (!html) return this.sanitizer.bypassSecurityTrustHtml('');
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
@@ -282,20 +312,25 @@ export class ListeEmailsComponent implements OnInit, OnDestroy {
   }
 
   formatDate(dateStr: string): string {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const mins = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
 
-    if (mins < 1) return this.t.isFr ? "A l'instant" : 'Just now';
+    if (mins < 1) return this.t.isFr ? "À l'instant" : 'Just now';
     if (mins < 60) return `${mins}min`;
     if (hours < 24) return `${hours}h`;
     return date.toLocaleDateString(this.t.locale, { day: 'numeric', month: 'short' });
   }
 
   formatDateFull(dateStr: string): string {
-    return new Date(dateStr).toLocaleString(this.t.locale, {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleString(this.t.locale, {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });

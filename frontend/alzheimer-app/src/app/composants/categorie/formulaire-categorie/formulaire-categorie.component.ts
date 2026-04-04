@@ -68,8 +68,8 @@ import { TraductionService } from '../../../services/traduction.service';
                 </div>
 
                 <div class="d-flex justify-content-between">
-                  <a routerLink="/admin/categories" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>{{ t.tr('common.retour') }}
+                  <a routerLink="/admin/categories" class="btn-ghost-nav">
+                    <i class="bi bi-arrow-left"></i>{{ t.tr('common.retour') }}
                   </a>
                   <button type="submit" class="btn btn-primary"
                           [disabled]="formulaire.invalid || enCours">

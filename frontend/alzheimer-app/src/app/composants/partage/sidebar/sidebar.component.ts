@@ -158,6 +158,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   currentTime = '';
   unreadEmailCount = 0;
   private routerSub!: Subscription;
+  private emailSub!: Subscription;
   private timerInterval: any;
   private emailInterval: any;
 
@@ -175,12 +176,18 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.updateTime();
     this.timerInterval = setInterval(() => this.updateTime(), 60000);
 
-    this.loadUnreadCount();
-    this.emailInterval = setInterval(() => this.loadUnreadCount(), 30000);
+    // Subscribe to shared observable — updates instantly when any component changes unread state
+    this.emailSub = this.emailService.unreadCount$.subscribe(count => {
+      this.unreadEmailCount = count;
+    });
+    // Initial fetch + background refresh every 60s (short-circuits if email page is open)
+    this.emailService.refreshUnreadCount();
+    this.emailInterval = setInterval(() => this.emailService.refreshUnreadCount(), 60000);
   }
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
+    this.emailSub?.unsubscribe();
     if (this.timerInterval) clearInterval(this.timerInterval);
     if (this.emailInterval) clearInterval(this.emailInterval);
   }
@@ -189,13 +196,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.isCollapsed = !this.isCollapsed;
     localStorage.setItem('sidebar-collapsed', String(this.isCollapsed));
     document.body.classList.toggle('sidebar-collapsed', this.isCollapsed);
-  }
-
-  private loadUnreadCount(): void {
-    this.emailService.compterNonLus().subscribe({
-      next: (res) => this.unreadEmailCount = res.count,
-      error: () => {}
-    });
   }
 
   private updateBreadcrumb(url: string): void {

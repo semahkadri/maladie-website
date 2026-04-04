@@ -174,13 +174,13 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                     <label class="cat-radio-item" [class.active]="selectedStock === 'en-stock'">
                       <input type="radio" name="stock" value="en-stock" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
                       <span class="cat-radio-dot"></span>
-                      <i class="bi bi-check-circle-fill" style="color:#1e8e3e;font-size:.75rem;"></i>
+                      <i class="bi bi-check-circle-fill cat-icon-stock"></i>
                       {{ t.tr('catalogue.disponible') }}
                     </label>
                     <label class="cat-radio-item" [class.active]="selectedStock === 'en-promo'">
                       <input type="radio" name="stock" value="en-promo" [(ngModel)]="selectedStock" (ngModelChange)="applyFilters()">
                       <span class="cat-radio-dot"></span>
-                      <i class="bi bi-tag-fill" style="color:#d32f2f;font-size:.75rem;"></i>
+                      <i class="bi bi-tag-fill cat-icon-promo"></i>
                       {{ t.tr('catalogue.filtrePromo') }}
                     </label>
                   </div>

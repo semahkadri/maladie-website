@@ -125,33 +125,38 @@ import { TraductionService } from '../../../services/traduction.service';
 
           <!-- Status Management -->
           <div class="col-lg-4">
-            <div class="card" style="position: sticky; top: 80px;">
-              <div class="card-header card-header-gradient">
-                <h6 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>{{ t.tr('dcmd.changerStatut') }}</h6>
-              </div>
-              <div class="card-body">
-                <select class="form-select mb-3" [(ngModel)]="nouveauStatut">
-                  <option value="EN_ATTENTE">{{ t.tr('lcmd.enAttente') }}</option>
-                  <option value="CONFIRMEE">{{ t.tr('lcmd.confirmee') }}</option>
-                  <option value="EN_PREPARATION">{{ t.tr('lcmd.enPreparation') }}</option>
-                  <option value="EXPEDIEE">{{ t.tr('lcmd.expediee') }}</option>
-                  <option value="LIVREE">{{ t.tr('lcmd.livree') }}</option>
-                  <option value="ANNULEE">{{ t.tr('lcmd.annulee') }}</option>
-                </select>
-                <button class="btn btn-primary w-100"
-                        (click)="changerStatut()"
-                        [disabled]="enCours || nouveauStatut === commande.statut">
-                  <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
-                  <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
-                  {{ t.tr('dcmd.appliquer') }}
-                </button>
-              </div>
-            </div>
+            <div class="dc-sidebar-sticky">
 
-            <!-- Back Button -->
-            <a routerLink="/admin/commandes" class="btn btn-secondary w-100 mt-3">
-              <i class="bi bi-arrow-left me-1"></i>{{ t.tr('dcmd.retourListe') }}
-            </a>
+              <!-- Change Status Card -->
+              <div class="card mb-3">
+                <div class="card-header card-header-gradient">
+                  <h6 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>{{ t.tr('dcmd.changerStatut') }}</h6>
+                </div>
+                <div class="card-body">
+                  <select class="form-select mb-3" [(ngModel)]="nouveauStatut">
+                    <option value="EN_ATTENTE">{{ t.tr('lcmd.enAttente') }}</option>
+                    <option value="CONFIRMEE">{{ t.tr('lcmd.confirmee') }}</option>
+                    <option value="EN_PREPARATION">{{ t.tr('lcmd.enPreparation') }}</option>
+                    <option value="EXPEDIEE">{{ t.tr('lcmd.expediee') }}</option>
+                    <option value="LIVREE">{{ t.tr('lcmd.livree') }}</option>
+                    <option value="ANNULEE">{{ t.tr('lcmd.annulee') }}</option>
+                  </select>
+                  <button class="btn btn-primary w-100"
+                          (click)="changerStatut()"
+                          [disabled]="enCours || nouveauStatut === commande.statut">
+                    <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
+                    <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
+                    {{ t.tr('dcmd.appliquer') }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Back Button — ghost style: invisible until hover -->
+              <a routerLink="/admin/commandes" class="btn-ghost-nav w-100">
+                <i class="bi bi-arrow-left"></i>{{ t.tr('dcmd.retourListe') }}
+              </a>
+
+            </div>
           </div>
         </div>
       </div>

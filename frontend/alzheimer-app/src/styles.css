@@ -1582,7 +1582,7 @@ body.sidebar-collapsed .topbar {
 
 .empty-state i {
   font-size: 3rem;
-  color: #dadce0;
+  color: var(--border, #dadce0);
   margin-bottom: 16px;
 }
 
@@ -1754,6 +1754,75 @@ html[data-theme="dark"] .lc-stock-badge.in  { background: rgba(27,94,32,0.25); c
 html[data-theme="dark"] .lc-stock-badge.out { background: rgba(183,28,28,0.25); color: #ef9a9a; }
 html[data-theme="dark"] .lc-drawer { border-color: var(--border); }
 
+/* ==================== GHOST NAVIGATION BACK BUTTON ====================
+ * Invisible until hover — only shows border/background on mouse-over.
+ * Use on "Back to list" / "Cancel" links in admin pages.
+ */
+.btn-ghost-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  color: var(--text-secondary, #64748b);
+  background: transparent;
+  border: 1.5px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  white-space: nowrap;
+}
+.btn-ghost-nav:hover,
+.btn-ghost-nav:focus-visible {
+  color: var(--text-primary, #1e293b);
+  background: var(--sidebar-hover, rgba(78,128,238,0.06));
+  border-color: var(--border, #e2e8f0);
+  text-decoration: none;
+}
+.btn-ghost-nav i {
+  font-size: 0.8rem;
+  transition: transform 0.18s ease;
+}
+.btn-ghost-nav:hover i {
+  transform: translateX(-3px);
+}
+/* Full-width variant (detail-commande sticky sidebar) */
+.btn-ghost-nav.w-100 {
+  width: 100%;
+}
+/* Dark mode */
+html[data-theme="dark"] .btn-ghost-nav {
+  color: var(--text-secondary, #94a3b8);
+}
+html[data-theme="dark"] .btn-ghost-nav:hover {
+  color: var(--text-primary, #f1f5f9);
+  background: rgba(255,255,255,0.06);
+  border-color: var(--border, #334155);
+}
+
+/* ==================== DETAIL COMMANDE SIDEBAR STICKY ==================== */
+/*
+ * Wraps the "Change Status" card + "Back to list" button so BOTH stay
+ * visible during scroll. Using CSS var keeps it in sync with the topbar.
+ */
+.dc-sidebar-sticky {
+  position: sticky;
+  top: calc(var(--topbar-height, 64px) + 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* On mobile, stop being sticky so it stacks naturally below order info */
+@media (max-width: 991px) {
+  .dc-sidebar-sticky {
+    position: static;
+  }
+}
+
 /* ==================== ORDER STATUS BADGES ==================== */
 .cmd-badge { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 0.75rem; padding: 5px 14px; border-radius: 20px; white-space: nowrap; }
 .cmd-badge i { font-size: 0.72rem; }
@@ -1912,6 +1981,14 @@ html[data-theme="dark"] .cmd-annulee       { background: rgba(242,139,130,0.15);
   .filter-bar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* Make all selects/inputs inside filter-bar full-width on mobile */
+  .filter-bar .form-select,
+  .filter-bar .form-control,
+  .filter-bar select {
+    width: 100% !important;
+    min-width: unset !important;
   }
 }
 
@@ -7779,10 +7856,11 @@ html[data-theme="dark"] .fo-carousel-arrow:hover:not(.disabled) {
   transition: all 0.2s;
 }
 
+.email-action-btn.danger:hover,
 .email-action-btn:hover {
-  background: var(--danger-light);
-  color: var(--danger);
-  border-color: var(--danger);
+  background: var(--danger-light, #fee2e2);
+  color: var(--danger, #dc3545);
+  border-color: var(--danger, #dc3545);
 }
 
 .email-preview-meta {
@@ -7820,6 +7898,25 @@ html[data-theme="dark"] .fo-carousel-arrow:hover:not(.disabled) {
   height: 100%;
   min-height: 400px;
   border: none;
+}
+
+/* Empty content fallback (when email has no HTML body) */
+.email-no-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  gap: 12px;
+}
+.email-no-content i {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+.email-no-content p {
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 /* No selection placeholder */
@@ -9364,8 +9461,36 @@ html[data-theme="dark"] .cat-empty-icon-circle {
 [data-theme="dark"] .cat-prs-thumb::-webkit-slider-thumb { background: #1e293b; }
 [data-theme="dark"] .cat-prs-thumb::-moz-range-thumb { background: #1e293b; }
 
+/* ── CATALOGUE FILTER ICONS (replaces inline hardcoded colors) ── */
+.cat-icon-stock {
+  color: var(--success, #1e8e3e);
+  font-size: 0.75rem;
+}
+.cat-icon-promo {
+  color: var(--danger, #d32f2f);
+  font-size: 0.75rem;
+}
+[data-theme="dark"] .cat-icon-stock { color: #86efac; }
+[data-theme="dark"] .cat-icon-promo { color: #fca5a5; }
+
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media (max-width: 992px) { .cat-sidebar { width: 230px; } }
+
+/* On tablet/mobile: stack sidebar above content, full-width, no sticky */
+@media (max-width: 767px) {
+  .cat-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .cat-sidebar {
+    width: 100%;
+    position: static;
+    border-radius: 14px;
+  }
+  .cat-sidebar-head {
+    border-radius: 12px 12px 0 0;
+  }
+}
 
 @media (max-width: 768px) {
   .cat-layout { flex-direction: column; gap: 16px; }
