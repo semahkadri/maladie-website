@@ -37,264 +37,285 @@ import { Panier } from '../../../modeles/panier.model';
       transition(':leave', [
         animate('200ms ease', style({ opacity: 0 }))
       ])
-    ]),
-    trigger('fadeInUp', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(16px)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
     ])
   ],
   template: `
     <!-- Scroll Progress Bar -->
     <div class="fo-scroll-progress" [style.width.%]="scrollProgress"></div>
 
-    <!-- Announcement Bar -->
-    <div class="fo-announcement-bar" *ngIf="!announcementClosed">
-      <div class="fo-announcement-inner">
-        <span class="fo-announcement-item">
-          <i class="bi bi-truck"></i> {{ t.tr('announce.livraison') }}
-        </span>
-        <span class="fo-announcement-separator"></span>
-        <span class="fo-announcement-item">
-          <i class="bi bi-shield-check"></i> {{ t.tr('announce.pharmacie') }}
-        </span>
-        <span class="fo-announcement-separator"></span>
-        <span class="fo-announcement-item">
-          <i class="bi bi-headset"></i> {{ t.tr('announce.support') }}
-        </span>
-      </div>
-      <button class="fo-announcement-close" (click)="announcementClosed = true">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </div>
+    <!-- App Container (Flex Row — matches team's main-layout structure) -->
+    <div class="fo-app-container">
 
-    <!-- ════════════════════════════════════════════
-         SINGLE UNIFIED NAVBAR
-         ════════════════════════════════════════════ -->
-    <nav class="fo-nb" [class.fo-nb-elevated]="showBackToTop">
+      <!-- Sidebar Overlay (mobile) -->
+      <div class="fo-lsidebar-overlay" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
 
-      <!-- ── Row 1: Brand · Search · Actions ── -->
-      <div class="fo-nb-row1">
+      <!-- Left Sidebar -->
+      <aside class="fo-lsidebar" [class.fo-lsidebar-collapsed]="sidebarCollapsed" [class.fo-lsidebar-open]="sidebarOpen">
 
-        <!-- Brand -->
-        <a routerLink="/" class="fo-nb-brand">
-          <div class="fo-nb-brand-orb">
-            <i class="bi bi-heart-pulse"></i>
-          </div>
-          <div class="fo-nb-brand-text">
-            <span class="fo-nb-brand-name">{{ t.tr('nav.brand') }}</span>
-            <span class="fo-nb-brand-sub">{{ t.isFr ? 'Votre pharmacie en ligne' : 'Your online pharmacy' }}</span>
-          </div>
-        </a>
-
-        <!-- Search bar -->
-        <div class="fo-nb-search">
-          <i class="bi bi-search fo-nb-search-ico"></i>
-          <input type="text" class="fo-nb-search-input" [placeholder]="t.tr('nav.rechercher')"
-                 [(ngModel)]="navSearch"
-                 (keyup.enter)="doNavSearch()"
-                 (keyup.escape)="navSearch = ''">
-          <button class="fo-nb-search-btn" (click)="doNavSearch()">
-            <i class="bi bi-search"></i>
-            <span class="d-none d-xl-inline ms-1">{{ t.isFr ? 'Rechercher' : 'Search' }}</span>
+        <!-- Brand Header -->
+        <div class="fo-lsidebar-header" [class.fo-lsidebar-header-collapsed]="sidebarCollapsed">
+          <!-- Brand: fully hidden when collapsed — identical pattern to backoffice -->
+          <a routerLink="/" class="fo-lsidebar-brand" *ngIf="!sidebarCollapsed" (click)="sidebarOpen=false">
+            <div class="fo-lsidebar-brand-icon">
+              <i class="bi bi-heart-pulse"></i>
+            </div>
+            <div class="fo-lsidebar-brand-text">
+              <span class="fo-lsidebar-brand-name">{{ t.tr('nav.brand') }}</span>
+              <span class="fo-lsidebar-brand-sub">{{ t.isFr ? 'Pharmacie en ligne' : 'Online Pharmacy' }}</span>
+            </div>
+          </a>
+          <!-- Toggle button: always visible, centered when collapsed -->
+          <button class="fo-lsidebar-toggle" (click)="onSidebarToggleClick()" [title]="sidebarCollapsed ? 'Développer' : 'Réduire'">
+            <i class="bi bi-list"></i>
           </button>
         </div>
 
-        <!-- Actions -->
-        <div class="fo-nb-actions">
+        <!-- Navigation -->
+        <nav class="fo-lsidebar-nav">
 
-          <!-- Language -->
-          <div class="fo-nb-lang">
-            <button [class.fo-nb-lang-active]="t.isFr" (click)="t.setLang('fr')">FR</button>
-            <button [class.fo-nb-lang-active]="t.isEn" (click)="t.setLang('en')">EN</button>
+          <div class="fo-lsidebar-label" *ngIf="!sidebarCollapsed">{{ t.isFr ? 'Navigation' : 'Menu' }}</div>
+
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
+             class="fo-lsidebar-link" (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? t.tr('nav.accueil') : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-house-door-fill"></i></span>
+            <span class="fo-lsidebar-link-text">{{ t.tr('nav.accueil') }}</span>
+          </a>
+
+          <a routerLink="/catalogue" routerLinkActive="active"
+             class="fo-lsidebar-link" (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? t.tr('nav.catalogue') : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-grid-3x3-gap-fill"></i></span>
+            <span class="fo-lsidebar-link-text">{{ t.tr('nav.catalogue') }}</span>
+          </a>
+
+          <a routerLink="/wishlist" routerLinkActive="active"
+             class="fo-lsidebar-link" (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? (t.isFr ? 'Souhaits' : 'Wishlist') : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-heart"></i></span>
+            <span class="fo-lsidebar-link-text">{{ t.isFr ? 'Souhaits' : 'Wishlist' }}</span>
+            <span class="fo-lsidebar-badge fo-lsidebar-badge-red" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
+          </a>
+
+          <a routerLink="/panier" routerLinkActive="active"
+             class="fo-lsidebar-link" (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? t.tr('nav.panier') : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-cart3"></i></span>
+            <span class="fo-lsidebar-link-text">{{ t.tr('nav.panier') }}</span>
+            <span class="fo-lsidebar-badge" *ngIf="nombreArticles > 0" [class.bounce]="cartBounce">{{ nombreArticles }}</span>
+          </a>
+
+          <a routerLink="/comparer" routerLinkActive="active"
+             class="fo-lsidebar-link" (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? (t.isFr ? 'Comparer' : 'Compare') : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-bar-chart-steps"></i></span>
+            <span class="fo-lsidebar-link-text">{{ t.isFr ? 'Comparer' : 'Compare' }}</span>
+            <span class="fo-lsidebar-badge fo-lsidebar-badge-green" *ngIf="compareCount > 0">{{ compareCount }}</span>
+          </a>
+
+          <!-- Categories section -->
+          <div class="fo-lsidebar-label" *ngIf="!sidebarCollapsed && topCategories.length > 0">
+            {{ t.isFr ? 'Catégories' : 'Categories' }}
           </div>
 
-          <!-- Dark / Light mode -->
-          <button class="fo-nb-icon-btn" (click)="th.toggle()"
-                  [title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
-            <i class="bi" [class.bi-moon-stars-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
-          </button>
-
-          <!-- Compare -->
-          <a routerLink="/comparer" class="fo-nb-icon-btn fo-nb-compare-btn"
-             [title]="t.isFr ? 'Comparateur de produits' : 'Product comparison'">
-            <i class="bi bi-bar-chart-steps"></i>
-            <span class="fo-nb-badge fo-nb-badge-compare" *ngIf="compareCount > 0">{{ compareCount }}</span>
-          </a>
-
-          <!-- Wishlist -->
-          <a routerLink="/wishlist" class="fo-nb-icon-btn fo-nb-wishlist-btn"
-             [title]="t.isFr ? 'Ma liste de souhaits' : 'My wishlist'">
-            <i class="bi bi-heart"></i>
-            <span class="fo-nb-badge fo-nb-badge-red" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
-          </a>
-
-          <!-- Cart -->
-          <a routerLink="/panier" class="fo-nb-icon-btn fo-nb-cart-btn" [title]="t.tr('nav.panier')">
-            <i class="bi bi-cart3"></i>
-            <span class="fo-nb-badge fo-nb-badge-primary" *ngIf="nombreArticles > 0" [class.bounce]="cartBounce">
-              {{ nombreArticles }}
-            </span>
-          </a>
-
-          <!-- Hamburger (mobile only) -->
-          <button class="fo-nb-hamburger" (click)="menuOpen = !menuOpen" [class.fo-nb-hamburger-open]="menuOpen">
-            <span></span><span></span><span></span>
-          </button>
-
-        </div>
-      </div>
-
-      <!-- ── Row 2: Category strip (desktop) ── -->
-      <div class="fo-nb-row2">
-        <div class="fo-nb-cats">
-          <a routerLink="/" routerLinkActive="fo-nb-cat-active"
-             [routerLinkActiveOptions]="{exact: true}" class="fo-nb-cat">
-            <i class="bi bi-house-door-fill"></i>
-            <span>{{ t.tr('nav.accueil') }}</span>
-          </a>
-          <a routerLink="/catalogue" routerLinkActive="fo-nb-cat-active" class="fo-nb-cat">
-            <i class="bi bi-grid-3x3-gap-fill"></i>
-            <span>{{ t.tr('nav.catalogue') }}</span>
-          </a>
-          <span class="fo-nb-cats-divider"></span>
           <a *ngFor="let cat of topCategories" [routerLink]="['/categories', cat.id]"
-             routerLinkActive="fo-nb-cat-active" class="fo-nb-cat">
-            {{ cat.nom }}
+             routerLinkActive="active" class="fo-lsidebar-link" (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? cat.nom : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-tag"></i></span>
+            <span class="fo-lsidebar-link-text">{{ cat.nom }}</span>
           </a>
-          <span class="fo-nb-cats-divider"></span>
-          <a [routerLink]="['/catalogue']" [queryParams]="{filtre:'promo'}" class="fo-nb-cat fo-nb-cat-promo"
-             routerLinkActive="fo-nb-cat-active">
-            <i class="bi bi-fire"></i>
-            <span>{{ t.isFr ? 'Promos' : 'Deals' }}</span>
+
+          <a [routerLink]="['/catalogue']" [queryParams]="{filtre:'promo'}"
+             class="fo-lsidebar-link fo-lsidebar-link-promo" (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? (t.isFr ? 'Promos' : 'Deals') : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-fire"></i></span>
+            <span class="fo-lsidebar-link-text">{{ t.isFr ? 'Promotions' : 'Deals' }}</span>
           </a>
-          <span class="fo-nb-cats-spacer"></span>
-        </div>
-      </div>
 
-      <!-- ── Mobile slide-down menu ── -->
-      <div class="fo-nb-mobile" [class.fo-nb-mobile-open]="menuOpen">
-        <!-- Mobile search -->
-        <div class="fo-nb-mobile-search">
-          <i class="bi bi-search"></i>
-          <input type="text" [(ngModel)]="navSearch" [placeholder]="t.tr('nav.rechercher')"
-                 (keyup.enter)="doNavSearch()" class="fo-nb-mobile-search-input">
-        </div>
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
-           class="fo-nb-mlink" (click)="menuOpen=false">
-          <i class="bi bi-house-door-fill"></i> {{ t.tr('nav.accueil') }}
-        </a>
-        <a routerLink="/catalogue" routerLinkActive="active"
-           class="fo-nb-mlink" (click)="menuOpen=false">
-          <i class="bi bi-grid-3x3-gap-fill"></i> {{ t.tr('nav.catalogue') }}
-        </a>
-        <a routerLink="/wishlist" routerLinkActive="active"
-           class="fo-nb-mlink fo-nb-mlink-wishlist" (click)="menuOpen=false">
-          <i class="bi bi-heart-fill"></i>
-          {{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}
-          <span class="fo-nb-badge fo-nb-badge-red fo-nb-badge-inline" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
-        </a>
-        <a routerLink="/comparer" routerLinkActive="active"
-           class="fo-nb-mlink fo-nb-mlink-compare" (click)="menuOpen=false">
-          <i class="bi bi-bar-chart-steps"></i>
-          {{ t.isFr ? 'Comparateur' : 'Compare' }}
-          <span class="fo-nb-badge fo-nb-badge-compare fo-nb-badge-inline" *ngIf="compareCount > 0">{{ compareCount }}</span>
-        </a>
-        <a routerLink="/panier" routerLinkActive="active"
-           class="fo-nb-mlink" (click)="menuOpen=false">
-          <i class="bi bi-cart3-fill"></i>
-          {{ t.tr('nav.panier') }}
-          <span class="fo-nb-badge fo-nb-badge-primary fo-nb-badge-inline" *ngIf="nombreArticles > 0">{{ nombreArticles }}</span>
-        </a>
-        <a [routerLink]="['/catalogue']" [queryParams]="{filtre:'promo'}"
-           class="fo-nb-mlink fo-nb-mlink-promo" (click)="menuOpen=false">
-          <i class="bi bi-fire"></i> {{ t.isFr ? 'Promotions' : 'Deals' }}
-        </a>
-      </div>
+          <!-- ── Flexible spacer: pushes bottom section to the bottom of the nav ── -->
+          <div class="fo-lsidebar-spacer"></div>
 
-    </nav>
-
-    <!-- Page Content -->
-    <main class="fo-main">
-      <router-outlet></router-outlet>
-    </main>
-
-    <!-- Footer -->
-    <footer class="fo-footer">
-      <div class="fo-footer-main">
-        <!-- Brand Column -->
-        <div class="fo-footer-brand-col">
-          <div class="fo-footer-brand">
-            <i class="bi bi-heart-pulse"></i>
-            <span>{{ t.tr('footer.brand') }}</span>
+          <!-- ── Pharmacy brand card (visible when expanded — mirrors BO user profile) ── -->
+          <div class="fo-lsidebar-pharmacy-card" *ngIf="!sidebarCollapsed">
+            <div class="fo-lsidebar-pharmacy-avatar">
+              <i class="bi bi-bag-heart-fill"></i>
+            </div>
+            <div class="fo-lsidebar-pharmacy-info">
+              <div class="fo-lsidebar-pharmacy-name">PharmaCare</div>
+              <div class="fo-lsidebar-pharmacy-sub">
+                <span class="fo-lsidebar-pharmacy-dot"></span>
+                {{ t.isFr ? 'Votre pharmacie en ligne' : 'Your online pharmacy' }}
+              </div>
+            </div>
           </div>
-          <p>{{ t.tr('footer.desc') }}</p>
-          <div class="fo-footer-social">
-            <a href="#"><i class="bi bi-facebook"></i></a>
-            <a href="#"><i class="bi bi-instagram"></i></a>
-            <a href="#"><i class="bi bi-twitter-x"></i></a>
-            <a href="#"><i class="bi bi-whatsapp"></i></a>
+
+          <!-- ── Admin shortcut (inside nav — no white space below) ── -->
+          <a routerLink="/admin" class="fo-lsidebar-link fo-lsidebar-admin-nav"
+             (click)="sidebarOpen=false"
+             [title]="sidebarCollapsed ? 'Admin' : ''">
+            <span class="fo-lsidebar-icon"><i class="bi bi-shield-lock-fill"></i></span>
+            <span class="fo-lsidebar-link-text">Administration</span>
+          </a>
+
+        </nav>
+
+      </aside>
+
+      <!-- Main Content -->
+      <main class="fo-main-area">
+
+        <!-- Compact Topbar -->
+        <header class="fo-topbar-compact">
+          <div class="fo-topbar-left">
+            <!-- Hamburger (always visible — mobile: open drawer, desktop: collapse sidebar) -->
+            <button class="fo-topbar-hamburger" (click)="onHamburgerClick()">
+              <i class="bi bi-list"></i>
+            </button>
+            <!-- Search bar -->
+            <div class="fo-topbar-search">
+              <i class="bi bi-search fo-topbar-search-ico"></i>
+              <input type="text" class="fo-topbar-search-input"
+                     [placeholder]="t.tr('nav.rechercher')"
+                     [(ngModel)]="navSearch"
+                     (keyup.enter)="doNavSearch()"
+                     (keyup.escape)="navSearch = ''">
+              <button class="fo-topbar-search-btn" (click)="doNavSearch()">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
           </div>
+
+          <div class="fo-topbar-right">
+            <!-- Language toggle (pill style) -->
+            <div class="fo-topbar-lang">
+              <button [class.active]="t.isFr" (click)="t.setLang('fr')">FR</button>
+              <button [class.active]="t.isEn" (click)="t.setLang('en')">EN</button>
+            </div>
+            <!-- Divider -->
+            <div class="fo-topbar-sep"></div>
+            <!-- Theme toggle -->
+            <button class="fo-topbar-icon-btn" (click)="th.toggle()"
+                    [title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
+              <i class="bi" [class.bi-moon-stars-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
+            </button>
+            <!-- Compare -->
+            <a routerLink="/comparer" class="fo-topbar-icon-btn"
+               [title]="t.isFr ? 'Comparateur' : 'Compare'">
+              <i class="bi bi-bar-chart-steps"></i>
+              <span class="fo-topbar-badge fo-topbar-badge-green" *ngIf="compareCount > 0">{{ compareCount }}</span>
+            </a>
+            <!-- Wishlist -->
+            <a routerLink="/wishlist" class="fo-topbar-icon-btn fo-topbar-wishlist-btn"
+               [title]="t.isFr ? 'Liste de souhaits' : 'Wishlist'">
+              <i class="bi bi-heart"></i>
+              <span class="fo-topbar-badge fo-topbar-badge-red" *ngIf="wishlistCount > 0">{{ wishlistCount }}</span>
+            </a>
+            <!-- Cart -->
+            <a routerLink="/panier" class="fo-topbar-icon-btn fo-topbar-cart-btn" [title]="t.tr('nav.panier')">
+              <i class="bi bi-cart3"></i>
+              <span class="fo-topbar-badge" *ngIf="nombreArticles > 0" [class.bounce]="cartBounce">{{ nombreArticles }}</span>
+            </a>
+          </div>
+        </header>
+
+        <!-- Announcement Bar (below topbar) -->
+        <div class="fo-announcement-bar" *ngIf="!announcementClosed">
+          <div class="fo-announcement-inner">
+            <span class="fo-announcement-item">
+              <i class="bi bi-truck"></i> {{ t.tr('announce.livraison') }}
+            </span>
+            <span class="fo-announcement-separator"></span>
+            <span class="fo-announcement-item">
+              <i class="bi bi-shield-check"></i> {{ t.tr('announce.pharmacie') }}
+            </span>
+            <span class="fo-announcement-separator"></span>
+            <span class="fo-announcement-item">
+              <i class="bi bi-headset"></i> {{ t.tr('announce.support') }}
+            </span>
+          </div>
+          <button class="fo-announcement-close" (click)="announcementClosed = true">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
 
-        <!-- Quick Links -->
-        <div class="fo-footer-col">
-          <h4>{{ t.tr('footer.liens') }}</h4>
-          <ul>
-            <li><a routerLink="/">{{ t.tr('nav.accueil') }}</a></li>
-            <li><a routerLink="/catalogue">{{ t.tr('nav.catalogue') }}</a></li>
-            <li><a routerLink="/panier">{{ t.tr('nav.panier') }}</a></li>
-            <li><a routerLink="/wishlist">{{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}</a></li>
-          </ul>
+        <!-- Page Content -->
+        <div class="fo-page-content">
+          <router-outlet></router-outlet>
         </div>
 
-        <!-- Customer Service -->
-        <div class="fo-footer-col">
-          <h4>{{ t.tr('footer.service') }}</h4>
-          <ul>
-            <li><a href="#">{{ t.tr('footer.livraison') }}</a></li>
-            <li><a href="#">{{ t.tr('footer.retours') }}</a></li>
-            <li><a href="#">{{ t.tr('footer.faq') }}</a></li>
-          </ul>
-        </div>
+        <!-- Footer -->
+        <footer class="fo-footer">
+          <div class="fo-footer-main">
+            <!-- Brand Column -->
+            <div class="fo-footer-brand-col">
+              <div class="fo-footer-brand">
+                <i class="bi bi-heart-pulse"></i>
+                <span>{{ t.tr('footer.brand') }}</span>
+              </div>
+              <p>{{ t.tr('footer.desc') }}</p>
+              <div class="fo-footer-social">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+                <a href="#"><i class="bi bi-whatsapp"></i></a>
+              </div>
+            </div>
 
-        <!-- Contact -->
-        <div class="fo-footer-col">
-          <h4>{{ t.tr('footer.contact') }}</h4>
-          <div class="fo-footer-contact-item">
-            <i class="bi bi-geo-alt-fill"></i>
-            <span>{{ t.tr('footer.adresse') }}</span>
-          </div>
-          <div class="fo-footer-contact-item">
-            <i class="bi bi-telephone-fill"></i>
-            <span>+216 71 000 000</span>
-          </div>
-          <div class="fo-footer-contact-item">
-            <i class="bi bi-envelope-fill"></i>
-            <span>contact&#64;pharmacare.tn</span>
-          </div>
-        </div>
-      </div>
+            <!-- Quick Links -->
+            <div class="fo-footer-col">
+              <h4>{{ t.tr('footer.liens') }}</h4>
+              <ul>
+                <li><a routerLink="/">{{ t.tr('nav.accueil') }}</a></li>
+                <li><a routerLink="/catalogue">{{ t.tr('nav.catalogue') }}</a></li>
+                <li><a routerLink="/panier">{{ t.tr('nav.panier') }}</a></li>
+                <li><a routerLink="/wishlist">{{ t.isFr ? 'Liste de souhaits' : 'Wishlist' }}</a></li>
+              </ul>
+            </div>
 
-      <!-- Bottom Bar -->
-      <div class="fo-footer-bottom">
-        <div class="fo-footer-bottom-inner">
-          <p>&copy; {{ annee }} {{ t.tr('footer.brand') }}. {{ t.tr('footer.droits') }}</p>
-          <div class="fo-footer-payment">
-            <span>Visa</span>
-            <span>Mastercard</span>
-            <span>D17</span>
-          </div>
-        </div>
-      </div>
-    </footer>
+            <!-- Customer Service -->
+            <div class="fo-footer-col">
+              <h4>{{ t.tr('footer.service') }}</h4>
+              <ul>
+                <li><a href="#">{{ t.tr('footer.livraison') }}</a></li>
+                <li><a href="#">{{ t.tr('footer.retours') }}</a></li>
+                <li><a href="#">{{ t.tr('footer.faq') }}</a></li>
+              </ul>
+            </div>
 
-    <!-- Admin Floating Button (temp — replace with guard after auth integration) -->
-    <a routerLink="/admin" class="fo-admin-fab" title="Administration">
-      <i class="bi bi-shield-lock-fill"></i>
-      <span>Admin</span>
-    </a>
+            <!-- Contact -->
+            <div class="fo-footer-col">
+              <h4>{{ t.tr('footer.contact') }}</h4>
+              <div class="fo-footer-contact-item">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>{{ t.tr('footer.adresse') }}</span>
+              </div>
+              <div class="fo-footer-contact-item">
+                <i class="bi bi-telephone-fill"></i>
+                <span>+216 71 000 000</span>
+              </div>
+              <div class="fo-footer-contact-item">
+                <i class="bi bi-envelope-fill"></i>
+                <span>contact&#64;pharmacare.tn</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Bar -->
+          <div class="fo-footer-bottom">
+            <div class="fo-footer-bottom-inner">
+              <p>&copy; {{ annee }} {{ t.tr('footer.brand') }}. {{ t.tr('footer.droits') }}</p>
+              <div class="fo-footer-payment">
+                <span>Visa</span>
+                <span>Mastercard</span>
+                <span>D17</span>
+              </div>
+            </div>
+          </div>
+        </footer>
+
+      </main>
+
+    </div>
 
     <!-- Mini-Cart Sidebar -->
     <div *ngIf="miniCartOpen" class="fo-minicart-overlay" [@miniCartOverlay] (click)="miniCartOpen = false"></div>
@@ -331,13 +352,13 @@ import { Panier } from '../../../modeles/panier.model';
       </div>
     </div>
 
-    <!-- AI Assistant (floating bottom-left) -->
+    <!-- AI Assistant -->
     <app-ai-assistant></app-ai-assistant>
 
-    <!-- Compare Bar (floating bottom) -->
+    <!-- Compare Bar -->
     <app-compare-bar></app-compare-bar>
 
-    <!-- Back to Top Button -->
+    <!-- Back to Top -->
     <button class="fo-back-to-top" [class.visible]="showBackToTop" (click)="scrollToTop()" [title]="t.tr('backToTop')">
       <svg class="fo-btt-ring" viewBox="0 0 54 54">
         <circle cx="27" cy="27" r="25"></circle>
@@ -351,7 +372,6 @@ import { Panier } from '../../../modeles/panier.model';
 })
 export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   annee = new Date().getFullYear();
-  menuOpen = false;
   navSearch = '';
   nombreArticles = 0;
   announcementClosed = false;
@@ -359,7 +379,9 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
   wishlistCount = 0;
   compareCount = 0;
 
-  // Dynamic features
+  sidebarOpen = false;
+  sidebarCollapsed = false;
+
   scrollProgress = 0;
   showBackToTop = false;
   miniCartOpen = false;
@@ -387,10 +409,37 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
     if (!q) return;
     this.router.navigate(['/catalogue'], { queryParams: { q } });
     this.navSearch = '';
-    this.menuOpen = false;
+    this.sidebarOpen = false;
+  }
+
+  private applyCollapse(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+    localStorage.setItem('fo-sidebar-collapsed', String(this.sidebarCollapsed));
+    document.body.classList.toggle('fo-sidebar-collapsed', this.sidebarCollapsed);
+  }
+
+  /** Topbar hamburger — mobile: open/close drawer · desktop: collapse/expand sidebar */
+  onHamburgerClick(): void {
+    if (window.innerWidth <= 991) {
+      this.sidebarOpen = !this.sidebarOpen;
+    } else {
+      this.applyCollapse();
+    }
+  }
+
+  /** Toggle button inside sidebar — mobile: close drawer · desktop: collapse/expand */
+  onSidebarToggleClick(): void {
+    if (window.innerWidth <= 991) {
+      this.sidebarOpen = false;
+    } else {
+      this.applyCollapse();
+    }
   }
 
   ngOnInit(): void {
+    this.sidebarCollapsed = localStorage.getItem('fo-sidebar-collapsed') === 'true';
+    document.body.classList.toggle('fo-sidebar-collapsed', this.sidebarCollapsed);
+
     this.panierService.chargerPanier().subscribe();
     this.panierSub = this.panierService.panier$.subscribe(panier => {
       this.panier = panier;
@@ -402,14 +451,10 @@ export class LayoutFrontofficeComponent implements OnInit, OnDestroy {
     this.wishlistSub = this.wishlistService.wishlist$.subscribe(items => this.wishlistCount = items.length);
     this.compareSub = this.compareService.items$.subscribe(items => this.compareCount = items.length);
 
-    // Mini-cart auto-open + badge bounce on item added
     this.itemAddedSub = this.panierService.itemAdded$.subscribe(() => {
-      // Open mini-cart
       this.miniCartOpen = true;
       clearTimeout(this.miniCartTimer);
       this.miniCartTimer = setTimeout(() => this.miniCartOpen = false, 5000);
-
-      // Badge bounce
       this.cartBounce = true;
       setTimeout(() => this.cartBounce = false, 600);
     });

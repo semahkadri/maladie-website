@@ -14,20 +14,22 @@ import { EmailLogService } from '../../../services/email-log.service';
     <!-- Mobile overlay -->
     <div *ngIf="mobileOpen" class="sidebar-overlay" (click)="mobileOpen = false"></div>
 
-    <!-- Sidebar (team template style) -->
-    <aside class="sidebar" [class.collapsed]="isCollapsed" [class.open]="mobileOpen">
+    <!-- Sidebar (admin template style) -->
+    <aside class="sidebar admin-sidebar" [class.collapsed]="isCollapsed" [class.open]="mobileOpen">
 
-      <!-- Header: brand + toggle button -->
+      <!-- Header: brand + toggle -->
       <div class="sidebar-header">
         <div class="sidebar-brand-logo" *ngIf="!isCollapsed">
-          <div class="sidebar-brand-icon"><i class="bi bi-heart-pulse"></i></div>
+          <div class="sidebar-brand-icon">
+            <i class="fa-solid fa-heart-pulse"></i>
+          </div>
           <div class="sidebar-brand-text">
             {{ t.tr('sidebar.brand') }}
             <small>{{ t.tr('sidebar.brandSub') }}</small>
           </div>
         </div>
         <button class="sidebar-toggle-btn" (click)="toggleCollapse()">
-          <i class="bi bi-list"></i>
+          <i class="fa-solid fa-bars"></i>
         </button>
       </div>
 
@@ -39,7 +41,7 @@ import { EmailLogService } from '../../../services/email-log.service';
         <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.tdb') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-grid-1x2-fill"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-table-columns"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.tdb') }}</span>
         </a>
 
@@ -48,21 +50,21 @@ import { EmailLogService } from '../../../services/email-log.service';
         <a routerLink="/admin/categories" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.categories') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-tags-fill"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-tags"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.categories') }}</span>
         </a>
 
         <a routerLink="/admin/produits" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.produits') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-box-seam-fill"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-box"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.produits') }}</span>
         </a>
 
         <a routerLink="/admin/commandes" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.commandes') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-receipt-cutoff"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-receipt"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.commandes') }}</span>
         </a>
 
@@ -71,14 +73,14 @@ import { EmailLogService } from '../../../services/email-log.service';
         <a routerLink="/admin/analyse-stock" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.analyseStock') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-graph-up"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-chart-line"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.analyseStock') }}</span>
         </a>
 
         <a routerLink="/admin/emails" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.emails') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-envelope-fill"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-envelope"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.emails') }}</span>
           <span class="sidebar-badge" *ngIf="unreadEmailCount > 0">{{ unreadEmailCount }}</span>
         </a>
@@ -88,25 +90,35 @@ import { EmailLogService } from '../../../services/email-log.service';
         <a routerLink="/admin/categories/ajouter" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.nouvelleCat') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-plus-circle"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-circle-plus"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.nouvelleCat') }}</span>
         </a>
 
         <a routerLink="/admin/produits/ajouter" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.nouveauProd') : ''">
-          <span class="sidebar-icon-box"><i class="bi bi-plus-circle"></i></span>
+          <span class="sidebar-icon-box"><i class="fa-solid fa-circle-plus"></i></span>
           <span class="sidebar-link-text">{{ t.tr('sidebar.nouveauProd') }}</span>
         </a>
       </nav>
 
-      <!-- Pro Card (hidden when collapsed) -->
-      <div class="sidebar-pro-card" *ngIf="!isCollapsed">
-        <h4>PharmaCare Pro</h4>
-        <p>{{ t.isFr ? 'Analyse avancée et rapports détaillés pour votre pharmacie.' : 'Advanced analytics and detailed reports for your pharmacy.' }}</p>
-        <a routerLink="/" class="sidebar-pro-btn">
-          <i class="bi bi-box-arrow-up-right me-1"></i>{{ t.tr('sidebar.voirSite') }}
-        </a>
+      <!-- User Profile (replaces PRO card — team's admin-sidebar style) -->
+      <div class="sidebar-user-profile" *ngIf="!isCollapsed">
+        <div class="sidebar-user-avatar">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Administrateur</div>
+          <div class="sidebar-user-role">
+            <span class="sidebar-user-dot"></span>
+            PharmaCare Admin
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-user-profile sidebar-user-profile-collapsed" *ngIf="isCollapsed">
+        <div class="sidebar-user-avatar">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
       </div>
 
     </aside>
@@ -115,7 +127,7 @@ import { EmailLogService } from '../../../services/email-log.service';
     <header class="topbar">
       <div class="topbar-left">
         <button class="topbar-toggle" (click)="mobileOpen = !mobileOpen">
-          <i class="bi bi-list"></i>
+          <i class="fa-solid fa-bars"></i>
         </button>
         <nav class="breadcrumb-nav">
           <a routerLink="/admin">{{ t.tr('breadcrumb.accueil') }}</a>
@@ -125,15 +137,15 @@ import { EmailLogService } from '../../../services/email-log.service';
       </div>
       <div class="topbar-right">
         <div class="lang-toggle lang-toggle-bo">
-          <i class="bi bi-globe2 lang-toggle-icon"></i>
+          <i class="fa-solid fa-globe lang-toggle-icon"></i>
           <button [class.active]="t.isFr" (click)="t.setLang('fr')">FR</button>
           <button [class.active]="t.isEn" (click)="t.setLang('en')">EN</button>
         </div>
         <button class="theme-toggle" (click)="th.toggle()" [attr.title]="th.isDark ? t.tr('theme.light') : t.tr('theme.dark')">
-          <i class="bi" [class.bi-moon-fill]="th.isLight" [class.bi-sun-fill]="th.isDark"></i>
+          <i class="fa-solid" [class.fa-moon]="th.isLight" [class.fa-sun]="th.isDark"></i>
         </button>
         <span class="topbar-clock">
-          <i class="bi bi-clock me-1"></i>{{ currentTime }}
+          <i class="fa-solid fa-clock me-1"></i>{{ currentTime }}
         </span>
       </div>
     </header>
@@ -152,7 +164,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   constructor(private router: Router, public t: TraductionService, public th: ThemeService, private emailService: EmailLogService) {}
 
   ngOnInit(): void {
-    // Restore collapse state
     this.isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
     document.body.classList.toggle('sidebar-collapsed', this.isCollapsed);
 
