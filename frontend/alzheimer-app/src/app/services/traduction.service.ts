@@ -409,7 +409,6 @@ const DICT: Record<string, TranslationEntry> = {
   'confirmation.reference': { fr: 'Référence de commande', en: 'Order reference' },
   'confirmation.details': { fr: 'Détails de la commande', en: 'Order Details' },
   'confirmation.statut': { fr: 'Statut', en: 'Status' },
-  'confirmation.enAttente': { fr: 'En attente', en: 'Pending' },
   'confirmation.continuer': { fr: 'Continuer les achats', en: 'Continue shopping' },
   'confirmation.produitsEpuises': { fr: 'Les produits suivants sont désormais en rupture de stock :', en: 'The following products are now out of stock:' },
 

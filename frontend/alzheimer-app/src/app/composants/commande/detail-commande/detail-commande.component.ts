@@ -134,25 +134,39 @@ import { EmailLogService } from '../../../services/email-log.service';
                   <h6 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>{{ t.tr('dcmd.changerStatut') }}</h6>
                 </div>
                 <div class="card-body">
-                  <select class="form-select mb-3" [(ngModel)]="nouveauStatut">
-                    <option value="EN_ATTENTE">{{ t.tr('lcmd.enAttente') }}</option>
-                    <option value="CONFIRMEE">{{ t.tr('lcmd.confirmee') }}</option>
-                    <option value="EN_PREPARATION">{{ t.tr('lcmd.enPreparation') }}</option>
-                    <option value="EXPEDIEE">{{ t.tr('lcmd.expediee') }}</option>
-                    <option value="LIVREE">{{ t.tr('lcmd.livree') }}</option>
-                    <option value="ANNULEE" [disabled]="commande.statut === 'LIVREE'">{{ t.tr('lcmd.annulee') }}</option>
-                  </select>
-                  <div *ngIf="commande.statut === 'LIVREE'" class="alert alert-warning py-2 mb-2" style="font-size:0.82rem;">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    {{ t.isFr ? 'Une commande livrée ne peut pas être annulée.' : 'A delivered order cannot be cancelled.' }}
+
+                  <!-- Terminal state — no further changes allowed -->
+                  <div *ngIf="estTerminal(commande.statut)" class="alert py-2 mb-0"
+                       [ngClass]="commande.statut === 'LIVREE' ? 'alert-success' : 'alert-secondary'"
+                       style="font-size:0.82rem;">
+                    <i class="bi me-1" [ngClass]="commande.statut === 'LIVREE' ? 'bi-bag-check-fill' : 'bi-x-circle-fill'"></i>
+                    {{ commande.statut === 'LIVREE'
+                        ? (t.isFr ? 'Commande livrée — statut définitif, aucune modification possible.' : 'Order delivered — final status, no further changes.')
+                        : (t.isFr ? 'Commande annulée — statut définitif, aucune modification possible.' : 'Order cancelled — final status, no further changes.') }}
                   </div>
-                  <button class="btn btn-primary w-100"
-                          (click)="changerStatut()"
-                          [disabled]="enCours || nouveauStatut === commande.statut">
-                    <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
-                    <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
-                    {{ t.tr('dcmd.appliquer') }}
-                  </button>
+
+                  <!-- Non-terminal: show only valid next transitions -->
+                  <ng-container *ngIf="!estTerminal(commande.statut)">
+                    <select class="form-select mb-3" [(ngModel)]="nouveauStatut">
+                      <!-- Current status — shown as disabled placeholder -->
+                      <option [value]="commande.statut" disabled>
+                        {{ t.tr('lcmd.' + getStatutKey(commande.statut)) }}
+                        ({{ t.isFr ? 'actuel' : 'current' }})
+                      </option>
+                      <!-- Only valid next transitions -->
+                      <option *ngFor="let s of getTransitionsValides(commande.statut)" [value]="s">
+                        {{ t.tr('lcmd.' + getStatutKey(s)) }}
+                      </option>
+                    </select>
+                    <button class="btn btn-primary w-100"
+                            (click)="changerStatut()"
+                            [disabled]="enCours || nouveauStatut === commande.statut">
+                      <span *ngIf="enCours" class="spinner-border spinner-border-sm me-1"></span>
+                      <i *ngIf="!enCours" class="bi bi-check-lg me-1"></i>
+                      {{ t.tr('dcmd.appliquer') }}
+                    </button>
+                  </ng-container>
+
                 </div>
               </div>
 
@@ -189,7 +203,9 @@ export class DetailCommandeComponent implements OnInit {
       this.commandeService.obtenirParId(+id).subscribe({
         next: (data) => {
           this.commande = data;
-          this.nouveauStatut = data.statut;
+          // Pre-select the first valid transition (not the current status itself)
+          const options = this.getTransitionsValides(data.statut);
+          this.nouveauStatut = options.length > 0 ? options[0] : data.statut;
           this.chargement = false;
         },
         error: () => {
@@ -201,14 +217,30 @@ export class DetailCommandeComponent implements OnInit {
     }
   }
 
+  estTerminal(statut: string): boolean {
+    return statut === 'LIVREE' || statut === 'ANNULEE';
+  }
+
+  getTransitionsValides(statut: string): string[] {
+    const map: Record<string, string[]> = {
+      'EN_ATTENTE':     ['CONFIRMEE', 'ANNULEE'],
+      'CONFIRMEE':      ['EN_PREPARATION', 'ANNULEE'],
+      'EN_PREPARATION': ['EXPEDIEE', 'ANNULEE'],
+      'EXPEDIEE':       ['LIVREE', 'ANNULEE']
+    };
+    return map[statut] || [];
+  }
+
   changerStatut(): void {
     if (!this.commande?.id) return;
+    if (this.estTerminal(this.commande.statut)) return;
     this.enCours = true;
     this.message = '';
     this.commandeService.modifierStatut(this.commande.id, this.nouveauStatut).subscribe({
       next: (data) => {
         this.commande = data;
-        this.nouveauStatut = data.statut;
+        const opts = this.getTransitionsValides(data.statut);
+        this.nouveauStatut = opts.length > 0 ? opts[0] : data.statut;
         this.enCours = false;
         this.message = this.t.tr('dcmd.statutModifie');
         this.messageType = 'success';

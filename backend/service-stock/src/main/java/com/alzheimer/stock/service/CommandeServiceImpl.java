@@ -16,7 +16,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -24,6 +29,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class CommandeServiceImpl implements CommandeService {
+
+    /**
+     * Allowed status transitions. LIVREE and ANNULEE are terminal states — no exit.
+     * This prevents: backwards jumps, double stock restoration, and free-items bugs.
+     */
+    private static final Map<StatutCommande, Set<StatutCommande>> TRANSITIONS_VALIDES;
+    static {
+        Map<StatutCommande, Set<StatutCommande>> m = new EnumMap<>(StatutCommande.class);
+        m.put(StatutCommande.EN_ATTENTE,     EnumSet.of(StatutCommande.CONFIRMEE,       StatutCommande.ANNULEE));
+        m.put(StatutCommande.CONFIRMEE,      EnumSet.of(StatutCommande.EN_PREPARATION,  StatutCommande.ANNULEE));
+        m.put(StatutCommande.EN_PREPARATION, EnumSet.of(StatutCommande.EXPEDIEE,         StatutCommande.ANNULEE));
+        m.put(StatutCommande.EXPEDIEE,       EnumSet.of(StatutCommande.LIVREE,           StatutCommande.ANNULEE));
+        m.put(StatutCommande.LIVREE,         Collections.emptySet());
+        m.put(StatutCommande.ANNULEE,        Collections.emptySet());
+        TRANSITIONS_VALIDES = Collections.unmodifiableMap(m);
+    }
 
     private final CommandeRepository commandeRepository;
     private final PanierRepository panierRepository;
@@ -152,18 +173,21 @@ public class CommandeServiceImpl implements CommandeService {
 
         StatutCommande ancienStatut = commande.getStatut();
 
-        // Prevent cancelling an already-delivered order (stock is physically gone)
-        if (statut == StatutCommande.ANNULEE && ancienStatut == StatutCommande.LIVREE) {
-            throw new IllegalArgumentException("Impossible d'annuler une commande déjà livrée");
+        // No-op if same status
+        if (ancienStatut == statut) {
+            return convertirEnDTO(commande);
         }
 
-        // Restore stock if cancelling, but only if not already cancelled and not delivered
-        // (prevents double-restoration: ANNULEE→EN_ATTENTE→ANNULEE scenario)
-        boolean doitRestaurerStock = statut == StatutCommande.ANNULEE
-                && ancienStatut != StatutCommande.ANNULEE
-                && ancienStatut != StatutCommande.LIVREE;
+        // Enforce transition rules — LIVREE and ANNULEE are terminal (no exit)
+        Set<StatutCommande> transitions = TRANSITIONS_VALIDES.getOrDefault(ancienStatut, Collections.emptySet());
+        if (!transitions.contains(statut)) {
+            throw new IllegalArgumentException(
+                    "Transition de statut invalide : " + ancienStatut.name() + " → " + statut.name() +
+                    ". Transitions autorisées depuis " + ancienStatut.name() + " : " + transitions);
+        }
 
-        if (doitRestaurerStock) {
+        // Restore stock when cancelling (safe: ANNULEE is terminal, so this runs at most once per order)
+        if (statut == StatutCommande.ANNULEE) {
             for (LigneCommande ligne : commande.getLignes()) {
                 Produit produit = ligne.getProduit();
                 if (produit != null) {
@@ -178,9 +202,7 @@ public class CommandeServiceImpl implements CommandeService {
         CommandeDTO dto = convertirEnDTO(modifiee);
 
         // Send status change email to customer (async)
-        if (ancienStatut != statut) {
-            emailService.envoyerChangementStatut(dto, ancienStatut);
-        }
+        emailService.envoyerChangementStatut(dto, ancienStatut);
 
         return dto;
     }
