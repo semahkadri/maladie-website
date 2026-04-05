@@ -152,8 +152,18 @@ public class CommandeServiceImpl implements CommandeService {
 
         StatutCommande ancienStatut = commande.getStatut();
 
-        // Restore stock if cancelling (skip lines whose product was deleted)
-        if (statut == StatutCommande.ANNULEE && commande.getStatut() != StatutCommande.ANNULEE) {
+        // Prevent cancelling an already-delivered order (stock is physically gone)
+        if (statut == StatutCommande.ANNULEE && ancienStatut == StatutCommande.LIVREE) {
+            throw new IllegalArgumentException("Impossible d'annuler une commande déjà livrée");
+        }
+
+        // Restore stock if cancelling, but only if not already cancelled and not delivered
+        // (prevents double-restoration: ANNULEE→EN_ATTENTE→ANNULEE scenario)
+        boolean doitRestaurerStock = statut == StatutCommande.ANNULEE
+                && ancienStatut != StatutCommande.ANNULEE
+                && ancienStatut != StatutCommande.LIVREE;
+
+        if (doitRestaurerStock) {
             for (LigneCommande ligne : commande.getLignes()) {
                 Produit produit = ligne.getProduit();
                 if (produit != null) {

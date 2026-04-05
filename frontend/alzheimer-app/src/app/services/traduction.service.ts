@@ -411,7 +411,7 @@ const DICT: Record<string, TranslationEntry> = {
   'confirmation.statut': { fr: 'Statut', en: 'Status' },
   'confirmation.enAttente': { fr: 'En attente', en: 'Pending' },
   'confirmation.continuer': { fr: 'Continuer les achats', en: 'Continue shopping' },
-  'confirmation.produitsEpuises': { fr: 'Les produits suivants sont désormais en rupture de stock et ont été retirés du catalogue :', en: 'The following products are now out of stock and have been removed from the catalog:' },
+  'confirmation.produitsEpuises': { fr: 'Les produits suivants sont désormais en rupture de stock :', en: 'The following products are now out of stock:' },
 
   // ─── Liste Commandes (Backoffice) ──────────────────────
   'lcmd.titre': { fr: 'Gestion des Commandes', en: 'Order Management' },

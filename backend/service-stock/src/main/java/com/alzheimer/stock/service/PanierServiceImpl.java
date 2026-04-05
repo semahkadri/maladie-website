@@ -159,7 +159,7 @@ public class PanierServiceImpl implements PanierService {
         }
 
         boolean removed = panier.getLignes().removeIf(
-            l -> l.getProduit().getId().equals(produitId));
+            l -> l.getProduit() != null && l.getProduit().getId().equals(produitId));
 
         if (!removed) {
             throw new ResourceIntrouvableException("Ligne panier", "produitId", produitId);
@@ -260,11 +260,17 @@ public class PanierServiceImpl implements PanierService {
         Produit produit = ligne.getProduit();
         BigDecimal sousTotal = produit.getPrix().multiply(BigDecimal.valueOf(ligne.getQuantite()));
 
+        boolean promoActive = Boolean.TRUE.equals(produit.getEnPromo())
+                && (produit.getDateFinPromo() == null
+                    || produit.getDateFinPromo().isAfter(LocalDateTime.now()));
+
         return LignePanierDTO.builder()
                 .id(ligne.getId())
                 .produitId(produit.getId())
                 .produitNom(produit.getNom())
                 .produitPrix(produit.getPrix())
+                .produitPrixOriginal(promoActive ? produit.getPrixOriginal() : null)
+                .produitEnPromo(promoActive)
                 .produitQuantiteStock(produit.getQuantite())
                 .produitImageUrl(produit.getImageUrl())
                 .categorieNom(produit.getCategorie().getNom())

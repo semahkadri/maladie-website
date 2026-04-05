@@ -257,7 +257,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
                   <span *ngIf="isPromoActive(prod) && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                  <span *ngIf="!isPromoActive(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <span *ngIf="!isPromoActive(prod) && isNouveauProduit(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
                     <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
@@ -430,10 +430,15 @@ export class AccueilComponent implements OnInit, OnDestroy {
     return track.scrollLeft < (track.scrollWidth - track.clientWidth - 2);
   }
 
+  isNouveauProduit(prod: Produit): boolean {
+    if (!prod.dateCreation) return false;
+    return Date.now() - new Date(prod.dateCreation).getTime() <= 30 * 24 * 60 * 60 * 1000;
+  }
+
   ajouterAuPanier(event: Event, produit: Produit): void {
     event.preventDefault();
     event.stopPropagation();
-    if (!produit.id || this.ajoutEnCours) return;
+    if (!produit.id || this.ajoutEnCours === produit.id) return;
     this.ajoutEnCours = produit.id;
     this.ajoutOk = null;
     this.panierService.ajouterProduit(produit.id, 1).subscribe({

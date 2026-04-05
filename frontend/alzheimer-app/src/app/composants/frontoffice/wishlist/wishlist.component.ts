@@ -61,7 +61,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
             <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
               <div class="fo-product-card-img">
                 <span *ngIf="isPromoActive(prod) && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                <span *ngIf="!isPromoActive(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                <span *ngIf="!isPromoActive(prod) && isNouveauProduit(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                 <!-- Heart button: filled red, click = remove from wishlist -->
                 <button class="fo-product-wishlist wl-active"
                         (click)="removeItem($event, prod.id!)"
@@ -157,10 +157,15 @@ export class WishlistComponent implements OnInit, OnDestroy {
     this.wishlistService.clear();
   }
 
+  isNouveauProduit(prod: Produit): boolean {
+    if (!prod.dateCreation) return false;
+    return Date.now() - new Date(prod.dateCreation).getTime() <= 30 * 24 * 60 * 60 * 1000;
+  }
+
   ajouterAuPanier(event: Event, produit: Produit): void {
     event.preventDefault();
     event.stopPropagation();
-    if (!produit.id || this.ajoutEnCours) return;
+    if (!produit.id || this.ajoutEnCours === produit.id) return;
     this.ajoutEnCours = produit.id;
     this.ajoutOk = null;
     this.panierService.ajouterProduit(produit.id, 1).subscribe({

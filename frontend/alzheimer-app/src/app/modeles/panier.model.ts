@@ -3,6 +3,8 @@ export interface LignePanier {
   produitId: number;
   produitNom?: string;
   produitPrix?: number;
+  produitPrixOriginal?: number;
+  produitEnPromo?: boolean;
   produitQuantiteStock?: number;
   produitImageUrl?: string;
   categorieNom?: string;

@@ -27,7 +27,7 @@ export interface Commande {
 export interface CreerCommande {
   nomClient: string;
   emailClient?: string;
-  telephoneClient?: string;
-  adresseLivraison?: string;
+  telephoneClient: string;
+  adresseLivraison: string;
   sessionId: string;
 }

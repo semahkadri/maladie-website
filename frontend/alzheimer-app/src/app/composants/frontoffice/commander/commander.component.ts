@@ -137,9 +137,9 @@ import { CreerCommande } from '../../../modeles/commande.model';
                                [ngClass]="{'is-invalid': tel.invalid && tel.touched,
                                            'is-valid':   tel.valid  && tel.touched}">
                         <span class="input-group-text co-tel-counter"
-                              [class.text-danger]="(commande.telephoneClient?.length ?? 0) > 0 && (commande.telephoneClient?.length ?? 0) < 8"
-                              [class.text-success]="(commande.telephoneClient?.length ?? 0) === 8">
-                          {{ commande.telephoneClient?.length ?? 0 }}/8
+                              [class.text-danger]="commande.telephoneClient.length > 0 && commande.telephoneClient.length < 8"
+                              [class.text-success]="commande.telephoneClient.length === 8">
+                          {{ commande.telephoneClient.length }}/8
                         </span>
                       </div>
                       <ng-container *ngIf="tel.touched && tel.invalid">
@@ -177,8 +177,8 @@ import { CreerCommande } from '../../../modeles/commande.model';
                                   [ngClass]="{'is-invalid': adresse.invalid && adresse.touched,
                                               'is-valid':   adresse.valid  && adresse.touched}"></textarea>
                         <small class="co-char-count"
-                               [class.text-danger]="(commande.adresseLivraison?.length ?? 0) > 270">
-                          {{ commande.adresseLivraison?.length ?? 0 }}/300
+                               [class.text-danger]="commande.adresseLivraison.length > 270">
+                          {{ commande.adresseLivraison.length }}/300
                         </small>
                       </div>
                       <ng-container *ngIf="adresse.touched && adresse.invalid">
@@ -229,8 +229,11 @@ import { CreerCommande } from '../../../modeles/commande.model';
                     <div>
                       <span class="fw-semibold" style="font-size: 0.88rem;">{{ ligne.produitNom }}</span>
                       <small class="d-block text-muted">x{{ ligne.quantite }}</small>
+                      <small *ngIf="ligne.produitEnPromo && ligne.produitPrixOriginal" class="d-block">
+                        <span class="text-muted text-decoration-line-through" style="font-size:0.75rem;">{{ (ligne.produitPrixOriginal * ligne.quantite) | number:'1.2-2' }} TND</span>
+                      </small>
                     </div>
-                    <span class="fw-bold" style="font-size: 0.88rem;">{{ ligne.sousTotal | number:'1.2-2' }} TND</span>
+                    <span class="fw-bold" [style.color]="ligne.produitEnPromo ? '#dc2626' : ''" style="font-size: 0.88rem;">{{ ligne.sousTotal | number:'1.2-2' }} TND</span>
                   </div>
                 </div>
                 <div class="card-body pt-3" style="border-top: 2px solid var(--primary);">
@@ -299,7 +302,7 @@ export class CommanderComponent implements OnInit {
         this.panierService.resetApresCommande();
         const extras: any = {};
         if (commande.produitsEpuises && commande.produitsEpuises.length > 0) {
-          extras.queryParams = { epuises: commande.produitsEpuises.join(',') };
+          extras.queryParams = { epuises: commande.produitsEpuises.map(encodeURIComponent).join(',') };
         }
         this.router.navigate(['/commande', commande.reference], extras);
       },

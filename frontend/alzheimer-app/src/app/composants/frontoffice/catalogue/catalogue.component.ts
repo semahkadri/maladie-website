@@ -280,7 +280,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
                 <a [routerLink]="['/catalogue', prod.id]" class="fo-card-link">
                   <div class="fo-product-card-img">
                     <span *ngIf="isPromoActive(prod) && prod.remise" class="fo-product-badge fo-badge-promo">-{{ prod.remise }}%</span>
-                    <span *ngIf="!isPromoActive(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                    <span *ngIf="!isPromoActive(prod) && isNouveauProduit(prod)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                     <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(prod.id!)"
                             (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(prod)">
                       <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(prod.id!)" [class.bi-heart]="!wishlistService.isInWishlist(prod.id!)"></i>
@@ -735,10 +735,16 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     return labels[value] || value;
   }
 
+  isNouveauProduit(prod: Produit): boolean {
+    if (!prod.dateCreation) return false;
+    const diff = Date.now() - new Date(prod.dateCreation).getTime();
+    return diff <= 30 * 24 * 60 * 60 * 1000; // 30 days
+  }
+
   ajouterAuPanier(event: Event, produit: Produit): void {
     event.preventDefault();
     event.stopPropagation();
-    if (!produit.id || this.ajoutEnCours) return;
+    if (!produit.id || this.ajoutEnCours === produit.id) return;
     this.ajoutEnCours = produit.id;
     this.ajoutOk = null;
     this.ajoutErreur = '';
@@ -768,7 +774,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
   }
 
   quickViewAjouterPanier(): void {
-    if (!this.quickViewProduct?.id || this.ajoutEnCours) return;
+    if (!this.quickViewProduct?.id || this.ajoutEnCours === this.quickViewProduct.id) return;
     this.ajoutEnCours = this.quickViewProduct.id;
     this.panierService.ajouterProduit(this.quickViewProduct.id, 1).subscribe({
       next: () => {

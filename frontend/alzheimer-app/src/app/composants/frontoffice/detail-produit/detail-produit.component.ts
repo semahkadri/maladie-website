@@ -191,7 +191,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <a [routerLink]="['/catalogue', p.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
                   <span *ngIf="isPromoActive(p) && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
-                  <span *ngIf="!isPromoActive(p)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <span *ngIf="!isPromoActive(p) && isNouveauProduit(p)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(p.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(p)"
                           [title]="wishlistService.isInWishlist(p.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
@@ -259,7 +259,7 @@ import { PromoCountdownComponent } from '../../shared/promo-countdown/promo-coun
               <a [routerLink]="['/catalogue', p.id]" class="fo-card-link">
                 <div class="fo-product-card-img">
                   <span *ngIf="isPromoActive(p) && p.remise" class="fo-product-badge fo-badge-promo">-{{ p.remise }}%</span>
-                  <span *ngIf="!isPromoActive(p)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
+                  <span *ngIf="!isPromoActive(p) && isNouveauProduit(p)" class="fo-product-badge fo-badge-new">{{ t.tr('badge.nouveau') }}</span>
                   <button class="fo-product-wishlist" [class.wl-active]="wishlistService.isInWishlist(p.id!)"
                           (click)="$event.preventDefault();$event.stopPropagation();wishlistService.toggle(p)"
                           [title]="wishlistService.isInWishlist(p.id!) ? (t.isFr ? 'Retirer' : 'Remove') : (t.isFr ? 'Sauvegarder' : 'Save')">
@@ -366,6 +366,11 @@ export class DetailProduitComponent implements OnInit, OnDestroy {
         error: () => this.loading = false
       });
     });
+  }
+
+  isNouveauProduit(prod: Produit): boolean {
+    if (!prod.dateCreation) return false;
+    return Date.now() - new Date(prod.dateCreation).getTime() <= 30 * 24 * 60 * 60 * 1000;
   }
 
   ajouterAuPanier(): void {

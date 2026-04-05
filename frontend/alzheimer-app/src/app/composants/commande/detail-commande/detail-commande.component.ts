@@ -140,8 +140,12 @@ import { EmailLogService } from '../../../services/email-log.service';
                     <option value="EN_PREPARATION">{{ t.tr('lcmd.enPreparation') }}</option>
                     <option value="EXPEDIEE">{{ t.tr('lcmd.expediee') }}</option>
                     <option value="LIVREE">{{ t.tr('lcmd.livree') }}</option>
-                    <option value="ANNULEE">{{ t.tr('lcmd.annulee') }}</option>
+                    <option value="ANNULEE" [disabled]="commande.statut === 'LIVREE'">{{ t.tr('lcmd.annulee') }}</option>
                   </select>
+                  <div *ngIf="commande.statut === 'LIVREE'" class="alert alert-warning py-2 mb-2" style="font-size:0.82rem;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    {{ t.isFr ? 'Une commande livrée ne peut pas être annulée.' : 'A delivered order cannot be cancelled.' }}
+                  </div>
                   <button class="btn btn-primary w-100"
                           (click)="changerStatut()"
                           [disabled]="enCours || nouveauStatut === commande.statut">

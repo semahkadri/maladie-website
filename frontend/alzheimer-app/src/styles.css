@@ -5459,6 +5459,14 @@ html[data-theme="dark"] .fo-reco-divider-label {
   border: 1px solid var(--pharmacy-green);
   border-radius: var(--radius);
   margin-bottom: 24px;
+  transition: background 0.4s, border-color 0.4s;
+}
+.fo-cart-expiring-soon {
+  background: rgba(220, 38, 38, 0.07) !important;
+  border-color: #dc2626 !important;
+}
+.fo-cart-expiring-soon .fo-cart-reservation-icon {
+  background: #dc2626 !important;
 }
 
 .fo-cart-reservation-icon {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PanierService } from '../../../services/panier.service';
@@ -42,14 +42,25 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
         <!-- Cart Content -->
         <div *ngIf="!chargement && panier && panier.lignes.length > 0">
 
-          <!-- Reservation Info Banner -->
-          <div class="fo-cart-reservation-banner">
+          <!-- Reservation Info Banner with live countdown -->
+          <div class="fo-cart-reservation-banner" [class.fo-cart-expiring-soon]="minutesRestantes !== null && minutesRestantes <= 5">
             <div class="fo-cart-reservation-icon">
               <i class="bi bi-clock-history"></i>
             </div>
             <div class="fo-cart-reservation-text">
               <h4>{{ t.tr('panier.reserveInfo') }}</h4>
-              <p>{{ t.tr('panier.expireInfo') }}</p>
+              <p *ngIf="minutesRestantes === null">{{ t.tr('panier.expireInfo') }}</p>
+              <p *ngIf="minutesRestantes !== null && (minutesRestantes > 0 || secondesRestantes > 0)">
+                {{ t.isFr ? 'Expire dans' : 'Expires in' }}
+                <strong>{{ minutesRestantes }}:{{ secondesRestantes.toString().padStart(2, '0') }}</strong>
+                {{ t.isFr ? 'min' : 'min' }}
+              </p>
+              <p *ngIf="minutesRestantes !== null && minutesRestantes === 0 && secondesRestantes === 0" class="text-danger fw-bold">
+                {{ t.isFr ? 'Panier expiré — veuillez recharger la page' : 'Cart expired — please reload the page' }}
+                <button class="btn btn-sm btn-outline-danger ms-2" (click)="chargerPanier()">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </p>
             </div>
           </div>
 
@@ -80,7 +91,13 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
                       <div class="fw-bold">{{ ligne.produitNom }}</div>
                       <small class="text-muted">{{ ligne.categorieNom }}</small>
                       <div class="mt-1">
-                        <span class="fw-semibold" style="color: var(--primary);">{{ ligne.produitPrix | number:'1.2-2' }} TND</span>
+                        <ng-container *ngIf="ligne.produitEnPromo && ligne.produitPrixOriginal; else prixNormal">
+                          <span class="text-muted text-decoration-line-through me-1" style="font-size:0.8rem;">{{ ligne.produitPrixOriginal | number:'1.2-2' }} TND</span>
+                          <span class="fw-bold" style="color:#dc2626;">{{ ligne.produitPrix | number:'1.2-2' }} TND</span>
+                        </ng-container>
+                        <ng-template #prixNormal>
+                          <span class="fw-semibold" style="color: var(--primary);">{{ ligne.produitPrix | number:'1.2-2' }} TND</span>
+                        </ng-template>
                       </div>
                     </div>
                     <!-- Quantity Controls -->
@@ -94,7 +111,7 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
                         <span class="fo-quantity-input" style="display: flex; align-items: center; justify-content: center;">{{ ligne.quantite }}</span>
                         <button class="fo-quantity-btn"
                                 (click)="modifierQuantite(ligne, ligne.quantite + 1)"
-                                [disabled]="enCours || ligne.quantite >= 10">
+                                [disabled]="enCours || ligne.quantite >= maxQty(ligne.produitQuantiteStock)">
                           <i class="bi bi-plus"></i>
                         </button>
                       </div>
@@ -156,11 +173,15 @@ import { Panier, LignePanier } from '../../../modeles/panier.model';
     </div>
   `
 })
-export class PanierComponent implements OnInit {
+export class PanierComponent implements OnInit, OnDestroy {
   panier: Panier | null = null;
   chargement = true;
   enCours = false;
   erreur = '';
+
+  minutesRestantes: number | null = null;
+  secondesRestantes = 0;
+  private countdownTimer: any;
 
   constructor(
     private panierService: PanierService,
@@ -171,12 +192,42 @@ export class PanierComponent implements OnInit {
     this.chargerPanier();
   }
 
+  ngOnDestroy(): void {
+    if (this.countdownTimer) clearInterval(this.countdownTimer);
+  }
+
+  maxQty(stock: number | undefined): number {
+    return Math.min(10, stock ?? 10);
+  }
+
+  private demarrerCompte(expireA: string): void {
+    if (this.countdownTimer) clearInterval(this.countdownTimer);
+    const expiration = new Date(expireA).getTime();
+    const tick = () => {
+      const restant = Math.max(0, expiration - Date.now());
+      this.minutesRestantes = Math.floor(restant / 60000);
+      this.secondesRestantes = Math.floor((restant % 60000) / 1000);
+      if (restant === 0) {
+        clearInterval(this.countdownTimer);
+        this.countdownTimer = null;
+      }
+    };
+    tick();
+    this.countdownTimer = setInterval(tick, 1000);
+  }
+
   chargerPanier(): void {
     this.chargement = true;
     this.panierService.chargerPanier().subscribe({
       next: (data) => {
         this.panier = data;
         this.chargement = false;
+        if (data.expireA && data.lignes.length > 0) {
+          this.demarrerCompte(data.expireA);
+        } else if (this.countdownTimer) {
+          clearInterval(this.countdownTimer);
+          this.minutesRestantes = null;
+        }
       },
       error: () => {
         this.chargement = false;
@@ -193,6 +244,7 @@ export class PanierComponent implements OnInit {
       next: (data) => {
         this.panier = data;
         this.enCours = false;
+        if (data.expireA && data.lignes.length > 0) this.demarrerCompte(data.expireA);
       },
       error: (err) => {
         this.erreur = err.error?.message || this.t.tr('panier.erreurModif');
@@ -208,6 +260,8 @@ export class PanierComponent implements OnInit {
       next: (data) => {
         this.panier = data;
         this.enCours = false;
+        if (data.expireA && data.lignes.length > 0) this.demarrerCompte(data.expireA);
+        else { clearInterval(this.countdownTimer); this.minutesRestantes = null; }
       },
       error: () => {
         this.erreur = this.t.tr('panier.erreurSupp');
@@ -223,6 +277,8 @@ export class PanierComponent implements OnInit {
       next: () => {
         this.panier = { sessionId: '', lignes: [], nombreArticles: 0, montantTotal: 0 };
         this.enCours = false;
+        if (this.countdownTimer) { clearInterval(this.countdownTimer); this.countdownTimer = null; }
+        this.minutesRestantes = null;
       },
       error: () => {
         this.erreur = this.t.tr('panier.erreurVider');

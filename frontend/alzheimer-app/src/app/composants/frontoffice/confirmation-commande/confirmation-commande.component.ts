@@ -82,7 +82,10 @@ interface ConfettiParticle {
                 </div>
                 <div class="col-sm-6">
                   <small class="text-muted d-block">{{ t.tr('confirmation.statut') }}</small>
-                  <span class="badge bg-warning text-dark">{{ t.tr('confirmation.enAttente') }}</span>
+                  <span class="cmd-badge" [ngClass]="getStatutClass(commande.statut)">
+                    <i class="bi" [ngClass]="getStatutIcon(commande.statut)"></i>
+                    {{ t.tr('lcmd.' + getStatutKey(commande.statut)) }}
+                  </span>
                 </div>
               </div>
               <div *ngIf="commande.emailClient" class="row mb-3">
@@ -161,7 +164,7 @@ export class ConfirmationCommandeComponent implements OnInit, OnDestroy {
     // Read exhausted products from query params (passed from checkout)
     const epuisesParam = this.route.snapshot.queryParamMap.get('epuises');
     if (epuisesParam) {
-      this.produitsEpuises = epuisesParam.split(',').filter(n => n.trim().length > 0);
+      this.produitsEpuises = epuisesParam.split(',').map(decodeURIComponent).filter(n => n.trim().length > 0);
     }
 
     const ref = this.route.snapshot.paramMap.get('ref');
@@ -256,5 +259,32 @@ export class ConfirmationCommandeComponent implements OnInit, OnDestroy {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
     }
+  }
+
+  getStatutClass(statut: string): string {
+    const map: Record<string, string> = {
+      'EN_ATTENTE': 'cmd-en-attente', 'CONFIRMEE': 'cmd-confirmee',
+      'EN_PREPARATION': 'cmd-en-preparation', 'EXPEDIEE': 'cmd-expediee',
+      'LIVREE': 'cmd-livree', 'ANNULEE': 'cmd-annulee'
+    };
+    return map[statut] || 'cmd-en-attente';
+  }
+
+  getStatutIcon(statut: string): string {
+    const map: Record<string, string> = {
+      'EN_ATTENTE': 'bi-hourglass-split', 'CONFIRMEE': 'bi-check-circle',
+      'EN_PREPARATION': 'bi-boxes', 'EXPEDIEE': 'bi-truck',
+      'LIVREE': 'bi-bag-check-fill', 'ANNULEE': 'bi-x-circle'
+    };
+    return map[statut] || 'bi-hourglass-split';
+  }
+
+  getStatutKey(statut: string): string {
+    const map: Record<string, string> = {
+      'EN_ATTENTE': 'enAttente', 'CONFIRMEE': 'confirmee',
+      'EN_PREPARATION': 'enPreparation', 'EXPEDIEE': 'expediee',
+      'LIVREE': 'livree', 'ANNULEE': 'annulee'
+    };
+    return map[statut] || 'enAttente';
   }
 }

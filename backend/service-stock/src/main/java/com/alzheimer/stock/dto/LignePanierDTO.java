@@ -21,6 +21,8 @@ public class LignePanierDTO {
 
     private String produitNom;
     private BigDecimal produitPrix;
+    private BigDecimal produitPrixOriginal;
+    private Boolean produitEnPromo;
     private Integer produitQuantiteStock;
     private String produitImageUrl;
     private String categorieNom;

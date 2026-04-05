@@ -21,8 +21,8 @@ public class CreerCommandeDTO {
     private String emailClient;
 
     @NotBlank(message = "Le téléphone est obligatoire")
-    @Pattern(regexp = "^[0-9 +]+$", message = "Le téléphone ne doit contenir que des chiffres")
-    @Size(max = 20, message = "Le téléphone ne peut pas dépasser 20 caractères")
+    @Pattern(regexp = "^[2-9][0-9]{7}$", message = "Le téléphone doit être un numéro tunisien valide (8 chiffres, commence par 2-9)")
+    @Size(min = 8, max = 8, message = "Le téléphone doit contenir exactement 8 chiffres")
     private String telephoneClient;
 
     @NotBlank(message = "L'adresse de livraison est obligatoire")

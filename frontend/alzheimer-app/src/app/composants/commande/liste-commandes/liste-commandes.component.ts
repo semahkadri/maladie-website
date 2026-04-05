@@ -201,7 +201,13 @@ export class ListeCommandesComponent implements OnInit {
     this.debut = (this.page - 1) * this.parPage;
     this.fin = Math.min(this.debut + this.parPage, this.commandesFiltrees.length);
     this.commandesPage = this.commandesFiltrees.slice(this.debut, this.fin);
-    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    // Show max 5 page buttons to avoid overflow on large datasets
+    const maxVisible = 5;
+    let start = Math.max(1, this.page - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+    if (end > this.totalPages) { end = this.totalPages; start = Math.max(1, end - maxVisible + 1); }
+    this.pages = [];
+    for (let i = start; i <= end; i++) this.pages.push(i);
   }
 
   getStatutClass(statut: string): string {
