@@ -47,17 +47,26 @@ import { AiService } from '../../../services/ai.service';
             <div class="card-body">
               <form #formulaire="ngForm" (ngSubmit)="sauvegarder()">
 
+                <!-- ── Nom produit ── -->
                 <div class="mb-3">
-                  <label for="nom" class="form-label">{{ t.tr('common.nom') }} <span class="text-danger">*</span></label>
+                  <label for="nom" class="form-label fw-semibold">
+                    {{ t.tr('common.nom') }} <span class="text-danger">*</span>
+                  </label>
                   <input type="text" class="form-control" id="nom" name="nom"
                          [(ngModel)]="produit.nom" required minlength="2" maxlength="100"
                          #nom="ngModel" [placeholder]="t.tr('fp.placeholderNom')"
-                         [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
-                  <div class="invalid-feedback" *ngIf="nom.errors?.['required']">
-                    {{ t.tr('fp.nomObligatoire') }}
-                  </div>
-                  <div class="invalid-feedback" *ngIf="nom.errors?.['minlength']">
-                    {{ t.tr('fp.nomMin') }}
+                         [ngClass]="{'is-invalid': nom.invalid && nom.touched,
+                                     'is-valid':   nom.valid  && nom.touched}">
+                  <ng-container *ngIf="nom.touched && nom.invalid">
+                    <div class="co-field-error" *ngIf="nom.errors?.['required']">
+                      <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.nomObligatoire') }}
+                    </div>
+                    <div class="co-field-error" *ngIf="nom.errors?.['minlength']">
+                      <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.nomMin') }}
+                    </div>
+                  </ng-container>
+                  <div class="co-field-valid" *ngIf="nom.valid && nom.touched">
+                    <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Nom valide' : 'Valid name' }}
                   </div>
                 </div>
 
@@ -77,30 +86,72 @@ import { AiService } from '../../../services/ai.service';
                     <i class="bi bi-check-circle-fill me-1"></i>
                     {{ t.isFr ? 'Description générée avec succès !' : 'Description generated successfully!' }}
                   </div>
-                  <textarea class="form-control" id="description" name="description"
-                            rows="3" [(ngModel)]="produit.description"
-                            maxlength="500" [placeholder]="t.tr('fp.placeholderDesc')"></textarea>
-                  <div class="form-text" *ngIf="produit.description">
-                    {{ (produit.description && produit.description.length) || 0 }}/500 {{ t.isFr ? 'caractères' : 'characters' }}
+                  <div class="position-relative">
+                    <textarea class="form-control" id="description" name="description"
+                              rows="3" [(ngModel)]="produit.description"
+                              maxlength="500" [placeholder]="t.tr('fp.placeholderDesc')"></textarea>
+                    <small class="co-char-count"
+                           [class.text-danger]="produit.description.length > 450">
+                      {{ produit.description.length }}/500
+                    </small>
                   </div>
                 </div>
 
+                <!-- ── Prix & Quantité ── -->
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="prix" class="form-label">{{ t.tr('fp.prixLabel') }} <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="prix" name="prix"
-                           [(ngModel)]="produit.prix" required min="0.01" step="0.01"
-                           #prix="ngModel" placeholder="0.00"
-                           [ngClass]="{'is-invalid': prix.invalid && prix.touched}">
-                    <div class="invalid-feedback">{{ t.tr('fp.prixInvalide') }}</div>
+                    <label for="prix" class="form-label fw-semibold">
+                      {{ t.tr('fp.prixLabel') }} <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input type="number" class="form-control" id="prix" name="prix"
+                             [(ngModel)]="produit.prix" required min="0.01" max="99999" step="0.01"
+                             #prix="ngModel" placeholder="0.00"
+                             [ngClass]="{'is-invalid': prix.invalid && prix.touched,
+                                         'is-valid':   prix.valid  && prix.touched}">
+                      <span class="input-group-text">TND</span>
+                    </div>
+                    <ng-container *ngIf="prix.touched && prix.invalid">
+                      <div class="co-field-error" *ngIf="prix.errors?.['required']">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.prixObligatoire') }}
+                      </div>
+                      <div class="co-field-error" *ngIf="prix.errors?.['min']">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.prixMinimum') }}
+                      </div>
+                      <div class="co-field-error" *ngIf="prix.errors?.['max']">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.prixMaximum') }}
+                      </div>
+                    </ng-container>
+                    <div class="co-field-valid" *ngIf="prix.valid && prix.touched">
+                      <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Prix valide' : 'Valid price' }}
+                    </div>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="quantite" class="form-label">{{ t.tr('fp.quantiteLabel') }} <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="quantite" name="quantite"
-                           [(ngModel)]="produit.quantite" required min="0"
-                           #quantite="ngModel" placeholder="0"
-                           [ngClass]="{'is-invalid': quantite.invalid && quantite.touched}">
-                    <div class="invalid-feedback">{{ t.tr('fp.quantiteInvalide') }}</div>
+                    <label for="quantite" class="form-label fw-semibold">
+                      {{ t.tr('fp.quantiteLabel') }} <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input type="number" class="form-control" id="quantite" name="quantite"
+                             [(ngModel)]="produit.quantite" required min="0" max="99999"
+                             #quantite="ngModel" placeholder="0"
+                             [ngClass]="{'is-invalid': quantite.invalid && quantite.touched,
+                                         'is-valid':   quantite.valid  && quantite.touched}">
+                      <span class="input-group-text">{{ t.isFr ? 'unités' : 'units' }}</span>
+                    </div>
+                    <ng-container *ngIf="quantite.touched && quantite.invalid">
+                      <div class="co-field-error" *ngIf="quantite.errors?.['required']">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.quantiteObligatoire') }}
+                      </div>
+                      <div class="co-field-error" *ngIf="quantite.errors?.['min']">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.quantiteInvalide') }}
+                      </div>
+                      <div class="co-field-error" *ngIf="quantite.errors?.['max']">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.quantiteMaximum') }}
+                      </div>
+                    </ng-container>
+                    <div class="co-field-valid" *ngIf="quantite.valid && quantite.touched">
+                      <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Quantité valide' : 'Valid quantity' }}
+                    </div>
                   </div>
                 </div>
 
@@ -163,10 +214,25 @@ import { AiService } from '../../../services/ai.service';
                       </div>
                     </div>
                     <div class="col-md-6 mb-3">
-                      <label for="numeroLot" class="form-label">{{ t.tr('expiry.numeroLot') }}</label>
+                      <label for="numeroLot" class="form-label fw-semibold">{{ t.tr('expiry.numeroLot') }}</label>
                       <input type="text" class="form-control" id="numeroLot" name="numeroLot"
                              [(ngModel)]="produit.numeroLot" [placeholder]="t.tr('expiry.placeholderLot')"
-                             maxlength="100">
+                             minlength="2" maxlength="100"
+                             pattern="[A-Za-z0-9\-\/\s]+"
+                             #numLot="ngModel"
+                             [ngClass]="{'is-invalid': numLot.invalid && numLot.touched,
+                                         'is-valid':   numLot.valid  && numLot.touched && (produit.numeroLot?.length ?? 0) > 0}">
+                      <ng-container *ngIf="numLot.touched && numLot.invalid">
+                        <div class="co-field-error" *ngIf="numLot.errors?.['minlength']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.numeroLotMin') }}
+                        </div>
+                        <div class="co-field-error" *ngIf="numLot.errors?.['pattern']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.numeroLotFormat') }}
+                        </div>
+                      </ng-container>
+                      <div class="co-field-valid" *ngIf="numLot.valid && numLot.touched && (produit.numeroLot?.length ?? 0) > 0">
+                        <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Numéro de lot valide' : 'Valid lot number' }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -223,16 +289,25 @@ import { AiService } from '../../../services/ai.service';
                   </div>
                 </div>
 
+                <!-- ── Catégorie ── -->
                 <div class="mb-4">
-                  <label for="categorie" class="form-label">{{ t.tr('fp.categorieLabel') }} <span class="text-danger">*</span></label>
+                  <label for="categorie" class="form-label fw-semibold">
+                    {{ t.tr('fp.categorieLabel') }} <span class="text-danger">*</span>
+                  </label>
                   <select class="form-select" id="categorie" name="categorieId"
                           [(ngModel)]="produit.categorieId" required
                           #cat="ngModel"
-                          [ngClass]="{'is-invalid': cat.invalid && cat.touched}">
+                          [ngClass]="{'is-invalid': (cat.invalid || produit.categorieId === 0) && cat.touched,
+                                      'is-valid':    cat.valid  && produit.categorieId !== 0 && cat.touched}">
                     <option [ngValue]="0" disabled>{{ t.tr('fp.selectCategorie') }}</option>
                     <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.nom }}</option>
                   </select>
-                  <div class="invalid-feedback">{{ t.tr('fp.categorieObligatoire') }}</div>
+                  <div class="co-field-error" *ngIf="(cat.invalid || produit.categorieId === 0) && cat.touched">
+                    <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fp.categorieObligatoire') }}
+                  </div>
+                  <div class="co-field-valid" *ngIf="cat.valid && produit.categorieId !== 0 && cat.touched">
+                    <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Catégorie sélectionnée' : 'Category selected' }}
+                  </div>
                 </div>
 
                 <!-- Stock preview -->

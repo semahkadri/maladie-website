@@ -44,27 +44,48 @@ import { TraductionService } from '../../../services/traduction.service';
             <div class="card-body">
               <form #formulaire="ngForm" (ngSubmit)="sauvegarder()">
 
+                <!-- ── Nom ── -->
                 <div class="mb-3">
-                  <label for="nom" class="form-label">{{ t.tr('common.nom') }} <span class="text-danger">*</span></label>
+                  <label for="nom" class="form-label fw-semibold">
+                    {{ t.tr('common.nom') }} <span class="text-danger">*</span>
+                  </label>
                   <input type="text" class="form-control" id="nom" name="nom"
                          [(ngModel)]="categorie.nom" required minlength="2" maxlength="100"
                          #nom="ngModel" [placeholder]="t.tr('fc.placeholderNom')"
-                         [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
-                  <div class="invalid-feedback" *ngIf="nom.errors?.['required']">
-                    {{ t.tr('fc.nomObligatoire') }}
-                  </div>
-                  <div class="invalid-feedback" *ngIf="nom.errors?.['minlength']">
-                    {{ t.tr('fc.nomMin') }}
+                         [ngClass]="{'is-invalid': nom.invalid && nom.touched,
+                                     'is-valid':   nom.valid  && nom.touched}">
+                  <ng-container *ngIf="nom.touched && nom.invalid">
+                    <div class="co-field-error" *ngIf="nom.errors?.['required']">
+                      <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fc.nomObligatoire') }}
+                    </div>
+                    <div class="co-field-error" *ngIf="nom.errors?.['minlength']">
+                      <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('fc.nomMin') }}
+                    </div>
+                  </ng-container>
+                  <div class="co-field-valid" *ngIf="nom.valid && nom.touched">
+                    <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Nom valide' : 'Valid name' }}
                   </div>
                 </div>
 
+                <!-- ── Description ── -->
                 <div class="mb-4">
-                  <label for="description" class="form-label">{{ t.tr('common.description') }}</label>
-                  <textarea class="form-control" id="description" name="description"
-                            rows="4" [(ngModel)]="categorie.description"
-                            maxlength="500" #desc="ngModel"
-                            [placeholder]="t.tr('fc.placeholderDesc')"></textarea>
-                  <small class="text-muted mt-1 d-block">{{ (categorie.description && categorie.description.length) || 0 }}/500 {{ t.tr('fc.caracteres') }}</small>
+                  <label for="description" class="form-label fw-semibold">{{ t.tr('common.description') }}</label>
+                  <div class="position-relative">
+                    <textarea class="form-control" id="description" name="description"
+                              rows="4" [(ngModel)]="categorie.description"
+                              maxlength="500" #desc="ngModel"
+                              [placeholder]="t.tr('fc.placeholderDesc')"
+                              [ngClass]="{'is-valid': desc.valid && categorie.description.length > 0 && desc.touched}">
+                    </textarea>
+                    <small class="co-char-count"
+                           [class.text-danger]="categorie.description.length > 450">
+                      {{ categorie.description.length }}/500
+                    </small>
+                  </div>
+                  <small class="text-muted mt-1 d-block">
+                    <i class="bi bi-info-circle me-1"></i>
+                    {{ t.isFr ? 'Optionnel — décrivez la catégorie en quelques mots' : 'Optional — briefly describe the category' }}
+                  </small>
                 </div>
 
                 <div class="d-flex justify-content-between">

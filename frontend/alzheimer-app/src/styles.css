@@ -11829,10 +11829,36 @@ img {
   }
 }
 
-/* Dark mode: safe overrides for panels */
-[data-theme="dark"] .fo-minicart-panel,
-[data-theme="dark"] .ai-panel {
-  background: var(--fo-surface) !important;
+/* Dark mode: panels — use bg-card which IS defined (#1E293B dark) */
+[data-theme="dark"] .fo-minicart-panel {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme="dark"] .fo-minicart-header {
+  background: var(--bg-card) !important;
+  border-bottom-color: var(--border) !important;
+}
+[data-theme="dark"] .fo-minicart-header h3 {
+  color: var(--text-primary) !important;
+}
+[data-theme="dark"] .fo-minicart-header button {
+  color: var(--text-primary) !important;
+}
+[data-theme="dark"] .fo-minicart-body {
+  background: var(--bg-card) !important;
+}
+[data-theme="dark"] .fo-minicart-item-img {
+  background: var(--bg-elevated) !important;
+}
+[data-theme="dark"] .fo-minicart-item-info h4 {
+  color: var(--text-primary) !important;
+}
+[data-theme="dark"] .fo-minicart-footer {
+  background: var(--bg-card) !important;
+  border-top-color: var(--border) !important;
+}
+[data-theme="dark"] .fo-minicart-empty {
+  color: var(--text-primary) !important;
 }
 
 /* ================================================================
@@ -13717,3 +13743,98 @@ img {
     bottom: 88px !important;
   }
 }
+
+/* ╔══════════════════════════════════════════════════════════════
+   ║  CHECKOUT FORM — Validation Styles
+   ╚══════════════════════════════════════════════════════════════ */
+
+/* Error message below a field */
+.co-field-error {
+  display: flex;
+  align-items: center;
+  font-size: 0.78rem;
+  color: #dc2626;
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: rgba(220,38,38,0.07);
+  border-left: 3px solid #dc2626;
+  border-radius: 0 6px 6px 0;
+  animation: coErrorSlide 0.2s ease;
+}
+
+@keyframes coErrorSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Success message below a field */
+.co-field-valid {
+  display: flex;
+  align-items: center;
+  font-size: 0.78rem;
+  color: #16a34a;
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: rgba(22,163,74,0.07);
+  border-left: 3px solid #16a34a;
+  border-radius: 0 6px 6px 0;
+  animation: coErrorSlide 0.2s ease;
+}
+
+/* Phone prefix badge (+216 + flag) */
+.co-tel-prefix {
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  gap: 4px;
+}
+
+/* Live digit counter next to phone */
+.co-tel-counter {
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-width: 42px;
+  justify-content: center;
+  background: var(--bg-elevated, #f8f9fa);
+}
+
+/* Character count for textarea */
+.co-char-count {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Green border on valid input */
+.form-control.is-valid,
+.form-control.is-valid:focus {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.12) !important;
+  background-image: none !important; /* remove Bootstrap tick — we show our own */
+}
+
+/* Red border on invalid input */
+.form-control.is-invalid,
+.form-control.is-invalid:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.12) !important;
+  background-image: none !important;
+}
+
+/* Dark mode */
+[data-theme="dark"] .co-field-error {
+  background: rgba(220,38,38,0.14);
+}
+[data-theme="dark"] .co-field-valid {
+  background: rgba(22,163,74,0.14);
+}
+[data-theme="dark"] .co-tel-counter {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+

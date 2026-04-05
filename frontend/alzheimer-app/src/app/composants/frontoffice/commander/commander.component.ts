@@ -47,6 +47,7 @@ import { CreerCommande } from '../../../modeles/commande.model';
         <!-- Checkout Form -->
         <div *ngIf="!chargement && panier && panier.lignes.length > 0">
           <div class="row g-4">
+
             <!-- Client Info Form -->
             <div class="col-lg-7">
               <div class="card">
@@ -54,53 +55,151 @@ import { CreerCommande } from '../../../modeles/commande.model';
                   <h5 class="mb-0"><i class="bi bi-person-fill me-2"></i>{{ t.tr('checkout.infosClient') }}</h5>
                 </div>
                 <div class="card-body">
-                  <form #formulaire="ngForm" (ngSubmit)="passerCommande()">
+                  <form #formulaire="ngForm" (ngSubmit)="passerCommande()" novalidate>
 
+                    <!-- ── Nom complet ── -->
                     <div class="mb-3">
-                      <label for="nomClient" class="form-label">{{ t.tr('checkout.nom') }} <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control" id="nomClient" name="nomClient"
-                             [(ngModel)]="commande.nomClient" required minlength="2" maxlength="100"
-                             #nom="ngModel" [placeholder]="t.tr('checkout.placeholderNom')"
-                             [ngClass]="{'is-invalid': nom.invalid && nom.touched}">
-                      <div class="invalid-feedback">{{ t.tr('checkout.nomObligatoire') }}</div>
+                      <label for="nomClient" class="form-label fw-semibold">
+                        {{ t.tr('checkout.nom') }} <span class="text-danger">*</span>
+                      </label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="nomClient" name="nomClient"
+                               [(ngModel)]="commande.nomClient"
+                               required minlength="2" maxlength="100"
+                               pattern="[a-zA-ZÀ-ÿ\\s\\-']+"
+                               #nom="ngModel"
+                               [placeholder]="t.tr('checkout.placeholderNom')"
+                               [ngClass]="{'is-invalid': nom.invalid && nom.touched,
+                                           'is-valid':   nom.valid  && nom.touched}">
+                      </div>
+                      <ng-container *ngIf="nom.touched && nom.invalid">
+                        <div class="co-field-error" *ngIf="nom.errors?.['required']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.nomObligatoire') }}
+                        </div>
+                        <div class="co-field-error" *ngIf="nom.errors?.['minlength']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.nomTropCourt') }}
+                        </div>
+                        <div class="co-field-error" *ngIf="nom.errors?.['pattern']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.nomInvalide') }}
+                        </div>
+                      </ng-container>
+                      <div class="co-field-valid" *ngIf="nom.valid && nom.touched">
+                        <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Nom valide' : 'Valid name' }}
+                      </div>
                     </div>
 
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="email" class="form-label">{{ t.tr('checkout.email') }}</label>
-                        <input type="email" class="form-control" id="email" name="emailClient"
-                               [(ngModel)]="commande.emailClient" email
-                               #email="ngModel" [placeholder]="t.tr('checkout.placeholderEmail')"
-                               [ngClass]="{'is-invalid': email.invalid && email.touched}">
-                        <div class="invalid-feedback">{{ t.tr('checkout.emailInvalide') }}</div>
+                    <!-- ── Email ── -->
+                    <div class="mb-3">
+                      <label for="emailClient" class="form-label fw-semibold">
+                        {{ t.tr('checkout.email') }} <span class="text-danger">*</span>
+                      </label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" id="emailClient" name="emailClient"
+                               [(ngModel)]="commande.emailClient"
+                               required email
+                               #emailRef="ngModel"
+                               [placeholder]="t.tr('checkout.placeholderEmail')"
+                               [ngClass]="{'is-invalid': emailRef.invalid && emailRef.touched,
+                                           'is-valid':   emailRef.valid  && emailRef.touched}">
                       </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="telephone" class="form-label">{{ t.tr('checkout.telephone') }} <span class="text-danger">*</span></label>
+                      <ng-container *ngIf="emailRef.touched && emailRef.invalid">
+                        <div class="co-field-error" *ngIf="emailRef.errors?.['required']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.emailObligatoire') }}
+                        </div>
+                        <div class="co-field-error" *ngIf="emailRef.errors?.['email']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.emailInvalideFormat') }}
+                        </div>
+                      </ng-container>
+                      <div class="co-field-valid" *ngIf="emailRef.valid && emailRef.touched">
+                        <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Email valide' : 'Valid email' }}
+                      </div>
+                    </div>
+
+                    <!-- ── Téléphone TN ── -->
+                    <div class="mb-3">
+                      <label for="telephone" class="form-label fw-semibold">
+                        {{ t.tr('checkout.telephone') }} <span class="text-danger">*</span>
+                      </label>
+                      <div class="input-group">
+                        <span class="input-group-text co-tel-prefix">
+                          <img src="https://flagcdn.com/w20/tn.png" width="20" alt="TN" class="me-1">
+                          +216
+                        </span>
                         <input type="tel" class="form-control" id="telephone" name="telephoneClient"
-                               [(ngModel)]="commande.telephoneClient" required maxlength="20"
-                               pattern="[0-9 +]+"
-                               #tel="ngModel" [placeholder]="t.tr('checkout.placeholderTel')"
-                               [ngClass]="{'is-invalid': tel.invalid && tel.touched}">
-                        <div *ngIf="tel.errors?.['required'] && tel.touched" class="invalid-feedback">{{ t.tr('checkout.telephoneObligatoire') }}</div>
-                        <div *ngIf="tel.errors?.['pattern'] && tel.touched" class="invalid-feedback">{{ t.tr('checkout.telephoneFormat') }}</div>
+                               [(ngModel)]="commande.telephoneClient"
+                               required minlength="8" maxlength="8"
+                               pattern="[2-9][0-9]{7}"
+                               #tel="ngModel"
+                               [placeholder]="t.tr('checkout.placeholderTel')"
+                               (input)="filtrerChiffres($event)"
+                               [ngClass]="{'is-invalid': tel.invalid && tel.touched,
+                                           'is-valid':   tel.valid  && tel.touched}">
+                        <span class="input-group-text co-tel-counter"
+                              [class.text-danger]="(commande.telephoneClient?.length ?? 0) > 0 && (commande.telephoneClient?.length ?? 0) < 8"
+                              [class.text-success]="(commande.telephoneClient?.length ?? 0) === 8">
+                          {{ commande.telephoneClient?.length ?? 0 }}/8
+                        </span>
+                      </div>
+                      <ng-container *ngIf="tel.touched && tel.invalid">
+                        <div class="co-field-error" *ngIf="tel.errors?.['required']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.telephoneObligatoire') }}
+                        </div>
+                        <div class="co-field-error" *ngIf="tel.errors?.['minlength'] || tel.errors?.['maxlength']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.telephoneLongueur') }}
+                        </div>
+                        <div class="co-field-error" *ngIf="tel.errors?.['pattern'] && !tel.errors?.['minlength']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.telephoneFormat') }}
+                        </div>
+                      </ng-container>
+                      <div class="co-field-valid" *ngIf="tel.valid && tel.touched">
+                        <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Numéro valide' : 'Valid number' }}
+                      </div>
+                      <small class="text-muted mt-1 d-block">
+                        <i class="bi bi-info-circle me-1"></i>
+                        {{ t.isFr ? 'Numéro tunisien 8 chiffres — commence par 2, 3, 4, 5, 7 ou 9' : '8-digit Tunisian number — starts with 2, 3, 4, 5, 7 or 9' }}
+                      </small>
+                    </div>
+
+                    <!-- ── Adresse de livraison ── -->
+                    <div class="mb-4">
+                      <label for="adresse" class="form-label fw-semibold">
+                        {{ t.tr('checkout.adresse') }} <span class="text-danger">*</span>
+                      </label>
+                      <div class="position-relative">
+                        <textarea class="form-control" id="adresse" name="adresseLivraison"
+                                  rows="3"
+                                  [(ngModel)]="commande.adresseLivraison"
+                                  required minlength="10" maxlength="300"
+                                  #adresse="ngModel"
+                                  [placeholder]="t.tr('checkout.placeholderAdresse')"
+                                  [ngClass]="{'is-invalid': adresse.invalid && adresse.touched,
+                                              'is-valid':   adresse.valid  && adresse.touched}"></textarea>
+                        <small class="co-char-count"
+                               [class.text-danger]="(commande.adresseLivraison?.length ?? 0) > 270">
+                          {{ commande.adresseLivraison?.length ?? 0 }}/300
+                        </small>
+                      </div>
+                      <ng-container *ngIf="adresse.touched && adresse.invalid">
+                        <div class="co-field-error" *ngIf="adresse.errors?.['required']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.adresseObligatoire') }}
+                        </div>
+                        <div class="co-field-error" *ngIf="adresse.errors?.['minlength']">
+                          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ t.tr('checkout.adresseTropCourte') }}
+                        </div>
+                      </ng-container>
+                      <div class="co-field-valid" *ngIf="adresse.valid && adresse.touched">
+                        <i class="bi bi-check-circle-fill me-1"></i>{{ t.isFr ? 'Adresse valide' : 'Valid address' }}
                       </div>
                     </div>
 
-                    <div class="mb-4">
-                      <label for="adresse" class="form-label">{{ t.tr('checkout.adresse') }} <span class="text-danger">*</span></label>
-                      <textarea class="form-control" id="adresse" name="adresseLivraison"
-                                rows="3" [(ngModel)]="commande.adresseLivraison" required
-                                #adresse="ngModel" maxlength="1000" [placeholder]="t.tr('checkout.placeholderAdresse')"
-                                [ngClass]="{'is-invalid': adresse.invalid && adresse.touched}"></textarea>
-                      <div class="invalid-feedback">{{ t.tr('checkout.adresseObligatoire') }}</div>
-                    </div>
-
-                    <!-- Error -->
+                    <!-- Error global -->
                     <div *ngIf="erreur" class="alert alert-danger mb-3">
                       <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ erreur }}
                     </div>
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                       <a routerLink="/panier" class="btn btn-secondary">
                         <i class="bi bi-arrow-left me-1"></i>{{ t.tr('common.retour') }}
                       </a>
@@ -135,13 +234,14 @@ import { CreerCommande } from '../../../modeles/commande.model';
                   </div>
                 </div>
                 <div class="card-body pt-3" style="border-top: 2px solid var(--primary);">
-                  <div class="d-flex justify-content-between">
+                  <div class="d-flex justify-content: between">
                     <span class="fw-bold fs-5">{{ t.tr('panier.total') }}</span>
-                    <span class="fw-bold fs-5" style="color: var(--primary);">{{ panier.montantTotal | number:'1.2-2' }} TND</span>
+                    <span class="fw-bold fs-5 ms-auto" style="color: var(--primary);">{{ panier.montantTotal | number:'1.2-2' }} TND</span>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -180,6 +280,14 @@ export class CommanderComponent implements OnInit {
         this.chargement = false;
       }
     });
+  }
+
+  /** Strip any non-digit character typed in the phone field */
+  filtrerChiffres(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digitsOnly = input.value.replace(/\D/g, '').slice(0, 8);
+    input.value = digitsOnly;
+    this.commande.telephoneClient = digitsOnly;
   }
 
   passerCommande(): void {
