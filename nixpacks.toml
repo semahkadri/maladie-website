@@ -1,8 +1,0 @@
-[phases.setup]
-nixPkgs = ["jdk17_headless", "maven"]
-
-[phases.build]
-cmds = ["mvn -f backend/service-stock/pom.xml package -DskipTests"]
-
-[start]
-cmd = "java -jar backend/service-stock/target/service-stock-1.0.0-SNAPSHOT.jar"
