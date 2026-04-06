@@ -144,7 +144,7 @@ Le projet suit une architecture **microservices** avec les composants suivants :
 ## 4. Structure du projet
 
 ```
-alzheimer-detection/
+alzheimer-stock-clean/
 │
 ├── backend/
 │   ├── pom.xml                                          # POM parent Maven

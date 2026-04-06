@@ -18,7 +18,7 @@ Base alzheimer_stock → créée
 ## Compilation (une seule fois ou après modification du code)
 
 ```
-cd alzheimer-detection/backend
+cd alzheimer-stock-clean/backend
 mvn clean install -DskipTests
 ```
 
@@ -31,7 +31,7 @@ Résultat attendu : **BUILD SUCCESS**
 ### Terminal 1 : Eureka Server
 
 ```
-cd alzheimer-detection/backend/eureka-server
+cd alzheimer-stock-clean/backend/eureka-server
 mvn spring-boot:run
 ```
 
@@ -43,7 +43,7 @@ Vérifier : http://localhost:8761
 ### Terminal 2 : API Gateway
 
 ```
-cd alzheimer-detection/backend/api-gateway
+cd alzheimer-stock-clean/backend/api-gateway
 mvn spring-boot:run
 ```
 
@@ -54,7 +54,7 @@ Attendre : `Started ApiGatewayApplication`
 ### Terminal 3 : Service Stock
 
 ```
-cd alzheimer-detection/backend/service-stock
+cd alzheimer-stock-clean/backend/service-stock
 mvn spring-boot:run
 ```
 
@@ -66,7 +66,7 @@ Vérifier : http://localhost:8081/api/categories
 ### Terminal 4 : Frontend Angular
 
 ```
-cd alzheimer-detection/frontend/alzheimer-app
+cd alzheimer-stock-clean/frontend/alzheimer-app
 npm install
 ng serve --open
 ```

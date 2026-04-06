@@ -22,7 +22,7 @@ public class OpenApiConfig {
                                 + "Ce microservice gère les catégories, les produits et le tableau de bord.")
                         .contact(new Contact()
                                 .name("Équipe Alzheimer Detection")
-                                .email("contact@alzheimer-detection.com")))
+                                .email("contact@alzheimer-stock-clean.com")))
                 .servers(List.of(
                         new Server().url("http://localhost:8081").description("Service Stock (direct)"),
                         new Server().url("http://localhost:8080/api/stock").description("Via API Gateway")

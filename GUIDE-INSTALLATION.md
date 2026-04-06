@@ -5,7 +5,7 @@
 ### Architecture Microservices
 
 ```
-alzheimer-detection/
+alzheimer-stock-clean/
 ├── backend/
 │   ├── pom.xml                    (Parent POM Maven)
 │   ├── eureka-server/             (Découverte de services - port 8761)
@@ -116,7 +116,7 @@ CREATE DATABASE alzheimer_stock;
 
 1. Ouvrir le fichier :
    ```
-   alzheimer-detection/backend/service-stock/src/main/resources/application.yml
+   alzheimer-stock-clean/backend/service-stock/src/main/resources/application.yml
    ```
 2. Modifier la ligne `password` avec votre mot de passe PostgreSQL :
    ```yaml
@@ -135,7 +135,7 @@ CREATE DATABASE alzheimer_stock;
 Ouvrir un terminal à la racine du projet backend :
 
 ```
-cd alzheimer-detection/backend
+cd alzheimer-stock-clean/backend
 ```
 
 Lancer la compilation :
@@ -167,7 +167,7 @@ Si vous voyez **BUILD SUCCESS**, tout est bon !
 ### Terminal 1 : Eureka Server (lancer en PREMIER, attendre 15 secondes)
 
 ```
-cd alzheimer-detection/backend/eureka-server
+cd alzheimer-stock-clean/backend/eureka-server
 mvn spring-boot:run
 ```
 
@@ -181,7 +181,7 @@ Vérifier dans le navigateur : http://localhost:8761
 ### Terminal 2 : API Gateway
 
 ```
-cd alzheimer-detection/backend/api-gateway
+cd alzheimer-stock-clean/backend/api-gateway
 mvn spring-boot:run
 ```
 
@@ -193,7 +193,7 @@ Started ApiGatewayApplication in X seconds
 ### Terminal 3 : Service Stock
 
 ```
-cd alzheimer-detection/backend/service-stock
+cd alzheimer-stock-clean/backend/service-stock
 mvn spring-boot:run
 ```
 
@@ -211,7 +211,7 @@ Vérifier que les tables sont créées automatiquement dans PostgreSQL (via pgAd
 Ouvrir un **Terminal 4** :
 
 ```
-cd alzheimer-detection/frontend/alzheimer-app
+cd alzheimer-stock-clean/frontend/alzheimer-app
 npm install
 ```
 
