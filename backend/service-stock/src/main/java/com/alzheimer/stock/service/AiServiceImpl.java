@@ -143,19 +143,47 @@ public class AiServiceImpl implements AiService {
         }
     }
 
-    // ─── Groq API Call ─────────────────────────────────────────────────────────
+    // ─── AI API Call with fallback models ────────────────────────────────────
+
+    private static final String[] FALLBACK_MODELS = {
+        "qwen/qwen3.6-plus:free",
+        "arcee-ai/trinity-large-preview:free",
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "liquid/lfm-2.5-1.2b-instruct:free"
+    };
 
     private String callGroq(List<Map<String, String>> messages, int maxTokens) throws Exception {
+        // Try primary model first
+        try {
+            return callModel(model, messages, maxTokens);
+        } catch (Exception e) {
+            log.warn("Primary model {} failed: {}", model, e.getMessage());
+        }
+
+        // Try fallback models
+        for (String fallback : FALLBACK_MODELS) {
+            if (fallback.equals(model)) continue;
+            try {
+                log.info("Trying fallback model: {}", fallback);
+                return callModel(fallback, messages, maxTokens);
+            } catch (Exception e) {
+                log.warn("Fallback {} failed: {}", fallback, e.getMessage());
+            }
+        }
+
+        throw new RuntimeException("All AI models unavailable");
+    }
+
+    private String callModel(String modelName, List<Map<String, String>> messages, int maxTokens) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
-        Map<String, Object> body = Map.of(
-            "model", model,
-            "messages", messages,
-            "max_tokens", maxTokens,
-            "temperature", 0.7
-        );
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("model", modelName);
+        body.put("messages", messages);
+        body.put("max_tokens", maxTokens);
+        body.put("temperature", 0.7);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
         ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
