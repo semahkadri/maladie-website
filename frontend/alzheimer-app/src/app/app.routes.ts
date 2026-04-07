@@ -134,6 +134,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./composants/email/liste-emails/liste-emails.component')
             .then(m => m.ListeEmailsComponent)
+      },
+      {
+        path: 'predictions',
+        loadComponent: () =>
+          import('./composants/predictions/predictions.component')
+            .then(m => m.PredictionsComponent)
       }
     ]
   },

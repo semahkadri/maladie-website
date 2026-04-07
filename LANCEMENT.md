@@ -9,6 +9,8 @@ java -version       → 17.x.x
 mvn --version       → 3.x.x
 node --version      → 18.x.x
 ng version          → 17.x.x
+python --version    → 3.10+ (pour le service d'analyse prédictive)
+pip --version       → 21+
 PostgreSQL          → en cours d'exécution
 Base alzheimer_stock → créée
 ```
@@ -26,7 +28,7 @@ Résultat attendu : **BUILD SUCCESS**
 
 ---
 
-## Lancement (4 terminaux)
+## Lancement (5 terminaux)
 
 ### Terminal 1 : Eureka Server
 
@@ -75,6 +77,23 @@ Vérifier : http://localhost:4200
 
 ---
 
+### Terminal 5 : Service Python Analytics (Prédictions IA)
+
+```
+cd alzheimer-stock-clean/python-analytics
+pip install -r requirements.txt
+uvicorn main:app --port 8083 --reload
+```
+
+Attendre : `Uvicorn running on http://0.0.0.0:8083`
+Vérifier : http://localhost:8083/docs (Swagger FastAPI)
+
+> Ce service Python se connecte à la même base PostgreSQL que Service Stock.
+> Il fournit des analyses prédictives (péremption, demande, anomalies) via Machine Learning (Pandas + Scikit-learn).
+> La page est accessible dans le backoffice : http://localhost:4200/admin/predictions
+
+---
+
 ## Toutes les URLs d'accès
 
 | Service | URL | Description |
@@ -91,6 +110,9 @@ Vérifier : http://localhost:4200
 | OpenAPI JSON | http://localhost:8081/api/v3/api-docs | Spécification OpenAPI brute |
 | **Frontend Frontoffice** | **http://localhost:4200** | **Site public (accueil, catalogue)** |
 | **Frontend Backoffice** | **http://localhost:4200/admin** | **Interface d'administration Angular** |
+| **Prédictions IA** | **http://localhost:4200/admin/predictions** | **Analyse prédictive Python (péremption, demande, anomalies)** |
+| Python Analytics API | http://localhost:8083/docs | Documentation Swagger FastAPI |
+| Python Dashboard | http://localhost:8083/api/analytics/dashboard | API JSON des KPIs analytiques |
 
 ---
 
@@ -144,6 +166,7 @@ Ouvrir **http://localhost:4200** pour accéder au site.
 | **Commandes** (`/admin/commandes`) | Liste avec recherche, filtre par statut, pagination, accès au détail |
 | **Détail Commande** (`/admin/commandes/:id`) | Infos client, articles commandés, changement de statut |
 | **Analyse Stock** (`/admin/analyse-stock`) | KPIs, classification ABC, tendance des ventes, tableau produits avec filtres/tri, scores de santé |
+| **Prédictions IA** (`/admin/predictions`) | Analyse prédictive Python : risque péremption, prévision demande ML, détection anomalies (Isolation Forest) |
 | **Formulaires** | Création / modification avec validation, aperçu valeur stock |
 
 ### Fonctionnalités clés :
@@ -172,12 +195,18 @@ En développement, le frontend communique **directement** avec le Service Stock 
 cd backend/service-stock
 mvn spring-boot:run
 
-# Terminal 2 : Frontend
+# Terminal 2 : Python Analytics
+cd python-analytics
+pip install -r requirements.txt
+uvicorn main:app --port 8083 --reload
+
+# Terminal 3 : Frontend
 cd frontend/alzheimer-app
 ng serve --open
 ```
 
 > Eureka et API Gateway ne sont nécessaires qu'en production ou pour tester le routage via Gateway.
+> Le service Python est nécessaire uniquement pour la page Prédictions IA (`/admin/predictions`).
 
 ---
 
@@ -202,6 +231,9 @@ ng serve --open
 | 15 | Naviguer vers "Commandes" | La commande créée apparaît dans la liste |
 | 16 | Cliquer "Voir" sur la commande | Détail avec changement de statut |
 | 17 | Naviguer vers "Analyse Stock" | Dashboard avec KPIs, ABC, tendances, tableau produits |
+| 17b | Naviguer vers "Prédictions IA" | KPIs Python (expirés, valeur à risque, anomalies), 3 onglets |
+| 17c | Cliquer onglet "Prévision Demande" | Tableau ML avec tendances, confiance, quantités à commander |
+| 17d | Cliquer onglet "Anomalies" | Jours de ventes inhabituelles + alertes réapprovisionnement |
 | 18 | Filtrer par classification A | Seuls les produits de catégorie A s'affichent |
 | 19 | Créer une catégorie | CRUD catégories fonctionne |
 | 20 | Créer un produit | CRUD produits fonctionne |
@@ -217,10 +249,11 @@ ng serve --open
 
 ## Résumé des ports
 
-| Service | Port |
-|---------|------|
-| PostgreSQL | 5432 |
-| Eureka Server | 8761 |
-| API Gateway | 8080 |
-| Service Stock | 8081 |
-| Frontend Angular | 4200 |
+| Service | Port | Technologie |
+|---------|------|-------------|
+| PostgreSQL | 5432 | Base de données |
+| Eureka Server | 8761 | Java / Spring Cloud |
+| API Gateway | 8080 | Java / Spring Cloud Gateway |
+| Service Stock | 8081 | Java / Spring Boot |
+| Python Analytics | 8083 | Python / FastAPI + Scikit-learn |
+| Frontend Angular | 4200 | TypeScript / Angular 17 |

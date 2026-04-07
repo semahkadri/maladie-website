@@ -77,6 +77,14 @@ import { EmailLogService } from '../../../services/email-log.service';
           <span class="sidebar-link-text">{{ t.tr('sidebar.analyseStock') }}</span>
         </a>
 
+        <a routerLink="/admin/predictions" routerLinkActive="active"
+           class="sidebar-nav-item" (click)="mobileOpen=false"
+           [title]="isCollapsed ? (t.isFr ? 'Prédictions IA' : 'AI Predictions') : ''">
+          <span class="sidebar-icon-box"><i class="fa-solid fa-brain"></i></span>
+          <span class="sidebar-link-text">{{ t.isFr ? 'Prédictions IA' : 'AI Predictions' }}</span>
+          <span class="sidebar-badge" style="background:#10B981;">PY</span>
+        </a>
+
         <a routerLink="/admin/emails" routerLinkActive="active"
            class="sidebar-nav-item" (click)="mobileOpen=false"
            [title]="isCollapsed ? t.tr('sidebar.emails') : ''">
@@ -207,6 +215,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       '/admin/produits/ajouter': this.t.tr('breadcrumb.nouveauProd'),
       '/admin/commandes': this.t.tr('breadcrumb.commandes'),
       '/admin/analyse-stock': this.t.tr('breadcrumb.analyseStock'),
+      '/admin/predictions': this.t.isFr ? 'Prédictions IA' : 'AI Predictions',
       '/admin/emails': this.t.tr('breadcrumb.emails')
     };
     if (map[url] !== undefined) {

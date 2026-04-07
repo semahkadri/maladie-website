@@ -56,3 +56,10 @@ seed.sql
 seed.sh
 run_seed.bat
 DEV_LAUNCH.md
+
+# ===================== Secrets =====================
+.env
+**/.env
+!**/.env.example
+__pycache__/
+*.pyc
