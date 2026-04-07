@@ -37,6 +37,13 @@ public class AiServiceImpl implements AiService {
     @Value("${app.ai.api-key:}")
     private String apiKey;
 
+    @jakarta.annotation.PostConstruct
+    void debugKey() {
+        log.info("=== AI API KEY LENGTH: {} | STARTS WITH: {} ===",
+            apiKey != null ? apiKey.length() : "NULL",
+            apiKey != null && apiKey.length() > 10 ? apiKey.substring(0, 10) : apiKey);
+    }
+
     @Value("${app.ai.api-url:https://api.groq.com/openai/v1/chat/completions}")
     private String apiUrl;
 
@@ -67,6 +74,17 @@ public class AiServiceImpl implements AiService {
 
             List<Long> productIds = extractProductIds(rawText);
             String cleanText = rawText.replaceAll("\\[(?:PRODUITS|PRODUCTS):[^\\]]*\\]", "").trim();
+
+            // Fallback: if model didn't add [PRODUCTS:] marker, detect product names in text
+            if (productIds.isEmpty()) {
+                String lowerText = cleanText.toLowerCase();
+                for (ProduitDTO p : allProducts) {
+                    if (p.getNom() != null && lowerText.contains(p.getNom().toLowerCase().split(" — ")[0].split(" \\(")[0].trim().toLowerCase())) {
+                        productIds.add(p.getId());
+                        if (productIds.size() >= 3) break;
+                    }
+                }
+            }
 
             List<ProduitDTO> suggested = productIds.stream()
                 .map(id -> allProducts.stream()
@@ -175,20 +193,31 @@ public class AiServiceImpl implements AiService {
     }
 
     private String callModel(String modelName, List<Map<String, String>> messages, int maxTokens) throws Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
-
+        // Use raw HttpClient (bypasses Spring Cloud LoadBalancer interceptors on RestTemplate)
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("model", modelName);
         body.put("messages", messages);
         body.put("max_tokens", maxTokens);
         body.put("temperature", 0.7);
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
+        String jsonBody = objectMapper.writeValueAsString(body);
 
-        JsonNode root = objectMapper.readTree(response.getBody());
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create(apiUrl))
+                .header("Authorization", "Bearer " + apiKey.trim())
+                .header("Content-Type", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
+                .timeout(java.time.Duration.ofSeconds(15))
+                .build();
+
+        java.net.http.HttpResponse<String> response = java.net.http.HttpClient.newHttpClient()
+                .send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 400) {
+            throw new RuntimeException(response.statusCode() + ": " + response.body().substring(0, Math.min(200, response.body().length())));
+        }
+
+        JsonNode root = objectMapper.readTree(response.body());
         return root.path("choices").get(0).path("message").path("content").asText("").trim();
     }
 

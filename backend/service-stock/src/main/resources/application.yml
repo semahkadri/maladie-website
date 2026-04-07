@@ -56,7 +56,7 @@ app:
   mail:
     admin-email: admin@pharmacare.tn
   ai:
-    api-key: ${AI_API_KEY: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}
+    api-key: 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
     api-url: https://openrouter.ai/api/v1/chat/completions
     model: qwen/qwen3.6-plus:free
     enabled: ${AI_ENABLED:true}
