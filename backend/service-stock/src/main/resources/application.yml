@@ -56,9 +56,9 @@ app:
   mail:
     admin-email: admin@pharmacare.tn
   ai:
-    api-key: ${GROQ_API_KEY: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}
-    api-url: https://api.groq.com/openai/v1/chat/completions
-    model: llama-3.3-70b-versatile
+    api-key: ${AI_API_KEY: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}
+    api-url: https://openrouter.ai/api/v1/chat/completions
+    model: qwen/qwen3.6-plus:free
     enabled: ${AI_ENABLED:true}
 
 eureka:
