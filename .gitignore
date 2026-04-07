@@ -61,5 +61,6 @@ DEV_LAUNCH.md
 .env
 **/.env
 !**/.env.example
+**/application-local.yml
 __pycache__/
 *.pyc

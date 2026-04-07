@@ -2,6 +2,8 @@ server:
   port: ${PORT:8081}
 
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   application:
     name: service-stock
   servlet:
@@ -56,7 +58,7 @@ app:
   mail:
     admin-email: admin@pharmacare.tn
   ai:
-    api-key: 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
+    api-key: ${AI_API_KEY:CHANGE_ME}
     api-url: https://openrouter.ai/api/v1/chat/completions
     model: qwen/qwen3.6-plus:free
     enabled: ${AI_ENABLED:true}
