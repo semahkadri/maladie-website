@@ -94,8 +94,9 @@ Le projet suit une architecture **microservices** avec les composants suivants :
 |-----------|------|------|
 | **Eureka Server** | Registre de découverte de services. Tous les microservices s'y enregistrent automatiquement au démarrage. Permet la résolution dynamique des adresses. | 8761 |
 | **API Gateway** | Point d'entrée unique pour le frontend en production. Route les requêtes vers les microservices. Gère le CORS et le load balancing. | 8080 |
-| **Service Stock** | Microservice métier responsable de la gestion des catégories, produits (avec upload d'images), panier (avec expiration automatique), commandes, tableau de bord et analyse de stock. Expose les API REST CRUD, l'upload de fichiers, l'analyse avancée (KPIs, ABC, tendances) et la documentation Swagger. Sert les images uploadées via `/uploads/**`. | 8081 |
-| **Frontend Angular** | Interface web comprenant un **frontoffice** public (catalogue, panier, commande, détail produit, catégories) et un **backoffice** d'administration (sidebar, tableau de bord, CRUD catégories/produits avec upload d'images drag & drop, gestion commandes, analyse de stock). Supporte le mode sombre/clair et le bilingue FR/EN. | 4200 |
+| **Service Stock** | Microservice métier responsable de la gestion des catégories, produits (avec upload d'images), panier (avec expiration automatique), commandes, tableau de bord, analyse de stock et chatbot IA. Expose les API REST CRUD, l'upload de fichiers, l'analyse avancée (KPIs, ABC, tendances), le chatbot IA (OpenRouter) et la documentation Swagger. | 8081 |
+| **Python Analytics** | Service d'analyse prédictive avec Machine Learning. Analyse de péremption (rule-based), prévision de demande (LinearRegression), détection d'anomalies (IsolationForest). Se connecte à la même base PostgreSQL en lecture seule. | 8083 |
+| **Frontend Angular** | Interface web comprenant un **frontoffice** public (catalogue, panier, commande, détail produit, catégories, chatbot IA) et un **backoffice** d'administration (sidebar, tableau de bord, CRUD catégories/produits, gestion commandes, analyse de stock, prédictions IA Python). Supporte le mode sombre/clair et le bilingue FR/EN. | 4200 |
 | **PostgreSQL** | Système de gestion de base de données relationnelle stockant les catégories, produits, paniers, commandes et leurs lignes. | 5432 |
 | **uploads/** | Répertoire de stockage physique des images produit sur le disque. Créé automatiquement au démarrage du service. Les fichiers sont nommés avec un UUID pour éviter les collisions. | - |
 
@@ -132,12 +133,35 @@ Le projet suit une architecture **microservices** avec les composants suivants :
 | Angular Router | 17.3 | Navigation et routage SPA |
 | Angular HttpClient | 17.3 | Communication HTTP avec le backend |
 
+### Service d'Analyse Prédictive (Python)
+
+| Technologie | Version | Utilisation |
+|-------------|---------|-------------|
+| Python | 3.10+ | Langage pour le machine learning |
+| FastAPI | 0.115 | Framework API REST (port 8083) |
+| Pandas | 2.2 | Manipulation et analyse de données |
+| Scikit-learn | 1.5 | Machine Learning (régression linéaire, Isolation Forest) |
+| SQLAlchemy | 2.0 | Connexion PostgreSQL (lecture seule) |
+
+### Chatbot IA (OpenRouter)
+
+| Technologie | Détail |
+|-------------|--------|
+| API Provider | OpenRouter (modèles gratuits) |
+| Modèle principal | Qwen 3.6 Plus |
+| Modèles fallback | Arcee Trinity, Nvidia Nemotron, Liquid LFM |
+| Protocole | API compatible OpenAI (REST) |
+| Intégration backend | Java `HttpClient` → OpenRouter API |
+| Frontend | Widget de chat flottant Angular |
+| Fonctionnalités | Conseil pharmaceutique, suggestion de produits du catalogue, bilingue FR/EN |
+
 ### Base de données
 
 | Technologie | Version | Utilisation |
 |-------------|---------|-------------|
 | PostgreSQL | 15+ | SGBD relationnel principal |
-| Hibernate | 6.4 | ORM pour le mapping objet-relationnel |
+| Hibernate | 6.4 | ORM pour le mapping objet-relationnel (Java) |
+| SQLAlchemy | 2.0 | ORM pour le service Python (lecture seule) |
 
 ---
 
